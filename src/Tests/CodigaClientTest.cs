@@ -35,14 +35,14 @@ namespace Tests
 		{
 			// act
 			var result = await mClient.GetRecipesForClientByShortcut.ExecuteAsync(
-				fingerprint: null,
+				fingerprint: "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c",
 				filename: "",
 				term: "",
 				dependencies: new ReadOnlyCollection<string>(new[] { "" }),
-				parameters: null,
+				parameters: "",
 				language: LanguageEnumeration.Csharp,
 				onlyPublic: true,
-				onlyPrivate: false,
+				onlyPrivate: null,
 				onlySubscribed: false);
 
 			// assert
@@ -62,7 +62,7 @@ namespace Tests
 			var result = await mClient.GetRecipesForClientSemantic.ExecuteAsync(
 				term: null,
 				onlyPublic: true,
-				onlyPrivate: false,
+				onlyPrivate: null,
 				onlySubscribed: false,
 				filename: null,
 				dependencies: new ReadOnlyCollection<string>(new[] { "" }),
@@ -84,12 +84,12 @@ namespace Tests
 		{
 			// act
 			var result = await mClient.GetRecipesForClient.ExecuteAsync(
-				fingerprint: "85430958324ß05832ß048",
+				fingerprint: "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c",
 				filename: null,
-				keywords: new ReadOnlyCollection<string>(new[] { "read" }),
+				keywords: new ReadOnlyCollection<string>(new[] { "read", "file" }),
 				dependencies: new ReadOnlyCollection<string>(new[] { "" }),
 				parameters: null,
-				language: LanguageEnumeration.Csharp);
+				language: LanguageEnumeration.Python);
 
 			// assert
 			Assert.False(result.IsErrorResult(), result.Errors.FirstOrDefault()?.Message);
@@ -104,7 +104,7 @@ namespace Tests
 		{
 			// act
 			var result = await mClient.GetRecipesForClientByShortcutLastTimestamp.ExecuteAsync(
-				fingerprint: null,
+				fingerprint: "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c",
 				dependencies: new ReadOnlyCollection<string>(new[] { "" }),
 				language: LanguageEnumeration.Csharp);
 

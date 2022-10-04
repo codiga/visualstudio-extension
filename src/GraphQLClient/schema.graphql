@@ -1,0 +1,2009 @@
+﻿schema {
+  query: Query
+  mutation: Mutation
+}
+
+enum AccessType {
+  Cli
+  Sublime
+  Firefox
+  Chrome
+  VsCode
+  IntelliJ
+  Frontend
+  Api
+  Web
+}
+
+enum ActionType {
+  ProjectOnboardingStep9
+  ProjectOnboardingStep8
+  ProjectOnboardingStep7
+  ProjectOnboardingStep6
+  ProjectOnboardingStep5
+  ProjectOnboardingStep4
+  ProjectOnboardingStep3
+  ProjectOnboardingStep2
+  ProjectOnboardingStep1
+  UserOnboardingStep9
+  UserOnboardingStep8
+  UserOnboardingStep7
+  UserOnboardingStep6
+  UserOnboardingStep5
+  UserOnboardingStep4
+  UserOnboardingStep3
+  UserOnboardingStep2
+  UserOnboardingStep1
+  AssistantRecipeSearchShortcut
+  AssistantRecipeSearch
+  AssistantRecipeUse
+  FileAnalysisRequest
+  FileFromProjectAnalysisRequest
+  FrontendProjectAnalysisViewFile
+  FrontendProjectAnalysisComplexFunctions
+  FrontendProjectAnalysisLongFunctions
+  FrontendProjectAnalysisDuplicates
+  FrontendProjectAnalysisViolations
+  FrontendProjectAnalysisTree
+  FrontendProjectCompare
+  FrontendProjectPreferences
+  FrontendUserPreferences
+  FrontendHome
+}
+
+"Object that contains everything to handle authentication"
+type Authentication {
+  "identifier"
+  token: String
+  "error"
+  error: String
+}
+
+"Status of a sent email"
+type EmailStatus {
+  "email address"
+  email: String!
+  "true if the email was sent successfully"
+  sent: Boolean!
+}
+
+type Mutation {
+  createCompareAnalysis("id of the project to compare (required)" projectId: Long! "Branch for the source repository (optional)" sourceBranch: String "Revision for the source repository (optional)" sourceRevision: String "Type of the target repository (required)" targetKind: ScmKind! "URL of the source repository (required)" targetUrl: String! "Username for the source repository (optional)" targetUsername: String "Password for the source repository (optional)" targetPassword: String "Branch for the source repository (optional)" targetBranch: String "Revision for the source repository (optional)" targetRevision: String): AnalysisCompare
+  scheduleAnalysis("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String "name of the branch" branch: String): Analysis
+  installWebhooks("id of the object to get (required)" id: Long!): Boolean!
+  removeWebhooks("id of the object to get (required)" id: Long!): Boolean!
+  githubAction("name of the project to get (optional)" projectName: String "id of the project to get (optional)" projectId: Long "access token" token: String! "actor that triggered the action" actor: String! "repository name that triggered the action" repositoryName: String! "sha of the commit (optional)" sha: String "ref" ref: String): Analysis
+  createProject("name of the object to get\/put (required)" name: String! "description of the object" description: String! "id of the group (required)" groupId: Long! "if the resource is public (optional)" isPublic: Boolean "Repository kind" kind: ScmKind! "URL" url: String!): Project
+  createGroup("name of the object to get\/put (required)" name: String! "Type of the group" groupType: GroupType!): Group
+  deleteGroup("id of the object to get (required)" id: Long!): String!
+  groupStartSubscription("id of the group (required)" groupId: Long! "Subbscriptiontype" subscriptionType: StripeSubscriptionEnumerationType! "should start a trial (optional)" trial: Boolean!): String!
+  groupUpdateSubscription("id of the group (required)" groupId: Long! "Subbscriptiontype" subscriptionType: StripeSubscriptionEnumerationType "Number of seats (optional)" seats: Long "coupon (optional)" coupon: String): String!
+  groupCancelSubscription("id of the group (required)" groupId: Long!): String!
+  groupUpdateBillingEmail("id of the group (required)" groupId: Long! "Billing email (required)" email: String!): String!
+  groupChangeSubscriptionSeats("id of the group (required)" groupId: Long! "Number of seats (required)" seats: Long!): String!
+  groupAddUser("id of the group (required)" groupId: Long! "account type (required)" accountType: AccountType! "identifier, string (required)" userIdentifier: String! "membership level (required)" level: GroupMembershipLevel!): String
+  groupUpdateUser("id of the group (required)" groupId: Long! "user id, long (required)" userId: Long! "membership level (required)" level: GroupMembershipLevel!): String!
+  groupDeleteUser("id of the group (required)" groupId: Long! "account type (required)" accountType: AccountType! "identifier, string (required)" userIdentifier: String!): String
+  deleteProject("id of the object to get (required)" id: Long!): String
+  addNotificationToProject("id of the project to compare (required)" projectId: Long! "how notification should be sent (required)" notificationType: ProjectNotificationType! "when the notification is triggered (required)" notificationEventType: ProjectNotificationEventType! "value of notification" notificationValue: String!): ProjectNotification
+  deleteNotificationFromProject("id of the project to compare (required)" projectId: Long! "how notification should be sent (required)" notificationType: ProjectNotificationType! "when the notification is triggered (required)" notificationEventType: ProjectNotificationEventType! "value of notification" notificationValue: String!): String
+  addProjectConfigurationDirective("id of the project to compare (required)" projectId: Long! "key (required)" key: String! "value (required)" value: String!): ProjectConfiguration
+  addViolationToIgnore("id of the project to compare (required)" projectId: Long! "description of the object" description: String "path prefix" prefix: String "filename (exact match)" filename: String "analysis rule" rule: String! "analysis tool" tool: String! "language" language: LanguageEnumeration): ViolationIgnore
+  removeViolationToIgnore("id of the project to compare (required)" projectId: Long! "filename (exact match)" filename: String "path prefix" prefix: String "analysis rule" rule: String! "analysis tool" tool: String! "language" language: LanguageEnumeration): String!
+  updateProjectVisibility("id of the project to compare (required)" projectId: Long! "set project public\/private (required)" public: Boolean!): String!
+  updateProjectDescription("id of the project to compare (required)" projectId: Long! "description of the object" description: String!): String!
+  deleteProjectConfigurationDirective("id of the project to compare (required)" projectId: Long! "key (required)" key: String!): String!
+  deleteRepositoryFromProject("id of the object to get (required)" id: Long!): String
+  changeDefaultBranch("id of the object to get (required)" id: Long! "name of the branch" branch: String): String
+  addBranchToProject("id of the object to get (required)" id: Long! "name of the branch" branch: String!): String
+  removeBranchFromProject("id of the object to get (required)" id: Long! "name of the branch" branch: String!): String
+  authentication("identifier (required)" identifier: String! "password (required)" password: String!): Authentication!
+  externalAuthentication("code for authentication (required)" code: String! "external account type (required)" accountType: AccountType! "redirect URI (required)" redirectUri: String!): Authentication!
+  linkExternalService("code for authentication (required)" code: String! "external account type (required)" accountType: LinkedAccountKind! "redirect URI (required)" redirectUri: String!): String!
+  unlinkExternalService("external account type (required)" accountType: LinkedAccountKind!): String!
+  createUser("identifier (required)" identifier: String! "password (required)" password: String!): User
+  confirmUser("identifier (required)" identifier: String! "confirmation" confirmation: String!): String!
+  forgotPassword("identifier (required)" identifier: String!): String!
+  changePassword("password (required)" password: String!): String!
+  createApiToken("description of the object" description: String): String
+  deleteApiToken("id of the object to get (required)" id: Long!): String!
+  deleteAccount: String!
+  addSlackNotification("id of the project to compare (required)" projectId: Long! "code (required)" code: String! "redirect URI (required)" redirectUri: String!): String!
+  deleteSlackNotification("id of the object to get (required)" id: Long!): String!
+  updateProfile("firstname" firstname: String! "lastname" lastname: String! "company" company: String "address" address: String! "zipcode" zipcode: String! "city" city: String! "state" state: String! "country" country: String! "seniority" seniority: SeniorityEnumeration "how the user heard about us" heardAbout: String "phone number (optional)" phoneNumber: String): String!
+  updateEmail("email (required)" email: String!): String!
+  recordAccess("access type to record (required)" accessType: AccessType! "action type to record (required)" actionType: ActionType! "metadata (optional)" metadata: String "recipe id (optional)" recipeId: Long "user fingerprint (optional)" userFingerprint: String): String!
+  addUserPreference("key of the preference (required)" key: UserPreferenceKey! "value of the preference (required)" value: String!): String!
+  updateUserPreference("key of the preference (required)" key: UserPreferenceKey! "value of the preference (required)" value: String!): String!
+  markNotificationsAsRead: String!
+  removeUserPreference("key of the preference (required)" key: UserPreferenceKey!): String!
+  support("support topic" topic: String! "message to send" message: String!): String!
+  contact("email (required)" email: String! "name of the object to get\/put (required)" name: String! "recapcha value (required)" recaptchaResponse: String! "content (required)" content: String!): String!
+  createAssistantCookbook("name of the object to get\/put (required)" name: String! "description of the object" description: String! "if the resource is public (required)" isPublic: Boolean!): AssistantCookbook
+  addDependencyConstraint("id of the object to get (required)" id: Long! "name of the object to get\/put (required)" name: String! "minimum version (optional)" minVersion: String "maximum version (optional)" maxVersion: String "negative" negative: Boolean!): String!
+  removeDependencyConstraint("id of the object to get (required)" id: Long! "name of the object to get\/put (required)" name: String!): String!
+  updateAssistantCookbook("id of the object to get (required)" id: Long! "name of the object to get\/put (required)" name: String! "description of the object" description: String!): AssistantCookbook
+  subscribeToRecipe("id of the object to get (required)" id: Long!): String!
+  unsubscribeFromRecipe("id of the object to get (required)" id: Long!): String!
+  subscribeToCookbook("id of the object to get (required)" id: Long!): String!
+  unsubscribeFromCookbook("id of the object to get (required)" id: Long!): String!
+  deleteAssistantCookbook("id of the object to get (required)" id: Long!): String!
+  addRecipeToGroup("recipe id (required)" recipeId: Long! "id of the group (required)" groupId: Long!): String!
+  removeRecipeFromGroup("recipe id (required)" recipeId: Long! "id of the group (required)" groupId: Long!): String!
+  addCookbookToGroup("cookbook id (required)" cookbookId: Long! "id of the group (required)" groupId: Long!): String!
+  removeCookbookFromGroup("cookbook id (required)" cookbookId: Long! "id of the group (required)" groupId: Long!): String!
+  createAssistantRecipe("name of the object to get\/put (required)" name: String! "description of the object" description: String "language" language: LanguageEnumeration! "tags" tags: [String!] "keywords" keywords: [String!]! "cookbook id (optional)" cookbookId: Long "filename patterns" filenamePatterns: [String!] "imports" imports: [String!] "code content (base 64 encoded)" code: String! "shortcut (optional)" shortcut: String "dependency (optional)" dependency: String "generate the description (optional)" generateDescription: Boolean "if the resource is public (required)" isPublic: Boolean!): AssistantRecipe
+  createAssistantRecipeComment("id of the object to get (required)" id: Long! "comment (required)" comment: String! "rating (optional)" rating: Long "security (optional)" securityFlag: Boolean): String!
+  deleteAssistantRecipeComment("id of the object to get (required)" id: Long!): String!
+  addRecipeToCookbook("recipe id (required)" recipeId: Long! "cookbook id (required)" cookbookId: Long!): String!
+  removeRecipeFromCookbook("recipe id (required)" recipeId: Long! "cookbook id (required)" cookbookId: Long!): String!
+  updateAssistantRecipe("id of the object to get (required)" id: Long! "name of the object to get\/put (required)" name: String! "description of the object" description: String! "language" language: LanguageEnumeration! "tags" tags: [String!] "keywords" keywords: [String!]! "filename patterns" filenamePatterns: [String!] "imports" imports: [String!] "cookbook id (optional)" cookbookId: Long "shortcut (optional)" shortcut: String "dependency (optional)" dependency: String "code content (base 64 encoded)" code: String!): AssistantRecipe
+  generateDescriptionForRecipe("id of the object to get (required)" id: Long!): AssistantRecipe
+  deleteAssistantRecipe("id of the object to get (required)" id: Long!): String!
+  addGroupPreference("id of the group (required)" groupId: Long! "key of the group preference (required)" key: GroupPreferenceKey! "value of the preference (required)" value: String!): String!
+  joinGroup("id of the group (required)" groupId: Long!): String!
+  updateGroupPreference("id of the group (required)" groupId: Long! "key of the group preference (required)" key: GroupPreferenceKey! "value of the preference (required)" value: String!): String!
+  removeGroupPreference("id of the group (required)" groupId: Long! "key of the group preference (required)" key: GroupPreferenceKey!): String!
+  createGroupInvitation("id of the group (required)" groupId: Long! "email (required)" email: String! "level of the group" level: GroupMembershipLevel!): String!
+  sendFriendInvitation("emails (required)" emails: [String!]!): [EmailStatus!]!
+  removeGroupInvitation("id of the group (required)" groupId: Long! "email (required)" email: String!): String!
+  addVote("identifier of the entity to vote" entityId: Long! "type of entity (required)" entityType: VoteEntity! "true if upvote \/ false for downvote (required)" isUpvote: Boolean!): String!
+  deleteVote("identifier of the entity to vote" entityId: Long! "type of entity (required)" entityType: VoteEntity!): String!
+  acceptGroupInvitation("id of the group (required)" groupId: Long! "invitation code for a group (required)" invitationCode: String!): String!
+}
+
+enum VoteEntity {
+  Comment
+  Cookbook
+  Recipe
+}
+
+enum AccountType {
+  Bitbucket
+  Google
+  Gitlab
+  Github
+  Regular
+}
+
+"An analysis object"
+type Analysis {
+  "identifier of the analysis"
+  id: Long!
+  "name of the project"
+  status: AnalysisResultStatus!
+  "when the analysis started"
+  startTimestamp: Long!
+  "time to run the analysis"
+  runningTimeSeconds: Long!
+  "revision that is under analysis"
+  revision: String
+  "URL of the repository"
+  repoUrl: String
+  "level for this analysis"
+  level: UserLevel!
+  "requested username to user on the repository for that analysis"
+  repoUsername: String
+  "requested revision to user on the repository for that analysis"
+  repoRevision: String
+  "requested branch to user on the repository for that analysis"
+  repoBranch: String
+  "indicate of the analysis has too many slocs"
+  tooManySlocs: Boolean!
+  "violations for this analysis"
+  violations("potential status of the analysis" status: [AnalysisResultStatus!] "languages to use to filter" languages: [LanguageEnumeration!] "rule (optional)" rule: String "filename (exact match)" filename: String "path (exact match)" path: String "how many records we want (required)" howmany: Long! "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "number of records to skip (required)" skip: Long! "order of the search query (optional)" orderBy: ViolationQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [Violation!]!
+  "violations count for this analysis based on filters"
+  violationsCount("languages to use to filter" languages: [LanguageEnumeration!] "filename (exact match)" filename: String "rule (optional)" rule: String "path (exact match)" path: String "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!]): Long!
+  "duplicates for this analysis"
+  duplicates("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "filename (exact match)" filename: String "path prefix" prefix: String): [Duplicate!]!
+  "complex functions"
+  complexFunctions("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "filename (exact match)" filename: String "path (exact match)" path: String "minimum complexity" minimumComplexity: Long "maximum complexity" maximumComplexity: Long "how to search for complex function" orderBy: ComplexFunctionSearchBy "set query order desc (optional, asc by default)" desc: Boolean): [ComplexFunction!]!
+  "count of complex functions"
+  complexFunctionsCount("filename (exact match)" filename: String "path (exact match)" path: String): Long!
+  "complex functions"
+  longFunctions("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "filename (exact match)" filename: String "path (exact match)" path: String "minimum length" minimumLength: Long "maximum length" maximumLength: Long "how to search for complex function" orderBy: ComplexFunctionSearchBy "set query order desc (optional, asc by default)" desc: Boolean): [ComplexFunction!]!
+  "list of dependencies"
+  dependencies("languages to use to filter" languages: [LanguageEnumeration!]): [AnalysisDependency!]!
+  "count of long functions"
+  longFunctionsCount("filename (exact match)" filename: String "path (exact match)" path: String): Long!
+  "technical debt for this analysis"
+  techdebt: TechnicalDebtType!
+  summary: AnalysisResultSummary!
+  errors: [AnalysisErrorType!]!
+  stats: [AnalysisResultStatType!]!
+  slocs: Long!
+  "filesystem view of the analysis"
+  tree("path prefix" prefix: String): [AnalysisNode!]!
+  "content of a file, which is an array of string representing the different lines"
+  fileContent("path (exact match, required)" path: String!): [String!]!
+}
+
+"Compare analysis of two projects\/repositories"
+type AnalysisCompare {
+  "identifier of the compare object"
+  id: Long!
+  "status of the compare object"
+  status: AnalysisResultStatus!
+  "how long it takes to compare"
+  completion_time: Long!
+  "tags"
+  tags: String
+  "type of repository of the project"
+  sourceKind: ScmKind!
+  "URL of the repository source"
+  sourceUrl: String!
+  "Username of the source repository"
+  sourceUsername: String
+  "Password of the source repository"
+  sourcePassword: String
+  "Branch of the source repository"
+  sourceBranch: String
+  "Revision of the source repository"
+  sourceRevision: String
+  "type of repository of the project"
+  targetKind: ScmKind!
+  "URL of the repository source"
+  targetUrl: String!
+  "Username of the source repository"
+  targetUsername: String
+  "Password of the source repository"
+  targetPassword: String
+  "Branch of the source repository"
+  targetBranch: String
+  "Revision of the source repository"
+  targetRevision: String
+  "Source analysis"
+  sourceAnalysis: Analysis
+  "Target analysis"
+  targetAnalysis: Analysis
+}
+
+"Analysis information gathered during an analysis"
+type AnalysisDependency {
+  "name of the repository"
+  name: String!
+  "language"
+  language: LanguageEnumeration!
+  "version constraint"
+  versionConstraint: VersionConstraintEnumeration
+  "version of the dependency"
+  version: String
+  "number of new versions available"
+  newVersions: Long
+  "versions actually registered"
+  versions("how many records we want (optional)" howmany: Long): [Dependency!]!
+}
+
+"Diff between two analysis"
+type AnalysisDiff {
+  "added violations"
+  addedViolations: [Violation!]!
+  "removed violations"
+  removedViolations: [Violation!]!
+  "added duplicates"
+  addedDuplicates: [FlattenedDuplicate!]!
+  "removed duplicates"
+  removedDuplicates: [FlattenedDuplicate!]!
+  "added complex functions"
+  addedComplexFunctions: [ComplexFunction!]!
+  "removed complex functions"
+  removedComplexFunctions: [ComplexFunction!]!
+  "added long functions"
+  addedLongFunctions: [ComplexFunction!]!
+  "removed long functions"
+  removedLongFunctions: [ComplexFunction!]!
+}
+
+enum AnalysisErrorType {
+  Unknown
+  TooManyLines
+  ShellError
+  ScalaError
+  SecurityError
+  PythonError
+  PhpError
+  LizardError
+  JavascriptError
+  JavaError
+  GoError
+  DependsError
+  DuplicationFindError
+  CloneError
+  CppError
+  BanditError
+  AuthenticationError
+}
+
+"Represent the filesystem view of the analysis"
+type AnalysisNode {
+  "name of the node"
+  name: String!
+  "is this a file or a directory?"
+  isFile: Boolean!
+  "full path"
+  fullPath: String!
+  "cumulative number of violations in that node"
+  violations: Long!
+  "cumulative number of duplicates in that node"
+  duplicates: Long!
+  "number of cumulative violations per language"
+  violationsPerLanguage: [AnalysisNodeViolationsPerLanguage!]!
+  "number of complex functions"
+  complexFunctions: Long!
+  "number of long functions"
+  longFunctions: Long!
+  "total number of functions"
+  totalFunctions: Long!
+}
+
+"Represent the number of violations per language on a node on the analysis"
+type AnalysisNodeViolationsPerLanguage {
+  "language"
+  language: LanguageEnumeration!
+  "count of violations"
+  violations: Long!
+}
+
+"Statistic on language usage"
+type AnalysisResultStatType {
+  "language"
+  language: String!
+  "lines"
+  lines: Long!
+}
+
+enum AnalysisResultStatus {
+  Unknown
+  Done
+  Error
+  Same_Revision
+  Ignore
+  InProgress
+  Scheduled
+  Started
+}
+
+"Summary on analysis"
+type AnalysisResultSummary {
+  "total number of duplicated lines"
+  duplicated_lines: Long!
+  "total number of duplicated lines per sloc"
+  duplicated_linesPerSloc: Float
+  "total number of duplicates lines"
+  duplicates: Long!
+  "total number of duplicates lines per sloc"
+  duplicatesPerSloc: Float
+  "total number of violations"
+  violations: Long!
+  "number of violations for documentation"
+  violationsDocumentation: Long!
+  "number of violations for performance category"
+  violationsPerformance: Long!
+  "number of violations for deployment category"
+  violationsDeployment: Long!
+  "number of violations for design category"
+  violationsDesign: Long!
+  "number of violations for security category"
+  violationsSecurity: Long!
+  "number of violations for safety category"
+  violationsSafety: Long!
+  "number of violations for best practice category"
+  violationsBest_practice: Long!
+  "number of violations for code_style category"
+  violationsCode_style: Long!
+  "number of violations for error_prone category"
+  violationsError_prone: Long!
+  "number of violations for unknown category"
+  violationsUnknown: Long!
+  "number of violations per sloc for documentation"
+  violationsDocumentationPerSloc: Float
+  "number of violations per sloc for performance category"
+  violationsPerformancePerSloc: Float
+  "number of violations per sloc for deployment category"
+  violationsDeploymentPerSloc: Float
+  "number of violations per sloc for design category"
+  violationsDesignPerSloc: Float
+  "number of violations per sloc for security category"
+  violationsSecurityPerSloc: Float
+  "number of violations per sloc for safety category"
+  violationsSafetyPerSloc: Float
+  "number of violations per sloc for best practice category"
+  violationsBest_practicePerSloc: Float
+  "number of violations per sloc for code_style category"
+  violationsCode_stylePerSloc: Float
+  "number of violations per sloc for error_prone category"
+  violationsError_pronePerSloc: Float
+  "number of violations per sloc for unknown category"
+  violationsUnknownPerSloc: Float
+  "number of violations of severity 1"
+  violationsSeverity1: Long!
+  "number of violations of severity 2"
+  violationsSeverity2: Long!
+  "number of violations of severity 3"
+  violationsSeverity3: Long!
+  "number of violations of severity 4"
+  violationsSeverity4: Long!
+  "number of violations of severity 1 per sloc"
+  violationsSeverity1PerSloc: Float
+  "number of violations of severity 2 per sloc"
+  violationsSeverity2PerSloc: Float
+  "number of violations of severity 3 per sloc"
+  violationsSeverity3PerSloc: Float
+  "number of violations of severity 4 per sloc"
+  violationsSeverity4PerSloc: Float
+  "rate of complex functions"
+  complexFunctionsRate: Float
+  "rate of long functions"
+  longFunctionsRate: Float
+  "long functions"
+  longFunctions: Long!
+  "complex functions"
+  complexFunctions: Long!
+  "total number of functions"
+  totalFunctions: Long!
+}
+
+enum AnalysisTrend {
+  Unknown
+  Worst
+  Same
+  Better
+}
+
+"ApiToken to access codiga"
+type ApiToken {
+  "identifier of the token"
+  id: Long
+  "uuid (partially hidden)"
+  value: String!
+  "description"
+  description: String
+  "creation timestamp"
+  creationTimestamp: Long!
+}
+
+"Cookbook that contains recipe"
+type AssistantCookbook {
+  "identifier"
+  id: Long!
+  "name"
+  name: String!
+  "description"
+  description: String!
+  "is public"
+  isPublic: Boolean!
+  "creation timestamp"
+  creationTimestampMs: Long!
+  "last update timestamp"
+  lastUpdateTimestampMs: Long!
+  "creation timestamp"
+  owner: PublicUser
+  "is the current user subscribed to the cookbook"
+  isSubscribed: Boolean!
+  "list of recipes for this cookbook"
+  recipes("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [AssistantRecipeWithStats!]!
+  "number of recipes for this cookbook that matche a query"
+  recipesCount("language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String): Long!
+  "all languages of a cookbook"
+  languages: [LanguageEnumeration!]!
+  "name of all dependencies of a cookbook that are not negative"
+  dependencies: [String!]!
+  "returns true is the current user upvoted"
+  isUpVoted: Boolean!
+  "returns true is the current user downvoted"
+  isDownVoted: Boolean!
+  "number of upvotes"
+  upvotes: Int!
+  "number of upvotes"
+  downvotes: Int!
+  "groups the cookbook is shared with"
+  groups: [Group!]!
+}
+
+enum AssistantCookbookQueryOrderBy {
+  CreationTimestamp
+  Name
+}
+
+"Association of a user with a language"
+type AssistantMostActiveUserPerLanguage {
+  publicRecipesCount: Long!
+  user: PublicUser
+}
+
+"Recipe to get code"
+type AssistantRecipe {
+  "identifier"
+  id: Long!
+  "name"
+  name: String!
+  "description"
+  description: String!
+  "is public"
+  isPublic: Boolean!
+  "filename patterns"
+  filenamePatterns: [String!]!
+  "keywords"
+  keywords: [String!]!
+  "filename patterns"
+  tags: [String!]!
+  "content"
+  code: String!
+  "uses"
+  uses: Long!
+  "vscode format"
+  vscodeFormat: String!
+  "presentable format without user variable"
+  presentableFormat: String!
+  "jetbrains format"
+  jetbrainsFormat: String!
+  "neovim format"
+  neovimFormat: String!
+  "imports to add when adding the recipe"
+  imports: [String!]!
+  "language of the recipe"
+  language: LanguageEnumeration!
+  "creation timestamp"
+  creationTimestampMs: Long!
+  "last update timestamp"
+  lastUpdateTimestampMs: Long!
+  "recipe owner"
+  owner: PublicUser
+  "shortcut"
+  shortcut: String
+  "average rating"
+  averageRating: Float
+  "dependencies"
+  dependencyConstraints: [AssistantRecipeDependencyConstraint!]!
+  "is the current user subscribed to the recipe"
+  isSubscribed: Boolean!
+  "list of comments"
+  comments("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [AssistantRecipeComment!]!
+  "groups the recipe is shared with"
+  groups: [Group!]!
+  "number of upvotes"
+  upvotes: Int!
+  "number of upvotes"
+  downvotes: Int!
+  "total number of comments"
+  commentsCount: Long!
+  "returns true is the current user upvoted"
+  isUpVoted: Boolean!
+  "returns true is the current user downvoted"
+  isDownVoted: Boolean!
+  "related cookbook"
+  cookbook: AssistantCookbook
+}
+
+"Comment on a recipe"
+type AssistantRecipeComment {
+  "identifier"
+  id: Long!
+  "creation timestamp"
+  creationTimestampMs: Long!
+  "rating of the recipe"
+  rating: Long!
+  "comment value"
+  comment: String!
+  "is the recipe unsecure"
+  securityFlag: Boolean!
+  "author of the comment"
+  author: PublicUser
+  "returns true is the current user upvoted"
+  isUpVoted: Boolean!
+  "returns true is the current user downvoted"
+  isDownVoted: Boolean!
+  "number of upvotes"
+  upvotes: Int!
+  "number of upvotes"
+  downvotes: Int!
+}
+
+"Dependency constraint on a recipe"
+type AssistantRecipeDependencyConstraint {
+  "name of dependency"
+  name: String!
+  "is negative"
+  isNegative: Boolean!
+  "minimum version"
+  minVersion: String
+  "maximum version"
+  maxVersion: String
+}
+
+enum AssistantRecipeQueryOrderBy {
+  Rating
+  Uses
+  Language
+  Visibility
+  Cookbook
+  CreationTimestamp
+  Name
+}
+
+"Recipe to get code"
+type AssistantRecipeWithStats {
+  "identifier"
+  id: Long!
+  "name"
+  name: String!
+  "description"
+  description: String!
+  "is public"
+  isPublic: Boolean!
+  "filename patterns"
+  filenamePatterns: [String!]!
+  "keywords"
+  keywords: [String!]!
+  "filename patterns"
+  tags: [String!]!
+  "content"
+  code: String!
+  "vscodeFormat"
+  vscodeFormat: String!
+  "presentable format without user variable"
+  presentableFormat: String!
+  "jetbrainsFormat"
+  jetbrainsFormat: String!
+  "neovimFormat"
+  neovimFormat: String!
+  "imports to add when adding the recipe"
+  imports: [String!]!
+  "language of the recipe"
+  language: LanguageEnumeration!
+  "creation timestamp"
+  creationTimestampMs: Long!
+  "last update timestamp"
+  lastUpdateTimestampMs: Long!
+  "creation timestamp"
+  owner: PublicUser
+  "total number of use"
+  uses: Long!
+  "average rating"
+  averageRating: Float
+  "shortcut"
+  shortcut: String
+  "dependencies"
+  dependencyConstraints: [AssistantRecipeDependencyConstraint!]!
+  "is the current user subscribed to the recipe"
+  isSubscribed: Boolean!
+  "list of comments"
+  comments("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [AssistantRecipeComment!]!
+  "groups the recipe is shared with"
+  groups: [Group!]!
+  "total number of comments"
+  commentsCount: Long!
+  "related cookbook"
+  cookbook: AssistantCookbook
+  "returns true is the current user upvoted"
+  isUpVoted: Boolean!
+  "returns true is the current user downvoted"
+  isDownVoted: Boolean!
+  "number of upvotes"
+  upvotes: Int!
+  "number of upvotes"
+  downvotes: Int!
+}
+
+"Count of recipe for a language"
+type AssistantRecipesCountPerLanguage {
+  language: LanguageEnumeration!
+  count: Long!
+}
+
+"Badges of user in the coding assistant"
+type AssistantUserBadges {
+  "badge of total number of public recipes authored by a specific user"
+  publicRecipesCountBadge: BadgeEnumeration!
+  "badge of average usage of recipes in relation to all public recipes"
+  publicRecipesUsageBadge: BadgeEnumeration!
+  "badge of total number of comments on public recipes authored by a specific user"
+  commentsBadge: BadgeEnumeration!
+  "did the user sign up"
+  signup: Boolean!
+  "does the user has 10 recipes"
+  has10recipes: Boolean!
+  "does the user has 50 recipes"
+  has50recipes: Boolean!
+  "does the user has 100 recipes"
+  has100recipes: Boolean!
+  "does the user has 10 downvotes"
+  has10downvotes: Boolean!
+  "does the user has 50 downvotes"
+  has50downvotes: Boolean!
+  "does the user has 100 downvotes"
+  has100downvotes: Boolean!
+  "does the user has 10 upvotes"
+  has10upvotes: Boolean!
+  "does the user has 50 upvotes"
+  has50upvotes: Boolean!
+  "does the user has 100 upvotes"
+  has100upvotes: Boolean!
+  "does the user has 10 comments"
+  has10comments: Boolean!
+  "does the user has 50 comments"
+  has50comments: Boolean!
+  "does the user has 100 comments"
+  has100comments: Boolean!
+  "did the user used 10 snippets"
+  used10snippets: Boolean!
+  "did the user used 50 snippets"
+  used50snippets: Boolean!
+  "did the user used 100 snippets"
+  used100snippets: Boolean!
+  "is the user one year old"
+  isOneYearOld: Boolean!
+  "user did onboarding"
+  onboardingDone: Boolean!
+}
+
+"General statistics of user in the coding assistant"
+type AssistantUserStatistics {
+  "total number of public recipes authored by a specific user"
+  totalNumberOfPublicRecipes: Long!
+  "average usage of recipes in relation to all public recipes"
+  averageUsageOfRecipes: Float!
+  "number of uses of all public recipes"
+  publicRecipesUsage: Long!
+  "total number of comments on public recipes authored by a specific user"
+  totalNumberOfCommentsInRecipes: Long!
+}
+
+enum BadgeEnumeration {
+  Gold
+  Silver
+  Bronze
+  None
+}
+
+"Represent a bitbucket installation"
+type BitbucketInstallation {
+  "identifier"
+  uuid: String
+  "error"
+  baseUrl: String
+  "error"
+  apiBaseUrl: String
+}
+
+"Representation of a GitHub Pull Request"
+type BitbucketPullRequest {
+  "identifier of the pull request in code inspector"
+  id: Long!
+  "identifier of the pull request on Bitbucket"
+  bitbucketPullRequestId: Long!
+  "tags of the pull request"
+  tags: String
+  "name of the submitter"
+  submitterName: String
+  "URL of the source commit"
+  sourceFullname: String!
+  "branch of the source commit"
+  sourceBranch: String
+  "revision of the source commit"
+  sourceRevision: String
+  "URL of the target commit"
+  targetFullname: String!
+  "Project identifier"
+  projectId: Long!
+  "branch of the target commit"
+  targetBranch: String
+  "target revision of the source commit"
+  targetRevision: String
+  "identifier of the compare analysis"
+  compareAnalysisId: Long
+  "analysis compare object"
+  compareObject: AnalysisCompare
+  "diff between analysis source and destination"
+  analysisDiff: AnalysisDiff
+  "diff"
+  diff: String
+}
+
+"File\/density information"
+type CodeDensity {
+  "filename"
+  filename: String
+  "filename"
+  function: String
+  "density"
+  metric: Float!
+}
+
+"Code Review object"
+type CodeReview {
+  "identifier of the code review"
+  id: Long!
+  "name of the repository"
+  scmKind: ScmKind!
+  "status of the review"
+  status: AnalysisResultStatus!
+  "tags of the code reviews"
+  tags: String
+  "when was it created (in ms)"
+  creationTimestampMs: Long!
+  "submitter name"
+  submitter: String
+  "source branch of the review"
+  sourceBranch: String
+  "target branch of the review"
+  targetBranch: String
+  "revision being reviewed"
+  revision: String
+  "url to the code review on code platform"
+  url: String
+  "list of annotations added on this code review"
+  annotations: [CodeReviewAnnotation!]!
+  "count of annotations for this review"
+  annotationsCount: Int!
+  "list of modifications for this code review"
+  modifications: [CodeReviewModification!]!
+  "count of modifications for this review"
+  modificationsCount: Int!
+}
+
+"Annotation (violation, duplicate, long function) that is detected during a code review"
+type CodeReviewAnnotation {
+  "identifier of the code review"
+  codeReviewIdentifier: Long!
+  "kind of repository (github, gitlab, etc.)"
+  kind: ScmKind!
+  "Kind of annotation (violation, duplicated, complex or long function)"
+  annotationKind: CodeReviewAnnotationKind!
+  "file reported"
+  filename: String!
+  "line reported"
+  line: Long!
+  "rules being used by the violation (if any)"
+  rule: String
+  "tool used to find the violation (if any)"
+  tool: String
+  "severity of the violation (if kind is violation)"
+  severity: Long
+  "category of the violation (if kind is violation)"
+  category: ViolationCategory
+  "description of the violation (if kind is violation)"
+  description: String
+}
+
+enum CodeReviewAnnotationKind {
+  LongFunction
+  ComplexFunction
+  Duplicate
+  Violation
+}
+
+"Modification on a file that is detected during a code review"
+type CodeReviewModification {
+  "identifier of the code review"
+  codeReviewIdentifier: Long!
+  "kind of repository (github, gitlab, etc.)"
+  kind: ScmKind!
+  "file reported"
+  filename: String!
+  "how many lines were added"
+  linesAdded: Long!
+  "how many lines were removed"
+  linesRemoved: Long!
+  "was the file added"
+  added: Boolean!
+  "was the file removed)"
+  removed: Boolean!
+}
+
+enum CodeReviewOrderBy {
+  Revision
+  Submitter
+  TargetBranch
+  SourceBranch
+  CreationDate
+  Identifier
+}
+
+"Function that is complex, either with the cyclomatic or maintanability complexity"
+type ComplexFunction {
+  "cyclomatic complexity"
+  complexity: Long!
+  "filename"
+  filename: String!
+  "filename"
+  functionName: String!
+  "filename"
+  length: Long!
+  "filename"
+  lineStart: Long!
+  "filename"
+  lineEnd: Long!
+  "filename"
+  nbParameters: Long!
+  "language of the function"
+  language: LanguageEnumeration!
+}
+
+enum ComplexFunctionSearchBy {
+  Filename
+  FunctionName
+  LineStart
+  Complexity
+  Length
+}
+
+"Dependency information"
+type Dependency {
+  "name of the repository"
+  name: String!
+  "language used for this dependency"
+  language: LanguageEnumeration!
+  "version of the dependency"
+  version: String
+  "timestamp when the dependency was added"
+  timestampAdded: Long!
+  "timestamp when the dependency was updated by Code Inspector"
+  timestampUpdated: Long!
+  "homepage for this dependency"
+  homepage: String
+  "is the dependency deprecated"
+  deprecated: Boolean
+  "is the dependency insecure"
+  insecure: Boolean
+  "tags associated with this library"
+  tags: [String!]!
+}
+
+"Information about duplicate (does not contain occurrences)"
+type Duplicate {
+  "identifier"
+  id: Long!
+  "number of duplicated lines"
+  lineCount: Long!
+  "code being duplicated"
+  code: String!
+  "list of occurrences"
+  occurrences("how many records we want (optional)" howmany: Long "filename (exact match)" filename: String "number of records to skip (optional)" skip: Long): [DuplicateOccurrence!]!
+}
+
+"Information about duplicate occurrence (where it is in your code)"
+type DuplicateOccurrence {
+  "where the duplicate is (what file)"
+  filename: String!
+  "number of duplicated lines"
+  line: Long!
+}
+
+"Information about duplicate occurrence (where it is in your code)"
+type ExternalRepository {
+  "Name of the repository"
+  name: String!
+  "URL of the repository"
+  url: String!
+  "kind of external provider"
+  kind: AccountType!
+  "is the repository public"
+  public: Boolean
+}
+
+"Duplicate values flattened (not hierarchical by duplicated code)"
+type FlattenedDuplicate {
+  "filename"
+  filename: String!
+  "line"
+  line: Long!
+  "lineCount"
+  lineCount: Long!
+  "code"
+  code: String!
+}
+
+"Representation of a GitHub Pull Request"
+type GitHubPullRequest {
+  "identifier of the pull request in code inspector"
+  id: Long!
+  "identifier of the pull request on GitHub"
+  githubPullRequestId: Long!
+  "tags of the pull request"
+  tags: String
+  "name of the submitter"
+  submitterName: String
+  "URL of the source commit"
+  sourceUrl: String!
+  "branch of the source commit"
+  sourceBranch: String
+  "revision of the source commit"
+  sourceRevision: String
+  "URL of the target commit"
+  targetUrl: String!
+  "Project identifier"
+  projectId: Long!
+  "branch of the target commit"
+  targetBranch: String
+  "target revision of the source commit"
+  targetRevision: String
+  "identifier of the compare analysis"
+  compareAnalysisId: Long
+  "analysis compare object"
+  compareObject: AnalysisCompare
+  "diff between analysis source and destination"
+  analysisDiff: AnalysisDiff
+  "diff"
+  diff: String
+}
+
+"Represent a Github Gist"
+type GithubGist {
+  "identifier of the gist"
+  id: String!
+  "return if the gist is public or not"
+  isPublic: Boolean!
+  "gist description"
+  description: String
+  "files"
+  files: [GithubGistFile!]!
+}
+
+"Represent a Github Gist file"
+type GithubGistFile {
+  "name of the file"
+  name: String!
+  "file type"
+  type: String!
+  "language of the gist"
+  language: String!
+  "file size"
+  size: Long!
+  "raw url"
+  rawUrl: String!
+  "content"
+  content: String
+  "content"
+  contentBase64: String
+}
+
+"Representation of a Gitlab Merge Request"
+type GitlabMergeRequest {
+  "identifier of the merge request in code inspector"
+  id: Long!
+  "tags of the pull request"
+  tags: String
+  "identifier of the merge request on gitlab"
+  gitlabId: Long!
+  "identifier of the merge request for the gitlab project"
+  gitlabIid: Long!
+  "identifier of the gitlab project"
+  gitlabProjectId: Long!
+  "identifier of the author"
+  gitlabAuthorId: Long!
+  "username of the committed"
+  gitlabAuthorUsername: String!
+  "state of the merge reqeust"
+  gitlabState: String!
+  "indicate of the request was merged"
+  gitlabMergeStatus: String!
+  "identifier of the project"
+  gitlabSourceProjectId: Long!
+  "identifier of the target rpoject"
+  gitlabTargetProjectId: Long!
+  "path of the source of the merge request"
+  sourcePath: String!
+  "url of the source of the merge request"
+  sourceUrl: String!
+  "branch of the source of the merge request"
+  sourceBranch: String!
+  "path of the target of the merge request"
+  targetPath: String!
+  "url of the target of the merge request"
+  targetUrl: String!
+  "branch of the target of the merge request"
+  targetBranch: String!
+  "last revision of the commit"
+  lastCommitRevision: String!
+  "identifier of the compare analysis"
+  compareAnalysisId: Long
+  "analysis compare object"
+  compareObject: AnalysisCompare
+  "diff between analysis source and destination"
+  analysisDiff: AnalysisDiff
+  "diff"
+  diff: String
+}
+
+"A group"
+type Group {
+  "identifier of the project"
+  id: Long!
+  "name of the group"
+  name: String!
+  "type of the group"
+  type: GroupType!
+  "description of the project"
+  state: GroupState!
+  "project state"
+  level: UserLevel!
+  "is the group disabled"
+  disabled: Boolean!
+  "owner of the project"
+  owner: User
+  "returns if the user can admin the group"
+  canAdmin: Boolean!
+  "list of members"
+  members: [GroupMembership!]!
+  "list of invitations"
+  invitations: [GroupInvitation!]!
+  "remaining quota for the group"
+  remainingAnalysisQuota: Long
+  "remaining quota for the group"
+  allowedNumberOfProjects: Long
+  "bitbucket installation"
+  bitbucketInstallation: BitbucketInstallation
+  "GitHub installation ID"
+  githubInstallationIdentifier: Long
+  "group subscription"
+  stripeSubscription: StripeSubscriptionType
+  "indicate if it has a subscription"
+  hasSubscription: Boolean!
+  "list of all projects for this group"
+  projects("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [Project!]!
+  "group preferences"
+  preferences: [GroupPreference!]!
+  "number of recipes shared with this group"
+  sharedRecipesCount: Long!
+  "number of recipes shared with this group"
+  sharedCookbooksCount: Long!
+}
+
+"Invitation directive for a group"
+type GroupInvitation {
+  "id of the invitation"
+  id: Long!
+  "id of the group for the invitation"
+  groupId: Long!
+  "timestamp of the invitation"
+  invitationTimestamp: Long!
+  "email for the invitation"
+  email: String!
+  "Type of the group of the invitation"
+  groupType: GroupType!
+  "If the invitation has been active for more than a week it is expired"
+  expired: Boolean!
+}
+
+"A group membership, association between a user and a group"
+type GroupMembership {
+  "identifier of the project"
+  groupId: Long!
+  "membership level"
+  level: GroupMembershipLevel!
+  "name of the group"
+  userId: Long!
+  "identifier of the user"
+  identifier: String
+  "identifier of the user"
+  accountType: AccountType
+}
+
+enum GroupMembershipLevel {
+  Admin
+  Read
+}
+
+"Preference directive for a group"
+type GroupPreference {
+  "name of the repository"
+  key: GroupPreferenceKey!
+  "value of the string"
+  value: String!
+  "boolean value of the key"
+  valueBoolean: Boolean!
+}
+
+enum GroupPreferenceKey {
+  AvoidUsersToJoin
+  SyncUsers
+}
+
+enum GroupState {
+  Deleting
+  Active
+  Disabled
+  Created
+}
+
+enum GroupType {
+  Bitbucket
+  Gitlab
+  Github
+  Regular
+}
+
+enum LanguageEnumeration {
+  Unknown
+  Coldfusion
+  Docker
+  Objectivec
+  Terraform
+  Json
+  Yaml
+  Typescript
+  Swift
+  Solidity
+  Sql
+  Shell
+  Scala
+  Rust
+  Ruby
+  Php
+  Python
+  Perl
+  Kotlin
+  Javascript
+  Java
+  Html
+  Haskell
+  Go
+  Dart
+  Csharp
+  Css
+  Cpp
+  C
+  Apex
+}
+
+"Linked Account (on external service)"
+type LinkedAccount {
+  "kind of account"
+  kind: LinkedAccountKind!
+  "status"
+  state: String
+  "identifier (numeric)"
+  externalIdentifier: Long
+  "identifier (login)"
+  externalLogin: String
+  "display name"
+  displayName: String
+}
+
+enum LinkedAccountKind {
+  Google
+  Bitbucket
+  Gitlab
+  Github
+}
+
+"Notification on frontend"
+type NotificationType {
+  "project id related to the notification"
+  projectId: Long
+  "analysis id related to the notification"
+  analysisId: Long
+  "cookbook related to the notification"
+  cookbookId: Long
+  "recipe id related to the notification"
+  recipeId: Long
+  "code review id related to the notification"
+  codeReviewId: Long
+  "timestamp"
+  ts: Long!
+  "was the notification read"
+  read: Boolean!
+  "was the notification read"
+  type: UserNotificationType!
+  "project related to the notification"
+  project: Project
+  "recipe related to the notification"
+  recipe: AssistantRecipeWithStats
+  "cookbook related to the notification"
+  cookbook: AssistantCookbook
+}
+
+enum PaymentMethodKind {
+  Card
+}
+
+"A project"
+type Project {
+  "identifier of the project"
+  id: Long!
+  "name of the project"
+  name: String!
+  "Is the project public"
+  public: Boolean!
+  "description of the project"
+  description: String!
+  "project state"
+  status: ProjectState!
+  "owner of the project"
+  owner: User
+  "level for this project"
+  level: UserLevel!
+  "count of analysis"
+  analysesCount("potential status of the analysis" status: [AnalysisResultStatus!] "List of branches we are looking for" branches: [String] "Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long): Long!
+  "list of all analyses"
+  analyses("potential status of the analysis" status: [AnalysisResultStatus!] "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "revisions we are looking for" revision: [String!] "List of branches we are looking for" branches: [String] "Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long): [Analysis!]!
+  "list of code reviews"
+  codeReviews("potential status of the analysis" status: [AnalysisResultStatus!] "how to search for code review" orderBy: CodeReviewOrderBy "set query order desc (optional, asc by default)" desc: Boolean "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "revision we are looking for (optional)" revision: String "Source Branch (optional)" sourceBranch: String "Branch for the source repository (optional)" targetBranch: String "Submitter (optional)" submitterArgument: String "Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long): [CodeReview!]!
+  "get a single code review"
+  codeReview("id of the object to get (required)" id: Long!): CodeReview
+  "list of code review authors"
+  codeReviewAuthors: [String!]!
+  "get the number of code reviews according to multiple criteria"
+  codeReviewsCount("potential status of the analysis" status: [AnalysisResultStatus!] "revision we are looking for (optional)" revision: String "Source Branch (optional)" sourceBranch: String "Branch for the source repository (optional)" targetBranch: String "Submitter (optional)" submitterArgument: String "Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long): Int!
+  "github pull request object"
+  githubPullRequest("id of the object to get (required)" id: Long!): GitHubPullRequest
+  "gitlab merge request object"
+  gitlabMergeRequest("id of the object to get (required)" id: Long!): GitlabMergeRequest
+  "bitbucket pull request object"
+  bitbucketPullRequest("id of the object to get (required)" id: Long!): BitbucketPullRequest
+  "latest analysis using the default branch"
+  lastAnalysis("name of the branch" branch: String): Analysis
+  "project state"
+  ownerLevel: UserLevel!
+  "Trend of the project"
+  trend: ProjectTrend!
+  "project repository"
+  repository: Repository
+  "list of existing configuration directive"
+  configuration: [ProjectConfiguration!]!
+  "List of violations to ignore"
+  violationsToIgnore: [ViolationIgnore!]!
+  "List of violations to ignore"
+  notifications: [ProjectNotification!]!
+  "Group of the project (if project is associated with a group)"
+  group: Group
+  "List of all slack integrations for that project"
+  slackIntegrations: [SlackIntegration!]!
+}
+
+"Configuration directive for a project"
+type ProjectConfiguration {
+  "name of the repository"
+  key: String!
+  "value of the string"
+  value: String!
+  "boolean value of the key"
+  valueBoolean: Boolean!
+  "float value of the key"
+  valueFloat: Float
+}
+
+"Notification for project event"
+type ProjectNotification {
+  "when the notification is triggered"
+  eventType: ProjectNotificationEventType!
+  "type of notification"
+  notificationType: ProjectNotificationType!
+  "value of the destination"
+  notificationValue: String!
+  "status of the notification"
+  status: ProjectNotificationStatus!
+  "confirm the notification"
+  confirmation: String
+}
+
+enum ProjectNotificationEventType {
+  AnalysisCompleted
+}
+
+enum ProjectNotificationStatus {
+  Confirmed
+  Pending
+}
+
+enum ProjectNotificationType {
+  Email
+}
+
+enum ProjectState {
+  Active
+  Deleting_In_Progress
+  Deleting
+  Disabled
+}
+
+enum ProjectStatus {
+  Unavailable
+  Unknown
+  Critical
+  Warning
+  Neutral
+  Good
+  Excellent
+}
+
+"Trend of the project (doing better or not)"
+type ProjectTrend {
+  "period of the trend (in hours)"
+  period: Long!
+  "value of the trend"
+  value: AnalysisTrend!
+}
+
+"All groups for a potential provider"
+type ProviderGroup {
+  "name of the group"
+  name: String!
+  "type of the group"
+  type: GroupType!
+  "member"
+  isMember: Boolean!
+  "does the group exists"
+  exists: Boolean!
+  "can the user join the group"
+  canJoin: Boolean!
+  "group identifier (if the group exists)"
+  groupId: Long
+}
+
+"Public statistics of site"
+type PublicStatisticsType {
+  "number of users"
+  users: Long!
+  "number of groups"
+  groups: Long!
+  "number of projects"
+  projects: Long!
+  assistantRecipesCountPerLanguage("Start timestamp in ms (optional)" startTimestampMs: Long): [AssistantRecipesCountPerLanguage!]!
+  assistantRecipesMostUsed("Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long "language" language: LanguageEnumeration "how many records we want (required)" howmany: Long!): [AssistantRecipeWithStats!]!
+  assistantUserMostActive("Start timestamp in ms (optional)" startTimestampMs: Long "End timestamp in ms (optional)" endTimestampMs: Long "language" language: LanguageEnumeration "how many records we want (required)" howmany: Long!): [AssistantMostActiveUserPerLanguage!]!
+}
+
+"A public user, contains only public information"
+type PublicUser {
+  "id of the user"
+  id: Long!
+  "user karma"
+  karma: Long!
+  "total downvotes the user has received on snippets, cookbooks and comments"
+  totalDownvotesReceived: Int!
+  "total upvotes the user has received on snippets, cookbooks and comments"
+  totalUpvotesReceived: Int!
+  "total downvotes the user has received on snippets, cookbooks and comments"
+  totalDownvotesGiven: Int!
+  "total upvotes the user has received on snippets, cookbooks and comments"
+  totalUpvotesGiven: Int!
+  "type of project (from third party or from the website"
+  accountType: AccountType!
+  "creation date"
+  creationDate: String!
+  "owned projects that are public"
+  ownedProjects: [Project!]!
+  "number of owned projects"
+  numberOfOwnedProjects: Long!
+  "first name"
+  firstname: String
+  "last name"
+  lastname: String
+  "city"
+  city: String
+  "country"
+  country: String
+  "general badges for user"
+  badges: AssistantUserBadges!
+  "list of recipes owned by the user"
+  assistantRecipes("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [AssistantRecipeWithStats!]!
+  "count of recipes that match some criteria"
+  assistantRecipesCount("language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String): Long!
+  "list of cookbooks owned by the user"
+  assistantCookbooks("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [AssistantCookbook!]!
+  "count of cookbooks that match a criteria"
+  assistantCookbooksCount("name of the object to get (optional)" name: String): Long!
+  "count of comments from this user"
+  assistantCommentsCount: Long!
+  "count of uses for the recipes of the users"
+  assistantRecipesUsageCount: Long!
+  assistantRecipesCountPerLanguage("Start timestamp in ms (optional)" startTimestampMs: Long): [AssistantRecipesCountPerLanguage!]!
+  averageRecipesRating: Float
+  socialDevTo: String
+  socialGitHub: String
+  socialTwitter: String
+  socialDiscord: String
+  hasSlug: Boolean!
+  slug: String
+  displayName: String
+  username: String
+  socialFacebook: String
+  socialInstagram: String
+  socialLinkedin: String
+  description: String
+}
+
+type Query {
+  publicStatistics: PublicStatisticsType!
+  getCoupon("id of the coupon to get (required)" id: String!): StripeCouponType
+  getRecipesForClient("fingerprint if the user is not identified (required)" fingerprint: String "keywords" keywords: [String!]! "list of dependencies (required)" dependencies: [String!]! "parameters of the analysis (optional)" parameters: String "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "language" language: LanguageEnumeration! "filename (exact match)" filename: String): [AssistantRecipe!]!
+  getRecipesForClientByShortcut("fingerprint if the user is not identified (required)" fingerprint: String "term to search" term: String "list of dependencies (required)" dependencies: [String!]! "parameters of the analysis (optional)" parameters: String "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get recipes\/cookbooks the user subscribed to (optional)" onlySubscribed: Boolean "language" language: LanguageEnumeration! "filename (exact match)" filename: String): [AssistantRecipe!]!
+  getRecipesForClientByShortcutLastTimestamp("fingerprint if the user is not identified (required)" fingerprint: String "list of dependencies (required)" dependencies: [String!]! "language" language: LanguageEnumeration!): Long
+  assistantPublicRecipe("id of the object to get (required)" id: Long!): AssistantRecipeWithStats
+  assistantRecipe("id of the object to get (required)" id: Long!): AssistantRecipeWithStats
+  assistantRecipesSemanticSearch("languages to use to filter" languages: [LanguageEnumeration!] "term to search" term: String "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get recipes\/cookbooks the user subscribed to (optional)" onlySubscribed: Boolean "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "list of dependencies (optional)" dependencies: [String!] "parameters of the analysis (optional)" parameters: String "tags" tags: [String!] "filename (exact match)" filename: String): [AssistantRecipe!]!
+  assistantRecipeComment("id of the object to get (required)" id: Long!): AssistantRecipeComment
+  assistantPublicRecipes("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "is global (optional)" isGlobal: Boolean "keyword (optional)" keyword: String "keyword (optional)" dependency: String "negative inclusion (optional)" negative: Boolean "set query order desc (optional, asc by default)" desc: Boolean "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "name of the object to get (optional)" name: String "user id, long (optional)" userId: Long): [AssistantRecipeWithStats!]!
+  assistantPublicRecipesCount("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "is global (optional)" isGlobal: Boolean "keyword (optional)" keyword: String "keyword (optional)" dependency: String "negative inclusion (optional)" negative: Boolean "name of the object to get (optional)" name: String "user id, long (optional)" userId: Long): Long!
+  sharedRecipes("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "keyword (optional)" keyword: String "how many records we want (required)" howmany: Long! "set query order desc (optional, asc by default)" desc: Boolean "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long "number of records to skip (required)" skip: Long!): [AssistantRecipeWithStats!]!
+  sharedRecipesCount("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "keyword (optional)" keyword: String "name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long): Long!
+  assistantPublicCookbook("id of the object to get (required)" id: Long!): AssistantCookbook
+  assistantPublicCookbooks("name of the object to get (optional)" name: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "languages to use to filter" languages: [LanguageEnumeration!] "dependency (optional)" dependency: String "set query order desc (optional, asc by default)" desc: Boolean "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "user id, long (optional)" userId: Long): [AssistantCookbook!]!
+  assistantPublicCookbooksCount("name of the object to get (optional)" name: String): Long!
+  sharedCookbooks("name of the object to get (optional)" name: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "set query order desc (optional, asc by default)" desc: Boolean "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "id of the group (optional)" groupId: Long): [AssistantCookbook!]!
+  sharedCookbooksCount("name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long): Long!
+  assistantCookbook("id of the object to get (required)" id: Long!): AssistantCookbook
+  recommendedAssistantCookbook("number of records to skip (required)" skip: Long! "how many records we want (required)" howmany: Long! "language" language: LanguageEnumeration "keyword (optional)" dependency: String): [AssistantCookbook!]!
+  rules("severity of the violation" severities: [Long!] "categories of the violation" categories: [ViolationCategory!] "languages to use to filter" languages: [LanguageEnumeration!]): [Rule!]!
+  project("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String): Project
+  analysis("id of the object to get (required)" id: Long!): Analysis
+  externalRepositories("Type of external repository" repositoryType: AccountType! "id of the group (optional)" groupId: Long): [ExternalRepository!]!
+  analysisCompare("id of the object to get (required)" id: Long!): AnalysisCompare
+  analysisDiff("id of the source analysis (required)" source: Long! "id of the target analysis (required)" target: Long!): AnalysisDiff
+  projects("number of records to skip (required)" skip: Long! "how many records we want (required)" howmany: Long! "filter state of your project" state: [ProjectState!]): [Project!]!
+  publicProjects("number of records to skip (required)" skip: Long! "how many records we want (required)" howmany: Long!): [Project!]!
+  publicProjectsCount: Long!
+  dependency("name of the object to get\/put (required)" name: String! "language" language: LanguageEnumeration!): [Dependency!]!
+  groups("number of records to skip (required)" skip: Long! "how many records we want (required)" howmany: Long!): [Group!]!
+  group("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String): Group
+  publicUser("account type (optional)" accountType: AccountType "name of the object to get (optional)" name: String "id of the object to get (optional)" id: Long "slug of the object to get (optional)" slug: String): PublicUser
+  publicUsers("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [PublicUser!]!
+  publicUsersCount: Long!
+  user: User
+  groupInvitation("invitation code for a group (required)" invitationCode: String! "id of the group (required)" groupId: Long!): GroupInvitation
+}
+
+"Repository associated with a project"
+type Repository {
+  "identifier of the repository"
+  id: Long!
+  "name of the repository"
+  name: String!
+  "kind of repository (github, gitlab, etc.)"
+  kind: ScmKind!
+  "URL of the repository"
+  url: String!
+  "default branch"
+  defaultBranch: String
+  "when the repository was created"
+  creationDate: Long!
+  "username used to checkout\/clone"
+  username: String
+  "list of branches to follow"
+  branches: [String!]!
+  "indicate if the project has webhooks"
+  hasWebhooks: Boolean!
+  "list of branches on the remote repository"
+  listOfRemoteBranches: [String!]!
+}
+
+"Rule used to check the code"
+type Rule {
+  "identifier of the rule"
+  id: Long!
+  "name of the rule"
+  rule: String!
+  "tool for the rule"
+  tool: String!
+  "URL of the rule (optional)"
+  ruleUrl: String
+  "category of the rule"
+  category: ViolationCategory!
+  "severity of the rule"
+  severity: Long!
+  "language applicable for this rule"
+  language: LanguageEnumeration!
+  "description"
+  description: String!
+}
+
+enum ScmKind {
+  Subversion
+  Gitlab
+  Github
+  Git
+  Bitbucket
+}
+
+enum SeniorityEnumeration {
+  VP
+  CTO
+  Staff
+  Senior
+  Mid
+  Junior
+  Student
+}
+
+"Details about slack integration"
+type SlackIntegration {
+  "id"
+  id: Long!
+  "team"
+  team: String!
+  "channel"
+  channel: String!
+  "configuration url"
+  configurationUrl: String!
+}
+
+"Payment Method from Stripe"
+type StripeCouponType {
+  "id of the coupon"
+  id: String
+  "name of the coupon"
+  name: String
+  "discount value in %"
+  percentageOff: Float
+  "fixed amount off"
+  amountOff: Long
+  "currency if fixed value"
+  currency: String
+  "duration of the coupon in months"
+  durationInMonths: Long
+}
+
+"Invoice from Stripe"
+type StripeInvoiceType {
+  "invoice identifier"
+  id: String!
+  "amount due"
+  amountDue: Long!
+  "amount paid"
+  amountPaid: Long!
+  "invoice status"
+  status: String!
+  "invoice description"
+  description: String
+  "invoice identifier"
+  currency: String!
+  "due date"
+  dueDate: Long
+  "due date"
+  periodStart: Long
+  "due date"
+  periodEnd: Long
+  "invoice identifier"
+  url: String
+}
+
+"Payment Method from Stripe"
+type StripePaymentMethodCardType {
+  "card brand"
+  cardBranch: String
+  "invoice status"
+  expirationYear: Long
+  "invoice identifier"
+  lastFourDigits: String
+  "expiration month"
+  expirationMonth: Long
+}
+
+"Payment Method from Stripe"
+type StripePaymentMethodType {
+  "invoice identifier"
+  kind: PaymentMethodKind!
+  "card"
+  card: StripePaymentMethodCardType
+}
+
+enum StripeSubscriptionEnumerationType {
+  Unknown
+  Yearly
+  Monthly
+}
+
+"All data for subscription"
+type StripeSubscriptionType {
+  "stripe subscription id"
+  id: Long!
+  "number of seats purchased"
+  purchasedSeats: Long
+  "links to checkout type"
+  checkoutSession: String
+  "link to the portal"
+  portalUrl: String
+  "when the trial expires"
+  trialEnd: Long
+  "if trial was already done"
+  trialDone: Boolean!
+  "current period start"
+  periodStart: Long
+  "current period end"
+  periodEnd: Long
+  "current discount"
+  discountCode: String
+  "discount object"
+  discountObject: StripeCouponType
+  "user level"
+  userLevel: UserLevel
+  "status of the subscription"
+  status: String
+  "says is the subscription is yearly or monthly"
+  subscriptionType: StripeSubscriptionEnumerationType
+  "intent to change payment method"
+  paymentIntentSecret: String
+  "payment method"
+  paymentMethod: StripePaymentMethodType
+  "billing email"
+  billingEmail: String
+  "secret for payment intent"
+  invoices: [StripeInvoiceType!]!
+  "payment intent to start a new subscription"
+  createNewSubscriptionPaymentIntentSecret("Subbscriptiontype" subscriptionType: StripeSubscriptionEnumerationType! "Number of seats (required)" seats: Long! "coupon (optional)" coupon: String): String
+}
+
+"Data about the technical debt"
+type TechnicalDebtType {
+  "quality score"
+  score: Long
+  "grade"
+  grade: ProjectStatus
+  "Hours to fix violations"
+  fixingViolationsHours: Float!
+  "Hours to fix duplicates"
+  fixingDuplicatesHours: Float!
+  "Hours to fix complexity"
+  fixingComplexityHours: Float!
+  "Hours to fix readability"
+  fixingReadabilityHours: Float!
+  "Cost (USD) to fix violations"
+  fixingViolationsCost: Float!
+  "Cost (USD) to fix duplicates"
+  fixingDuplicatesCost: Float!
+  "Cost (USD) to fix complexity"
+  fixingComplexityCost: Float!
+  "Cost (USD) to fix readability"
+  fixingReadabilityCost: Float!
+  "Hours to fix readability"
+  violationsDensity: [CodeDensity!]!
+  "Hours to fix readability"
+  duplicatesDensity: [CodeDensity!]!
+  "Hours to fix readability"
+  complexFunctions: [CodeDensity!]!
+  "Hours to fix readability"
+  longFunctions: [CodeDensity!]!
+}
+
+"A user"
+type User {
+  "id of the user"
+  id: Long!
+  "user karma"
+  karma: Long!
+  "total downvotes the user has received on snippets, cookbooks and comments"
+  totalDownvotesReceived: Int!
+  "total upvotes the user has received on snippets, cookbooks and comments"
+  totalUpvotesReceived: Int!
+  "total downvotes the user has received on snippets, cookbooks and comments"
+  totalDownvotesGiven: Int!
+  "total upvotes the user has received on snippets, cookbooks and comments"
+  totalUpvotesGiven: Int!
+  "name of the user"
+  username: String!
+  "type of project (from third party or from the website"
+  accountType: AccountType!
+  hasSlug: Boolean!
+  slug: String
+  "name of the project"
+  email: String!
+  "github gist of the user"
+  githubGists("page number (required)" page: Long!): [GithubGist!]!
+  "subscription level for the user"
+  level: UserLevel!
+  "indicates if the user has used a snippet"
+  hasUsedSnippets: Boolean!
+  "creation date"
+  creationDate: String!
+  "owned projects"
+  ownedProjects: [Project!]!
+  "number of owned projects"
+  numberOfOwnedProjects: Long!
+  "number of authored recipes"
+  numberOfAuthoredRecipes: Int!
+  "personal information about the user"
+  info: UserInfo
+  "general statistics for user"
+  statistics: AssistantUserStatistics!
+  "general badges for user"
+  badges: AssistantUserBadges!
+  "indicate if it has a subscription"
+  hasSubscription: Boolean!
+  "remaining quota for the user"
+  allowedNumberOfProjects: Long
+  "remaining quota for the user"
+  remainingAnalysisQuota: Long
+  "API tokens"
+  apiTokens: [ApiToken!]!
+  "github installation identifier"
+  githubInstallationIdentifier: Long
+  "bitbucket installation"
+  bitbucketInstallation: BitbucketInstallation
+  "user preferences"
+  preferences: [UserPreference!]!
+  "List of linked accounts"
+  linkedAccounts: [LinkedAccount!]!
+  "List of provider groups"
+  providerGroups("external account type (required)" accountType: LinkedAccountKind!): [ProviderGroup!]!
+  "list of recipes subscribed by the user"
+  assistantRecipesSubscribed("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [AssistantRecipeWithStats!]!
+  "number of recipes the user subscribed to"
+  assistantRecipesSubscribedCount("language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String): Long!
+  "list of cookbooks subscribed by the user"
+  assistantCookbooksSubscribed("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean): [AssistantCookbook!]!
+  "number of cookbooks subscribed by the user"
+  assistantCookbooksSubscribedCount("name of the object to get (optional)" name: String): Long!
+  "list of recipes owned by the user"
+  assistantRecipes("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get private recipes (optional)" onlyPrivate: Boolean): [AssistantRecipeWithStats!]!
+  "count of recipes that match some criteria"
+  assistantRecipesCount("language" language: LanguageEnumeration "name of the object to get (optional)" name: String "tag (optional)" tag: String "only get public recipes (optional)" onlyPublic: Boolean "only get private recipes (optional)" onlyPrivate: Boolean): Long!
+  "get a recipe by its id"
+  assistantRecipe("id of the object to get (required)" id: Long!): AssistantRecipeWithStats
+  "list of cookbooks owned by the user"
+  assistantCookbooks("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "set query order desc (optional, asc by default)" desc: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get private recipes (optional)" onlyPrivate: Boolean): [AssistantCookbook!]!
+  "count of cookbooks that match a criteria"
+  assistantCookbooksCount("name of the object to get (optional)" name: String "only get public recipes (optional)" onlyPublic: Boolean "only get private recipes (optional)" onlyPrivate: Boolean): Long!
+  "get a cookbook by its id"
+  assistantCookbook("id of the object to get (required)" id: Long!): AssistantCookbook
+  assistantPublicRecipesCountPerLanguage("Start timestamp in ms (optional)" startTimestampMs: Long): [AssistantRecipesCountPerLanguage!]!
+  "list of all keywords the user used in the past"
+  assistantKeywords: [String!]!
+  "list of all tags the user used in the past"
+  assistantTags: [String!]!
+  socialDevTo: String
+  socialGitHub: String
+  socialTwitter: String
+  socialDiscord: String
+  socialFacebook: String
+  socialInstagram: String
+  socialLinkedin: String
+  "list of notification for the current user"
+  notifications("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [NotificationType!]!
+  "is the linked account working"
+  isLinkedAccountWorking("external account type (required)" accountType: LinkedAccountKind!): Boolean!
+}
+
+"Personal Information about a user"
+type UserInfo {
+  "Firstname"
+  firstname: String!
+  "Lastname"
+  lastname: String!
+  "Address"
+  address: String!
+  "City"
+  city: String!
+  "Country"
+  country: String!
+  "How the user heard about us"
+  heardAbout: String!
+  "State"
+  state: String!
+  "URL"
+  url: String!
+  "Zipcode"
+  zipcode: String!
+  "Company"
+  company: String
+  "Seniority"
+  seniority: SeniorityEnumeration
+  "phone number"
+  phoneNumber: String
+}
+
+enum UserLevel {
+  Team
+  KpiViewer
+  Admin
+  Gold
+  Silver
+  Basic
+}
+
+enum UserNotificationType {
+  Unknown
+  CodingAssistantUpvote
+  CodingAssistantComment
+  CodingAssistantBadge
+  CodeReviewReady
+  AnalysisReady
+}
+
+"Models the user preference"
+type UserPreference {
+  "key"
+  key: UserPreferenceKey!
+  "value"
+  value: String!
+}
+
+enum UserPreferenceKey {
+  Slug
+  CodingAssistantOnboardingDone
+  ShowProjects
+  ShowPopularRecipes
+  ShowBadges
+  ShowGeneralStatistics
+  UserDescription
+  SocialMediaLinkedin
+  SocialMediaDiscord
+  SocialMediaInstagram
+  SocialMediaGithub
+  SocialMediaTwitter
+  SocialMediaFacebook
+  SocialMediaDevto
+  EnableGravatar
+  EnableAssistantWeeklySummary
+  EnableAssistantRecipeCommentNotification
+  UserWizardLaunched
+  CodingAssistantEnabled
+  EnablePublicProfile
+  Theme
+}
+
+enum VersionConstraintEnumeration {
+  Unknown
+  LessOrEqual
+  LessThan
+  GreaterOrEqual
+  GreaterThan
+  Equal
+}
+
+"Map a violation reported by code inspector"
+type Violation {
+  "name of the project"
+  filename: String!
+  "line where the violation occured"
+  line: Long!
+  "description of the violation"
+  description: String!
+  "severity of the violation"
+  severity: Long!
+  "category of the violation"
+  category: ViolationCategory!
+  "number of lines (unsupported now)"
+  lineCount: Long!
+  "language related to this violation"
+  language: LanguageEnumeration
+  "language related to this violation"
+  tool: String
+  "language related to this violation"
+  rule: String
+  "URL helper to fix the violation"
+  ruleUrl: String
+  "hash of the code for identification purposes"
+  codeHash: String
+  "unique identifier of the violation"
+  uniqueIdentifier: String!
+}
+
+enum ViolationCategory {
+  Unknown
+  Error_Prone
+  Code_Style
+  Best_Practice
+  Safety
+  Security
+  Design
+  Deployment
+  Performance
+  Documentation
+}
+
+"Violation to ignore for a particular project"
+type ViolationIgnore {
+  "filename of the violation to ignore"
+  filename: String
+  "description of the violation"
+  description: String
+  "language of the violation"
+  language: LanguageEnumeration
+  "when the repository was created"
+  rule: String!
+  "prefix to ignore"
+  prefix: String
+  "tool that detects this violation"
+  tool: String!
+}
+
+enum ViolationQueryOrderBy {
+  Category
+  Severity
+  Filename
+}
+
+"The `Long` scalar type represents non-fractional signed whole numeric values. Long can represent values between -(2^63) and 2^63 - 1."
+scalar Long

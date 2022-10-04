@@ -119,7 +119,7 @@ namespace Extension.AssistantCompletion
             var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
             var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
 
-            return new CompletionContext();
+            return null;
         }
 
 		/// <summary>
@@ -154,26 +154,11 @@ namespace Extension.AssistantCompletion
         }
 
         /// <summary>
-        /// Provides detailed element information in the tooltip
+        /// Provides detailed snippet information in the tooltip
         /// </summary>
         public async Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
         {
-            if (item.Properties.TryGetProperty<ElementCatalog.Element>(nameof(ElementCatalog.Element), out var matchingElement))
-            {
-                return $"{matchingElement.Name} [{matchingElement.AtomicNumber}, {matchingElement.Symbol}] is {GetCategoryName(matchingElement.Category)} with atomic weight {matchingElement.AtomicWeight}";
-            }
             return null;
-        }
-
-        private string GetCategoryName(ElementCatalog.Element.Categories category)
-        {
-            switch(category)
-            {
-                case ElementCatalog.Element.Categories.Metal: return "a metal";
-                case ElementCatalog.Element.Categories.Metalloid: return "a metalloid";
-                case ElementCatalog.Element.Categories.NonMetal: return "a non metal";
-                default:  return "an uncategorized element";
-            }
         }
     }
 }

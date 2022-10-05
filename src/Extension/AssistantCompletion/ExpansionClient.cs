@@ -27,6 +27,7 @@ namespace Extension.AssistantCompletion
 	{
 		private IVsExpansionSession m_currentExpansionSession;
 		private IOleCommandTarget m_nextCommandHandler;
+		private IVsTextView m_currentTextView;
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -36,6 +37,8 @@ namespace Extension.AssistantCompletion
 		/// <returns></returns>
 		public int StartExpansion(IVsTextView vsTextView, CompletionItem completionItem)
 		{
+			m_currentTextView = vsTextView;
+
 			vsTextView.AddCommandFilter(this, out m_nextCommandHandler);
 
 			vsTextView.GetBuffer(out var textLines);
@@ -51,8 +54,6 @@ namespace Extension.AssistantCompletion
 
 			var xmlSnippet = completionItem.Properties.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
 			var xml = xmlSnippet.xml;
-
-			var snippet = SnippetInsertion.GetSnippet();
 
 			expansion.InsertSpecificExpansion(
 				pSnippet: xmlSnippet,
@@ -94,7 +95,6 @@ namespace Extension.AssistantCompletion
 				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
 			}
 
-
 			//check for a commit character
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
 			    || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
@@ -121,7 +121,10 @@ namespace Extension.AssistantCompletion
 				}
 			}
 
-			return VSConstants.S_OK;
+			//pass along the command so the char is added to the buffer
+			var result = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
+			return result;
 		}
 
 		public int GetExpansionFunction(IXMLDOMNode xmlFunctionNode, string bstrFieldName, out IVsExpansionFunction pFunc)
@@ -137,6 +140,8 @@ namespace Extension.AssistantCompletion
 
 		public int EndExpansion()
 		{
+			// stop listening to input when the expansion is done
+			m_currentTextView.RemoveCommandFilter(this);
 			return VSConstants.S_OK;
 		}
 

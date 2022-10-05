@@ -47,10 +47,6 @@ namespace Extension.AssistantCompletion
 			// Objects of interest here are session.TextView and session.TextView.Caret.
 			// This method runs synchronously
 
-			// insert specific expansion
-			// start expansion session
-			// pass key 
-
 			// use IVsEditorAdaptersFactoryService to get access to IVsTextview
 			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
 

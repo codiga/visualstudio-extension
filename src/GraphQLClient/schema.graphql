@@ -68,6 +68,8 @@ type EmailStatus {
 }
 
 type Mutation {
+  createRuleSet("name of the object to get\/put (required)" name: String! "description of the object" description: String! "if the resource is public (required)" isPublic: Boolean!): RosieRuleSet
+  createRule("name of the object to get\/put (required)" name: String! "message to send" message: String! "description of the object" description: String! "content (required)" content: String! "tags" tags: [String!] "language" language: LanguageEnumeration! "cwe" cwe: String "cve" cve: String "severity" severity: Long! "violation" category: ViolationCategory! "rosie rule type" ruleType: RosieRuleTypeEnumeration! "pattern" pattern: String "is pattern multiline" patternMultiline: Boolean! "What elements should be checked" elementChecked: ElementCheckedEnumeration "The ruleset this rule belongs to" ruleSetId: Long!): RosieRule
   createCompareAnalysis("id of the project to compare (required)" projectId: Long! "Branch for the source repository (optional)" sourceBranch: String "Revision for the source repository (optional)" sourceRevision: String "Type of the target repository (required)" targetKind: ScmKind! "URL of the source repository (required)" targetUrl: String! "Username for the source repository (optional)" targetUsername: String "Password for the source repository (optional)" targetPassword: String "Branch for the source repository (optional)" targetBranch: String "Revision for the source repository (optional)" targetRevision: String): AnalysisCompare
   scheduleAnalysis("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String "name of the branch" branch: String): Analysis
   installWebhooks("id of the object to get (required)" id: Long!): Boolean!
@@ -970,6 +972,14 @@ type DuplicateOccurrence {
   line: Long!
 }
 
+enum ElementCheckedEnumeration {
+  TryBlock
+  FunctionDefinition
+  ForLoop
+  IfCondition
+  FunctionCall
+}
+
 "Information about duplicate occurrence (where it is in your code)"
 type ExternalRepository {
   "Name of the repository"
@@ -1216,6 +1226,10 @@ enum GroupType {
 
 enum LanguageEnumeration {
   Unknown
+  Markdown
+  Twig
+  Sass
+  Scss
   Coldfusion
   Docker
   Objectivec
@@ -1312,6 +1326,8 @@ type Project {
   status: ProjectState!
   "owner of the project"
   owner: User
+  "owner of the project"
+  ownerPublic: PublicUser
   "level for this project"
   level: UserLevel!
   "count of analysis"
@@ -1506,6 +1522,12 @@ type PublicUser {
 }
 
 type Query {
+  ruleSet("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String): RosieRuleSet
+  rule("id of the object to get (required)" id: Long!): RosieRule
+  ruleSets("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): [RosieRuleSet!]!
+  ruleSetsCount("name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): Int!
+  rules("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): [RosieRule!]!
+  rulesCount("name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): Long!
   publicStatistics: PublicStatisticsType!
   getCoupon("id of the coupon to get (required)" id: String!): StripeCouponType
   getRecipesForClient("fingerprint if the user is not identified (required)" fingerprint: String "keywords" keywords: [String!]! "list of dependencies (required)" dependencies: [String!]! "parameters of the analysis (optional)" parameters: String "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "language" language: LanguageEnumeration! "filename (exact match)" filename: String): [AssistantRecipe!]!
@@ -1519,14 +1541,13 @@ type Query {
   assistantPublicRecipesCount("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "is global (optional)" isGlobal: Boolean "keyword (optional)" keyword: String "keyword (optional)" dependency: String "negative inclusion (optional)" negative: Boolean "name of the object to get (optional)" name: String "user id, long (optional)" userId: Long): Long!
   sharedRecipes("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "keyword (optional)" keyword: String "how many records we want (required)" howmany: Long! "set query order desc (optional, asc by default)" desc: Boolean "how to search for recipe" orderBy: AssistantRecipeQueryOrderBy "name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long "number of records to skip (required)" skip: Long!): [AssistantRecipeWithStats!]!
   sharedRecipesCount("languages to use to filter" languages: [LanguageEnumeration!] "tag (optional)" tag: String "keyword (optional)" keyword: String "name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long): Long!
-  assistantPublicCookbook("id of the object to get (required)" id: Long!): AssistantCookbook
-  assistantPublicCookbooks("name of the object to get (optional)" name: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "languages to use to filter" languages: [LanguageEnumeration!] "dependency (optional)" dependency: String "set query order desc (optional, asc by default)" desc: Boolean "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "user id, long (optional)" userId: Long): [AssistantCookbook!]!
-  assistantPublicCookbooksCount("name of the object to get (optional)" name: String): Long!
+  assistantCookbooks("name of the object to get (optional)" name: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get recipes\/cookbooks the user subscribed to (optional)" onlySubscribed: Boolean "languages to use to filter" languages: [LanguageEnumeration!] "dependency (optional)" dependency: String "set query order desc (optional, asc by default)" desc: Boolean "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy): [AssistantCookbook!]!
+  assistantCookbooksCount("name of the object to get (optional)" name: String "only get private recipes (optional)" onlyPrivate: Boolean "only get public recipes (optional)" onlyPublic: Boolean "only get recipes\/cookbooks the user subscribed to (optional)" onlySubscribed: Boolean "languages to use to filter" languages: [LanguageEnumeration!] "dependency (optional)" dependency: String "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy): Long!
   sharedCookbooks("name of the object to get (optional)" name: String "how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "set query order desc (optional, asc by default)" desc: Boolean "how to search for cookbook" orderBy: AssistantCookbookQueryOrderBy "id of the group (optional)" groupId: Long): [AssistantCookbook!]!
   sharedCookbooksCount("name of the object to get (optional)" name: String "id of the group (optional)" groupId: Long): Long!
   assistantCookbook("id of the object to get (required)" id: Long!): AssistantCookbook
   recommendedAssistantCookbook("number of records to skip (required)" skip: Long! "how many records we want (required)" howmany: Long! "language" language: LanguageEnumeration "keyword (optional)" dependency: String): [AssistantCookbook!]!
-  rules("severity of the violation" severities: [Long!] "categories of the violation" categories: [ViolationCategory!] "languages to use to filter" languages: [LanguageEnumeration!]): [Rule!]!
+  legacyRules("severity of the violation" severities: [Long!] "categories of the violation" categories: [ViolationCategory!] "languages to use to filter" languages: [LanguageEnumeration!]): [Rule!]!
   project("id of the object to get (optional)" id: Long "name of the object to get (optional)" name: String): Project
   analysis("id of the object to get (required)" id: Long!): Analysis
   externalRepositories("Type of external repository" repositoryType: AccountType! "id of the group (optional)" groupId: Long): [ExternalRepository!]!
@@ -1567,6 +1588,75 @@ type Repository {
   hasWebhooks: Boolean!
   "list of branches on the remote repository"
   listOfRemoteBranches: [String!]!
+}
+
+"A rule (for rosie)"
+type RosieRule {
+  "Rule identifier"
+  id: Long!
+  "Rule name"
+  name: String!
+  "Rule message"
+  message: String!
+  "Rule description"
+  description: String!
+  "Rule content (encode as Base64"
+  content: String!
+  "Rule tags"
+  tags: [String!]!
+  "Rule language"
+  language: LanguageEnumeration!
+  "When the rule was created"
+  creationTimestamp: Long!
+  "When the rule was last updated"
+  updatedTimestamp: Long!
+  "A cwe that this rule addresses"
+  cwe: String
+  "A cve that this rule addresses"
+  cve: String
+  "Rule severity"
+  severity: Long!
+  "Rule category"
+  category: ViolationCategory!
+  "What type of rule is it"
+  ruleType: RosieRuleTypeEnumeration!
+  "Rule pattern"
+  pattern: String
+  "Does the rule pattern check multiple lines"
+  patternMultiline: Boolean!
+  "What element does this rule check"
+  elementChecked: ElementCheckedEnumeration
+  "How many times has this rule been used"
+  uses: Long!
+  "What rule set does this rule belong to"
+  ruleSet: RosieRuleSet
+  "Rule set owner"
+  owner: PublicUser
+}
+
+"A rule set"
+type RosieRuleSet {
+  "Rule set identifier"
+  id: Long!
+  "Rule set name"
+  name: String!
+  "Rule set description"
+  description: String!
+  "Is the rule set public or not"
+  isPublic: Boolean!
+  "When was the rule set created"
+  creationTimestamp: Long!
+  "When was the rule set last updated"
+  updatedTimestamp: Long!
+  "Rule set owner"
+  owner: PublicUser
+  "Rules in this ruleset"
+  rules("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String): [RosieRule!]!
+}
+
+enum RosieRuleTypeEnumeration {
+  Pattern
+  Ast
 }
 
 "Rule used to check the code"
@@ -1853,6 +1943,14 @@ type User {
   notifications("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long!): [NotificationType!]!
   "is the linked account working"
   isLinkedAccountWorking("external account type (required)" accountType: LinkedAccountKind!): Boolean!
+  "this user's created rule sets"
+  ruleSets("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): [RosieRuleSet!]!
+  "the count for rulesets"
+  ruleSetsCount("name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): Int!
+  "list of user rules"
+  rules("how many records we want (required)" howmany: Long! "number of records to skip (required)" skip: Long! "name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): [RosieRule!]!
+  "the count for rules"
+  rulesCount("name of the object to get (optional)" name: String "cwe" cwe: [String!] "cve" cve: [String!] "languages to use to filter" languages: [LanguageEnumeration!] "categories of the violation" categories: [ViolationCategory!] "severity of the violation" severities: [Long!] "tags" tags: [String!] "if the resource is public (optional)" isPublic: Boolean): Int!
 }
 
 "Personal Information about a user"

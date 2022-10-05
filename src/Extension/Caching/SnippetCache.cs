@@ -1,13 +1,23 @@
-﻿using Extension.Xml;
+﻿using Extension.SnippetFormats;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GraphQLClient;
 
-namespace Extension.AssistantCompletion
+namespace Extension.Caching
 {
+
+	interface ISnippetCache
+	{
+		//public IEnumerable<VisualStudioSnippet> GetSnippets(LanguageEnumeration language);
+		public IEnumerable<VisualStudioSnippet> GetSnippets(LanguageEnumeration language);
+		public IEnumerable<VisualStudioSnippet> GetSnippets();
+
+	}
+
     [Export]
     internal class SnippetCache
     {

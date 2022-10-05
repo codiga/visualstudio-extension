@@ -3,7 +3,7 @@
 
 namespace GraphQLClient
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataResult : global::System.IEquatable<GetFileDataResult>, IGetFileDataResult
     {
         public GetFileDataResult(global::GraphQLClient.IGetFileData_Project? project)
@@ -71,7 +71,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Project : global::System.IEquatable<GetFileData_Project_Project>, IGetFileData_Project_Project
     {
         public GetFileData_Project_Project(global::System.Int64 id, global::System.String name, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses> analyses)
@@ -156,7 +156,7 @@ namespace GraphQLClient
     /// <summary>
     /// An analysis object
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_Analysis : global::System.IEquatable<GetFileData_Project_Analyses_Analysis>, IGetFileData_Project_Analyses_Analysis
     {
         public GetFileData_Project_Analyses_Analysis(global::System.Int64 id, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses_Violations> violations, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses_LongFunctions> longFunctions, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses_ComplexFunctions> complexFunctions, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses_Duplicates> duplicates)
@@ -267,7 +267,7 @@ namespace GraphQLClient
     /// <summary>
     /// Map a violation reported by code inspector
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_Violations_Violation : global::System.IEquatable<GetFileData_Project_Analyses_Violations_Violation>, IGetFileData_Project_Analyses_Violations_Violation
     {
         public GetFileData_Project_Analyses_Violations_Violation(global::System.Int64 line, global::GraphQLClient.ViolationCategory category, global::System.Int64 severity, global::System.String description, global::System.String filename, global::System.Int64 lineCount, global::GraphQLClient.LanguageEnumeration? language, global::System.String? tool, global::System.String? rule, global::System.String? ruleUrl)
@@ -413,7 +413,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_LongFunctions_ComplexFunction : global::System.IEquatable<GetFileData_Project_Analyses_LongFunctions_ComplexFunction>, IGetFileData_Project_Analyses_LongFunctions_ComplexFunction
     {
         public GetFileData_Project_Analyses_LongFunctions_ComplexFunction(global::System.String filename, global::System.String functionName, global::System.Int64 complexity, global::System.Int64 length, global::System.Int64 lineStart, global::System.Int64 lineEnd)
@@ -515,7 +515,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_ComplexFunctions_ComplexFunction : global::System.IEquatable<GetFileData_Project_Analyses_ComplexFunctions_ComplexFunction>, IGetFileData_Project_Analyses_ComplexFunctions_ComplexFunction
     {
         public GetFileData_Project_Analyses_ComplexFunctions_ComplexFunction(global::System.String filename, global::System.String functionName, global::System.Int64 complexity, global::System.Int64 length, global::System.Int64 lineStart, global::System.Int64 lineEnd)
@@ -617,7 +617,7 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate (does not contain occurrences)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_Duplicates_Duplicate : global::System.IEquatable<GetFileData_Project_Analyses_Duplicates_Duplicate>, IGetFileData_Project_Analyses_Duplicates_Duplicate
     {
         public GetFileData_Project_Analyses_Duplicates_Duplicate(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetFileData_Project_Analyses_Duplicates_Occurrences> occurrences)
@@ -688,7 +688,7 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate occurrence (where it is in your code)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_Duplicates_Occurrences_DuplicateOccurrence : global::System.IEquatable<GetFileData_Project_Analyses_Duplicates_Occurrences_DuplicateOccurrence>, IGetFileData_Project_Analyses_Duplicates_Occurrences_DuplicateOccurrence
     {
         public GetFileData_Project_Analyses_Duplicates_Occurrences_DuplicateOccurrence(global::System.Int64 line, global::System.String filename)
@@ -759,7 +759,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileDataResult
     {
         public global::GraphQLClient.IGetFileData_Project? Project { get; }
@@ -768,7 +768,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project
     {
         /// <summary>
@@ -790,7 +790,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Project : IGetFileData_Project
     {
     }
@@ -798,7 +798,7 @@ namespace GraphQLClient
     /// <summary>
     /// An analysis object
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses
     {
         /// <summary>
@@ -830,7 +830,7 @@ namespace GraphQLClient
     /// <summary>
     /// An analysis object
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Analysis : IGetFileData_Project_Analyses
     {
     }
@@ -838,7 +838,7 @@ namespace GraphQLClient
     /// <summary>
     /// Map a violation reported by code inspector
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Violations
     {
         /// <summary>
@@ -895,7 +895,7 @@ namespace GraphQLClient
     /// <summary>
     /// Map a violation reported by code inspector
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Violations_Violation : IGetFileData_Project_Analyses_Violations
     {
     }
@@ -903,7 +903,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_LongFunctions
     {
         /// <summary>
@@ -940,7 +940,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_LongFunctions_ComplexFunction : IGetFileData_Project_Analyses_LongFunctions
     {
     }
@@ -948,7 +948,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_ComplexFunctions
     {
         /// <summary>
@@ -985,7 +985,7 @@ namespace GraphQLClient
     /// <summary>
     /// Function that is complex, either with the cyclomatic or maintanability complexity
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_ComplexFunctions_ComplexFunction : IGetFileData_Project_Analyses_ComplexFunctions
     {
     }
@@ -993,7 +993,7 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate (does not contain occurrences)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Duplicates
     {
         /// <summary>
@@ -1005,7 +1005,7 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate (does not contain occurrences)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Duplicates_Duplicate : IGetFileData_Project_Analyses_Duplicates
     {
     }
@@ -1013,7 +1013,7 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate occurrence (where it is in your code)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Duplicates_Occurrences
     {
         /// <summary>
@@ -1030,12 +1030,12 @@ namespace GraphQLClient
     /// <summary>
     /// Information about duplicate occurrence (where it is in your code)
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileData_Project_Analyses_Duplicates_Occurrences_DuplicateOccurrence : IGetFileData_Project_Analyses_Duplicates_Occurrences
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsResult : global::System.IEquatable<GetProjectsResult>, IGetProjectsResult
     {
         public GetProjectsResult(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetProjects_Projects> projects)
@@ -1103,7 +1103,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_Project : global::System.IEquatable<GetProjects_Projects_Project>, IGetProjects_Projects_Project
     {
         public GetProjects_Projects_Project(global::System.Int64 id, global::System.String name, global::GraphQLClient.IGetProjects_Projects_Owner? owner, global::GraphQLClient.IGetProjects_Projects_Group? @group, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetProjects_Projects_ViolationsToIgnore> violationsToIgnore)
@@ -1210,7 +1210,7 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_Owner_User : global::System.IEquatable<GetProjects_Projects_Owner_User>, IGetProjects_Projects_Owner_User
     {
         public GetProjects_Projects_Owner_User(global::System.String username)
@@ -1277,7 +1277,7 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_Group_Group : global::System.IEquatable<GetProjects_Projects_Group_Group>, IGetProjects_Projects_Group_Group
     {
         public GetProjects_Projects_Group_Group(global::System.Int64 id, global::System.String name)
@@ -1351,7 +1351,7 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_ViolationsToIgnore_ViolationIgnore : global::System.IEquatable<GetProjects_Projects_ViolationsToIgnore_ViolationIgnore>, IGetProjects_Projects_ViolationsToIgnore_ViolationIgnore
     {
         public GetProjects_Projects_ViolationsToIgnore_ViolationIgnore(global::System.String? filename, global::System.String? description, global::System.String? prefix, global::System.String rule, global::System.String tool, global::GraphQLClient.LanguageEnumeration? language)
@@ -1466,7 +1466,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjectsResult
     {
         public global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetProjects_Projects> Projects { get; }
@@ -1475,7 +1475,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects
     {
         /// <summary>
@@ -1507,7 +1507,7 @@ namespace GraphQLClient
     /// <summary>
     /// A project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_Project : IGetProjects_Projects
     {
     }
@@ -1515,7 +1515,7 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_Owner
     {
         /// <summary>
@@ -1527,7 +1527,7 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_Owner_User : IGetProjects_Projects_Owner
     {
     }
@@ -1535,7 +1535,7 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_Group
     {
         /// <summary>
@@ -1552,7 +1552,7 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_Group_Group : IGetProjects_Projects_Group
     {
     }
@@ -1560,7 +1560,7 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_ViolationsToIgnore
     {
         /// <summary>
@@ -1597,12 +1597,12 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjects_Projects_ViolationsToIgnore_ViolationIgnore : IGetProjects_Projects_ViolationsToIgnore
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientResult : global::System.IEquatable<GetRecipesForClientResult>, IGetRecipesForClientResult
     {
         public GetRecipesForClientResult(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClient_GetRecipesForClient> getRecipesForClient)
@@ -1670,7 +1670,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClient_GetRecipesForClient_AssistantRecipe : global::System.IEquatable<GetRecipesForClient_GetRecipesForClient_AssistantRecipe>, IGetRecipesForClient_GetRecipesForClient_AssistantRecipe
     {
         public GetRecipesForClient_GetRecipesForClient_AssistantRecipe(global::System.Int64 id, global::System.String name, global::System.String code, global::System.String jetbrainsFormat, global::System.Collections.Generic.IReadOnlyList<global::System.String> keywords, global::System.Collections.Generic.IReadOnlyList<global::System.String> imports, global::GraphQLClient.LanguageEnumeration language, global::System.String description, global::System.String? shortcut)
@@ -1802,7 +1802,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientResult
     {
         public global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClient_GetRecipesForClient> GetRecipesForClient { get; }
@@ -1811,7 +1811,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClient_GetRecipesForClient
     {
         /// <summary>
@@ -1863,12 +1863,12 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClient_GetRecipesForClient_AssistantRecipe : IGetRecipesForClient_GetRecipesForClient
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutResult : global::System.IEquatable<GetRecipesForClientByShortcutResult>, IGetRecipesForClientByShortcutResult
     {
         public GetRecipesForClientByShortcutResult(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut> getRecipesForClientByShortcut)
@@ -1936,7 +1936,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe : global::System.IEquatable<GetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe>, IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe
     {
         public GetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe(global::System.Int64 id, global::System.String name, global::System.String code, global::System.Collections.Generic.IReadOnlyList<global::System.String> keywords, global::System.Collections.Generic.IReadOnlyList<global::System.String> imports, global::GraphQLClient.LanguageEnumeration language, global::System.String description, global::System.String? shortcut)
@@ -2061,7 +2061,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcutResult
     {
         public global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut> GetRecipesForClientByShortcut { get; }
@@ -2070,7 +2070,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut
     {
         /// <summary>
@@ -2117,12 +2117,12 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe : IGetRecipesForClientByShortcut_GetRecipesForClientByShortcut
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampResult : global::System.IEquatable<GetRecipesForClientByShortcutLastTimestampResult>, IGetRecipesForClientByShortcutLastTimestampResult
     {
         public GetRecipesForClientByShortcutLastTimestampResult(global::System.Int64? getRecipesForClientByShortcutLastTimestamp)
@@ -2187,13 +2187,13 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcutLastTimestampResult
     {
         public global::System.Int64? GetRecipesForClientByShortcutLastTimestamp { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticResult : global::System.IEquatable<GetRecipesForClientSemanticResult>, IGetRecipesForClientSemanticResult
     {
         public GetRecipesForClientSemanticResult(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch> assistantRecipesSemanticSearch)
@@ -2261,7 +2261,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe : global::System.IEquatable<GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe>, IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe
     {
         public GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe(global::System.Int64 id, global::System.String name, global::System.String code, global::System.String jetbrainsFormat, global::System.String presentableFormat, global::System.Collections.Generic.IReadOnlyList<global::System.String> keywords, global::System.Collections.Generic.IReadOnlyList<global::System.String> imports, global::GraphQLClient.LanguageEnumeration language, global::System.Boolean isPublic, global::System.String description, global::System.String? shortcut, global::GraphQLClient.IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner? owner, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups> groups)
@@ -2432,7 +2432,7 @@ namespace GraphQLClient
     /// <summary>
     /// A public user, contains only public information
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser : global::System.IEquatable<GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser>, IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser
     {
         public GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser(global::System.Int64 id, global::System.String? displayName, global::System.String? slug, global::System.Boolean hasSlug, global::GraphQLClient.AccountType accountType)
@@ -2526,7 +2526,7 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group : global::System.IEquatable<GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group>, IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group
     {
         public GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group(global::System.Int64 id, global::System.String name)
@@ -2597,7 +2597,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemanticResult
     {
         public global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch> AssistantRecipesSemanticSearch { get; }
@@ -2606,7 +2606,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch
     {
         /// <summary>
@@ -2678,7 +2678,7 @@ namespace GraphQLClient
     /// <summary>
     /// Recipe to get code
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe : IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch
     {
     }
@@ -2686,7 +2686,7 @@ namespace GraphQLClient
     /// <summary>
     /// A public user, contains only public information
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner
     {
         /// <summary>
@@ -2709,7 +2709,7 @@ namespace GraphQLClient
     /// <summary>
     /// A public user, contains only public information
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser : IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner
     {
     }
@@ -2717,7 +2717,7 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups
     {
         /// <summary>
@@ -2734,12 +2734,12 @@ namespace GraphQLClient
     /// <summary>
     /// A group
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group : IGetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserResult : global::System.IEquatable<GetUserResult>, IGetUserResult
     {
         public GetUserResult(global::GraphQLClient.IGetUser_User? user)
@@ -2807,7 +2807,7 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUser_User_User : global::System.IEquatable<GetUser_User_User>, IGetUser_User_User
     {
         public GetUser_User_User(global::System.String username)
@@ -2871,7 +2871,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetUserResult
     {
         public global::GraphQLClient.IGetUser_User? User { get; }
@@ -2880,7 +2880,7 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetUser_User
     {
         /// <summary>
@@ -2892,12 +2892,12 @@ namespace GraphQLClient
     /// <summary>
     /// A user
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetUser_User_User : IGetUser_User
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreResult : global::System.IEquatable<AddViolationToIgnoreResult>, IAddViolationToIgnoreResult
     {
         public AddViolationToIgnoreResult(global::GraphQLClient.IAddViolationToIgnore_AddViolationToIgnore? addViolationToIgnore)
@@ -2965,7 +2965,7 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnore_AddViolationToIgnore_ViolationIgnore : global::System.IEquatable<AddViolationToIgnore_AddViolationToIgnore_ViolationIgnore>, IAddViolationToIgnore_AddViolationToIgnore_ViolationIgnore
     {
         public AddViolationToIgnore_AddViolationToIgnore_ViolationIgnore(global::System.String rule)
@@ -3029,7 +3029,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IAddViolationToIgnoreResult
     {
         public global::GraphQLClient.IAddViolationToIgnore_AddViolationToIgnore? AddViolationToIgnore { get; }
@@ -3038,7 +3038,7 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IAddViolationToIgnore_AddViolationToIgnore
     {
         /// <summary>
@@ -3050,12 +3050,12 @@ namespace GraphQLClient
     /// <summary>
     /// Violation to ignore for a particular project
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IAddViolationToIgnore_AddViolationToIgnore_ViolationIgnore : IAddViolationToIgnore_AddViolationToIgnore
     {
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessResult : global::System.IEquatable<RecordAccessResult>, IRecordAccessResult
     {
         public RecordAccessResult(global::System.String recordAccess)
@@ -3116,13 +3116,13 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRecordAccessResult
     {
         public global::System.String RecordAccess { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseResult : global::System.IEquatable<RecordRecipeUseResult>, IRecordRecipeUseResult
     {
         public RecordRecipeUseResult(global::System.String recordAccess)
@@ -3183,13 +3183,13 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRecordRecipeUseResult
     {
         public global::System.String RecordAccess { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreResult : global::System.IEquatable<RemoveViolationToIgnoreResult>, IRemoveViolationToIgnoreResult
     {
         public RemoveViolationToIgnoreResult(global::System.String removeViolationToIgnore)
@@ -3250,13 +3250,13 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRemoveViolationToIgnoreResult
     {
         public global::System.String RemoveViolationToIgnore { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public enum ViolationCategory
     {
         Unknown,
@@ -3271,7 +3271,7 @@ namespace GraphQLClient
         Documentation
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ViolationCategorySerializer : global::StrawberryShake.Serialization.IInputValueFormatter, global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, ViolationCategory>
     {
         public global::System.String TypeName => "ViolationCategory";
@@ -3310,10 +3310,14 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public enum LanguageEnumeration
     {
         Unknown,
+        Markdown,
+        Twig,
+        Sass,
+        Scss,
         Coldfusion,
         Docker,
         Objectivec,
@@ -3345,7 +3349,7 @@ namespace GraphQLClient
         Apex
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class LanguageEnumerationSerializer : global::StrawberryShake.Serialization.IInputValueFormatter, global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, LanguageEnumeration>
     {
         public global::System.String TypeName => "LanguageEnumeration";
@@ -3354,6 +3358,10 @@ namespace GraphQLClient
             return serializedValue switch
             {
                 "Unknown" => LanguageEnumeration.Unknown,
+                "Markdown" => LanguageEnumeration.Markdown,
+                "Twig" => LanguageEnumeration.Twig,
+                "Sass" => LanguageEnumeration.Sass,
+                "Scss" => LanguageEnumeration.Scss,
                 "Coldfusion" => LanguageEnumeration.Coldfusion,
                 "Docker" => LanguageEnumeration.Docker,
                 "Objectivec" => LanguageEnumeration.Objectivec,
@@ -3391,6 +3399,10 @@ namespace GraphQLClient
             return runtimeValue switch
             {
                 LanguageEnumeration.Unknown => "Unknown",
+                LanguageEnumeration.Markdown => "Markdown",
+                LanguageEnumeration.Twig => "Twig",
+                LanguageEnumeration.Sass => "Sass",
+                LanguageEnumeration.Scss => "Scss",
                 LanguageEnumeration.Coldfusion => "Coldfusion",
                 LanguageEnumeration.Docker => "Docker",
                 LanguageEnumeration.Objectivec => "Objectivec",
@@ -3424,7 +3436,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public enum AccountType
     {
         Bitbucket,
@@ -3434,7 +3446,7 @@ namespace GraphQLClient
         Regular
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AccountTypeSerializer : global::StrawberryShake.Serialization.IInputValueFormatter, global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, AccountType>
     {
         public global::System.String TypeName => "AccountType";
@@ -3463,7 +3475,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public enum AccessType
     {
         Cli,
@@ -3477,7 +3489,7 @@ namespace GraphQLClient
         Web
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AccessTypeSerializer : global::StrawberryShake.Serialization.IInputValueFormatter, global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, AccessType>
     {
         public global::System.String TypeName => "AccessType";
@@ -3514,7 +3526,7 @@ namespace GraphQLClient
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public enum ActionType
     {
         Projectonboardingstep9,
@@ -3552,7 +3564,7 @@ namespace GraphQLClient
         Frontendhome
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ActionTypeSerializer : global::StrawberryShake.Serialization.IInputValueFormatter, global::StrawberryShake.Serialization.ILeafValueParser<global::System.String, ActionType>
     {
         public global::System.String TypeName => "ActionType";
@@ -3701,7 +3713,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataQueryDocument : global::StrawberryShake.IDocument
     {
         private GetFileDataQueryDocument()
@@ -3786,7 +3798,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataQuery : global::GraphQLClient.IGetFileDataQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetFileDataResult> _operationExecutor;
@@ -3921,7 +3933,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetFileDataQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetFileDataResult>> ExecuteAsync(global::System.Int64 projectId, global::System.String revision, global::System.String path, global::System.Threading.CancellationToken cancellationToken = default);
@@ -3968,7 +3980,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsQueryDocument : global::StrawberryShake.IDocument
     {
         private GetProjectsQueryDocument()
@@ -4029,7 +4041,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsQuery : global::GraphQLClient.IGetProjectsQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetProjectsResult> _operationExecutor;
@@ -4107,7 +4119,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetProjectsQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetProjectsResult>> ExecuteAsync(global::System.Threading.CancellationToken cancellationToken = default);
@@ -4136,7 +4148,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientQueryDocument : global::StrawberryShake.IDocument
     {
         private GetRecipesForClientQueryDocument()
@@ -4179,7 +4191,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientQuery : global::GraphQLClient.IGetRecipesForClientQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetRecipesForClientResult> _operationExecutor;
@@ -4333,7 +4345,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetRecipesForClientResult>> ExecuteAsync(global::System.String? fingerprint, global::System.String? filename, global::System.Collections.Generic.IReadOnlyList<global::System.String> keywords, global::System.Collections.Generic.IReadOnlyList<global::System.String> dependencies, global::System.String? parameters, global::GraphQLClient.LanguageEnumeration language, global::System.Threading.CancellationToken cancellationToken = default);
@@ -4361,7 +4373,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutQueryDocument : global::StrawberryShake.IDocument
     {
         private GetRecipesForClientByShortcutQueryDocument()
@@ -4403,7 +4415,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutQuery : global::GraphQLClient.IGetRecipesForClientByShortcutQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetRecipesForClientByShortcutResult> _operationExecutor;
@@ -4588,7 +4600,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcutQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetRecipesForClientByShortcutResult>> ExecuteAsync(global::System.String? fingerprint, global::System.String? filename, global::System.String? term, global::System.Collections.Generic.IReadOnlyList<global::System.String> dependencies, global::System.String? parameters, global::GraphQLClient.LanguageEnumeration language, global::System.Boolean? onlyPublic, global::System.Boolean? onlyPrivate, global::System.Boolean? onlySubscribed, global::System.Threading.CancellationToken cancellationToken = default);
@@ -4603,7 +4615,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampQueryDocument : global::StrawberryShake.IDocument
     {
         private GetRecipesForClientByShortcutLastTimestampQueryDocument()
@@ -4632,7 +4644,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampQuery : global::GraphQLClient.IGetRecipesForClientByShortcutLastTimestampQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetRecipesForClientByShortcutLastTimestampResult> _operationExecutor;
@@ -4724,7 +4736,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientByShortcutLastTimestampQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetRecipesForClientByShortcutLastTimestampResult>> ExecuteAsync(global::System.String? fingerprint, global::System.Collections.Generic.IReadOnlyList<global::System.String> dependencies, global::GraphQLClient.LanguageEnumeration language, global::System.Threading.CancellationToken cancellationToken = default);
@@ -4774,7 +4786,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticQueryDocument : global::StrawberryShake.IDocument
     {
         private GetRecipesForClientSemanticQueryDocument()
@@ -4838,7 +4850,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticQuery : global::GraphQLClient.IGetRecipesForClientSemanticQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetRecipesForClientSemanticResult> _operationExecutor;
@@ -5059,7 +5071,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetRecipesForClientSemanticQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetRecipesForClientSemanticResult>> ExecuteAsync(global::System.String? term, global::System.Boolean? onlyPublic, global::System.Boolean? onlyPrivate, global::System.Boolean? onlySubscribed, global::System.String? filename, global::System.Collections.Generic.IReadOnlyList<global::System.String> dependencies, global::System.String? parameters, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.LanguageEnumeration>? languages, global::System.Int64 howmany, global::System.Int64 skip, global::System.Threading.CancellationToken cancellationToken = default);
@@ -5080,7 +5092,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserQueryDocument : global::StrawberryShake.IDocument
     {
         private GetUserQueryDocument()
@@ -5115,7 +5127,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserQuery : global::GraphQLClient.IGetUserQuery
     {
         private readonly global::StrawberryShake.IOperationExecutor<IGetUserResult> _operationExecutor;
@@ -5167,7 +5179,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IGetUserQuery : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IGetUserResult>> ExecuteAsync(global::System.Threading.CancellationToken cancellationToken = default);
@@ -5185,7 +5197,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreMutationDocument : global::StrawberryShake.IDocument
     {
         private AddViolationToIgnoreMutationDocument()
@@ -5217,7 +5229,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreMutation : global::GraphQLClient.IAddViolationToIgnoreMutation
     {
         private readonly global::StrawberryShake.IOperationExecutor<IAddViolationToIgnoreResult> _operationExecutor;
@@ -5346,7 +5358,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IAddViolationToIgnoreMutation : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IAddViolationToIgnoreResult>> ExecuteAsync(global::System.Int64 projectId, global::System.String rule, global::System.String tool, global::GraphQLClient.LanguageEnumeration language, global::System.String? filename, global::System.String? prefix, global::System.String? description, global::System.Threading.CancellationToken cancellationToken = default);
@@ -5361,7 +5373,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessMutationDocument : global::StrawberryShake.IDocument
     {
         private RecordAccessMutationDocument()
@@ -5390,7 +5402,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessMutation : global::GraphQLClient.IRecordAccessMutation
     {
         private readonly global::StrawberryShake.IOperationExecutor<IRecordAccessResult> _operationExecutor;
@@ -5453,7 +5465,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRecordAccessMutation : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IRecordAccessResult>> ExecuteAsync(global::GraphQLClient.AccessType accessType, global::GraphQLClient.ActionType actionType, global::System.Threading.CancellationToken cancellationToken = default);
@@ -5468,7 +5480,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseMutationDocument : global::StrawberryShake.IDocument
     {
         private RecordRecipeUseMutationDocument()
@@ -5497,7 +5509,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseMutation : global::GraphQLClient.IRecordRecipeUseMutation
     {
         private readonly global::StrawberryShake.IOperationExecutor<IRecordRecipeUseResult> _operationExecutor;
@@ -5567,7 +5579,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRecordRecipeUseMutation : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IRecordRecipeUseResult>> ExecuteAsync(global::System.Int64 recipeId, global::System.String? fingerprint, global::System.Threading.CancellationToken cancellationToken = default);
@@ -5582,7 +5594,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreMutationDocument : global::StrawberryShake.IDocument
     {
         private RemoveViolationToIgnoreMutationDocument()
@@ -5611,7 +5623,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreMutation : global::GraphQLClient.IRemoveViolationToIgnoreMutation
     {
         private readonly global::StrawberryShake.IOperationExecutor<IRemoveViolationToIgnoreResult> _operationExecutor;
@@ -5711,7 +5723,7 @@ namespace GraphQLClient
     /// }
     /// </code>
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface IRemoveViolationToIgnoreMutation : global::StrawberryShake.IOperationRequestFactory
     {
         global::System.Threading.Tasks.Task<global::StrawberryShake.IOperationResult<IRemoveViolationToIgnoreResult>> ExecuteAsync(global::System.Int64 projectId, global::System.String rule, global::System.String tool, global::GraphQLClient.LanguageEnumeration language, global::System.String? filename, global::System.Threading.CancellationToken cancellationToken = default);
@@ -5721,7 +5733,7 @@ namespace GraphQLClient
     /// <summary>
     /// Represents the CodigaGraphQLClient GraphQL client
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class CodigaGraphQLClient : global::GraphQLClient.ICodigaGraphQLClient
     {
         private readonly global::GraphQLClient.IGetFileDataQuery _getFileData;
@@ -5767,7 +5779,7 @@ namespace GraphQLClient
     /// <summary>
     /// Represents the CodigaGraphQLClient GraphQL client
     /// </summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial interface ICodigaGraphQLClient
     {
         global::GraphQLClient.IGetFileDataQuery GetFileData { get; }
@@ -5797,7 +5809,7 @@ namespace GraphQLClient
 namespace GraphQLClient.State
 {
     ///<summary>A project</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ProjectEntity
     {
         public ProjectEntity(global::System.Int64 id = default !, global::System.String name = default !, global::System.Collections.Generic.IReadOnlyList<global::StrawberryShake.EntityId> analyses = default !, global::StrawberryShake.EntityId? owner = default !, global::StrawberryShake.EntityId? @group = default !, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.State.ViolationIgnoreData> violationsToIgnore = default !)
@@ -5830,7 +5842,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>An analysis object</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AnalysisEntity
     {
         public AnalysisEntity(global::System.Int64 id = default !, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.State.ViolationData> violations = default !, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.State.ComplexFunctionData> longFunctions = default !, global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.State.ComplexFunctionData> complexFunctions = default !, global::System.Collections.Generic.IReadOnlyList<global::StrawberryShake.EntityId> duplicates = default !)
@@ -5859,7 +5871,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Information about duplicate (does not contain occurrences)</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class DuplicateEntity
     {
         public DuplicateEntity(global::System.Collections.Generic.IReadOnlyList<global::GraphQLClient.State.DuplicateOccurrenceData> occurrences = default !)
@@ -5872,7 +5884,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>A user</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class UserEntity
     {
         public UserEntity(global::System.String username = default !)
@@ -5885,7 +5897,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>A group</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GroupEntity
     {
         public GroupEntity(global::System.Int64 id = default !, global::System.String name = default !)
@@ -5902,7 +5914,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Recipe to get code</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AssistantRecipeEntity
     {
         public AssistantRecipeEntity(global::System.Int64 id = default !, global::System.String name = default !, global::System.String code = default !, global::System.String jetbrainsFormat = default !, global::System.Collections.Generic.IReadOnlyList<global::System.String> keywords = default !, global::System.Collections.Generic.IReadOnlyList<global::System.String> imports = default !, global::GraphQLClient.LanguageEnumeration language = default !, global::System.String description = default !, global::System.String? shortcut = default !, global::System.String presentableFormat = default !, global::System.Boolean isPublic = default !, global::StrawberryShake.EntityId? owner = default !, global::System.Collections.Generic.IReadOnlyList<global::StrawberryShake.EntityId> groups = default !)
@@ -5963,7 +5975,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>A public user, contains only public information</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class PublicUserEntity
     {
         public PublicUserEntity(global::System.Int64 id = default !, global::System.String? displayName = default !, global::System.String? slug = default !, global::System.Boolean hasSlug = default !, global::GraphQLClient.AccountType accountType = default !)
@@ -5988,7 +6000,7 @@ namespace GraphQLClient.State
         public global::GraphQLClient.AccountType AccountType { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetFileDataResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6036,7 +6048,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -6058,7 +6070,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_ProjectFromProjectEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.ProjectEntity, GetFileData_Project_Project>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6258,7 +6270,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_AnalysisFromAnalysisEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.AnalysisEntity, GetFileData_Project_Analyses_Analysis>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6430,7 +6442,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileData_Project_Analyses_Duplicates_DuplicateFromDuplicateEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.DuplicateEntity, GetFileData_Project_Analyses_Duplicates_Duplicate>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6481,7 +6493,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetProjectsResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6540,7 +6552,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -6562,7 +6574,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_ProjectFromProjectEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.ProjectEntity, GetProjects_Projects_Project>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6647,7 +6659,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_Owner_UserFromUserEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.UserEntity, GetProjects_Projects_Owner_User>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6667,7 +6679,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjects_Projects_Group_GroupFromGroupEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.GroupEntity, GetProjects_Projects_Group_Group>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6687,7 +6699,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetRecipesForClientResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6746,7 +6758,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -6768,7 +6780,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClient_GetRecipesForClient_AssistantRecipeFromAssistantRecipeEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.AssistantRecipeEntity, GetRecipesForClient_GetRecipesForClient_AssistantRecipe>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6788,7 +6800,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetRecipesForClientByShortcutResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6847,7 +6859,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -6869,7 +6881,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipeFromAssistantRecipeEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.AssistantRecipeEntity, GetRecipesForClientByShortcut_GetRecipesForClientByShortcut_AssistantRecipe>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6889,7 +6901,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetRecipesForClientByShortcutLastTimestampResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -6920,7 +6932,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -6942,7 +6954,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetRecipesForClientSemanticResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7001,7 +7013,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7023,7 +7035,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipeFromAssistantRecipeEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.AssistantRecipeEntity, GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_AssistantRecipe>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7088,7 +7100,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUserFromPublicUserEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.PublicUserEntity, GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Owner_PublicUser>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7108,7 +7120,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_GroupFromGroupEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.GroupEntity, GetRecipesForClientSemantic_AssistantRecipesSemanticSearch_Groups_Group>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7128,7 +7140,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.GetUserResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7176,7 +7188,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7198,7 +7210,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUser_User_UserFromUserEntityMapper : global::StrawberryShake.IEntityMapper<global::GraphQLClient.State.UserEntity, GetUser_User_User>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7218,7 +7230,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.AddViolationToIgnoreResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7269,7 +7281,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7291,7 +7303,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.RecordAccessResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7322,7 +7334,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7344,7 +7356,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.RecordRecipeUseResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7375,7 +7387,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7397,7 +7409,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreResultFactory : global::StrawberryShake.IOperationResultDataFactory<global::GraphQLClient.RemoveViolationToIgnoreResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7428,7 +7440,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreResultInfo : global::StrawberryShake.IOperationResultDataInfo
     {
         private readonly global::System.Collections.Generic.IReadOnlyCollection<global::StrawberryShake.EntityId> _entityIds;
@@ -7450,7 +7462,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetFileDataBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetFileDataResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -7815,7 +7827,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetProjectsBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetProjectsResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8056,7 +8068,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetRecipesForClientResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8229,7 +8241,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetRecipesForClientByShortcutResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8404,7 +8416,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientByShortcutLastTimestampBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetRecipesForClientByShortcutLastTimestampResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8487,7 +8499,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetRecipesForClientSemanticBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetRecipesForClientSemanticResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8752,7 +8764,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class GetUserBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IGetUserResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8859,7 +8871,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class AddViolationToIgnoreBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IAddViolationToIgnoreResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -8958,7 +8970,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordAccessBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IRecordAccessResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -9041,7 +9053,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RecordRecipeUseBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IRecordRecipeUseResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -9122,7 +9134,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class RemoveViolationToIgnoreBuilder : global::StrawberryShake.IOperationResultBuilder<global::System.Text.Json.JsonDocument, global::GraphQLClient.IRemoveViolationToIgnoreResult>
     {
         private readonly global::StrawberryShake.IEntityStore _entityStore;
@@ -9206,7 +9218,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Map a violation reported by code inspector</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ViolationData
     {
         public ViolationData(global::System.String __typename, global::System.Int64? line = default !, global::GraphQLClient.ViolationCategory? category = default !, global::System.Int64? severity = default !, global::System.String? description = default !, global::System.String? filename = default !, global::System.Int64? lineCount = default !, global::GraphQLClient.LanguageEnumeration? language = default !, global::System.String? tool = default !, global::System.String? rule = default !, global::System.String? ruleUrl = default !)
@@ -9258,7 +9270,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Function that is complex, either with the cyclomatic or maintanability complexity</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ComplexFunctionData
     {
         public ComplexFunctionData(global::System.String __typename, global::System.String? filename = default !, global::System.String? functionName = default !, global::System.Int64? complexity = default !, global::System.Int64? length = default !, global::System.Int64? lineStart = default !, global::System.Int64? lineEnd = default !)
@@ -9294,7 +9306,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Information about duplicate occurrence (where it is in your code)</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class DuplicateOccurrenceData
     {
         public DuplicateOccurrenceData(global::System.String __typename, global::System.Int64? line = default !, global::System.String? filename = default !)
@@ -9314,7 +9326,7 @@ namespace GraphQLClient.State
     }
 
     ///<summary>Violation to ignore for a particular project</summary>
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class ViolationIgnoreData
     {
         public ViolationIgnoreData(global::System.String __typename, global::System.String? filename = default !, global::System.String? description = default !, global::System.String? prefix = default !, global::System.String? rule = default !, global::System.String? tool = default !, global::GraphQLClient.LanguageEnumeration? language = default !)
@@ -9349,7 +9361,7 @@ namespace GraphQLClient.State
         public global::GraphQLClient.LanguageEnumeration? Language { get; }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class CodigaGraphQLClientEntityIdFactory : global::StrawberryShake.IEntityIdSerializer
     {
         private static readonly global::System.Text.Json.JsonWriterOptions _options = new global::System.Text.Json.JsonWriterOptions()
@@ -9503,7 +9515,7 @@ namespace GraphQLClient.State
         }
     }
 
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public partial class CodigaGraphQLClientStoreAccessor : global::StrawberryShake.StoreAccessor
     {
         public CodigaGraphQLClientStoreAccessor(global::StrawberryShake.IOperationStore operationStore, global::StrawberryShake.IEntityStore entityStore, global::StrawberryShake.IEntityIdSerializer entityIdSerializer, global::System.Collections.Generic.IEnumerable<global::StrawberryShake.IOperationRequestFactory> requestFactories, global::System.Collections.Generic.IEnumerable<global::StrawberryShake.IOperationResultDataFactory> resultDataFactories) : base(operationStore, entityStore, entityIdSerializer, requestFactories, resultDataFactories)
@@ -9514,7 +9526,7 @@ namespace GraphQLClient.State
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.13.1.0")]
+    [global::System.CodeDom.Compiler.GeneratedCode("StrawberryShake", "12.14.0.0")]
     public static partial class CodigaGraphQLClientServiceCollectionExtensions
     {
         public static global::StrawberryShake.IClientBuilder<global::GraphQLClient.State.CodigaGraphQLClientStoreAccessor> AddCodigaGraphQLClient(this global::Microsoft.Extensions.DependencyInjection.IServiceCollection services, global::StrawberryShake.ExecutionStrategy strategy = global::StrawberryShake.ExecutionStrategy.NetworkOnly)

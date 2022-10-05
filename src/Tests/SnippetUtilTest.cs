@@ -1,6 +1,5 @@
-﻿using Extension.Xml;
-using Microsoft.VisualStudio.TextManager.Interop;
-using System.Xml;
+﻿using System.Xml;
+using Extension.SnippetFormats;
 
 namespace Tests
 {

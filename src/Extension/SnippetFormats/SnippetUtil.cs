@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Text.Differencing;
 using Match = System.Text.RegularExpressions.Match;
 using System.Text;
 
-namespace Extension.Xml
+namespace Extension.SnippetFormats
 {
 
 	public static class SnippetUtil
@@ -37,7 +37,7 @@ namespace Extension.Xml
 
 				var parts = m.Value.Split(':');
 
-				return new UserVariable
+				return new CodigaUserVariable
 				{
 					Order = int.Parse(parts[1]),
 					Default = parts[2].Substring(0, parts[2].Length - 1),
@@ -71,7 +71,10 @@ namespace Extension.Xml
 			return vsSnippet;
 		}
 
-		private class UserVariable
+		/// <summary>
+		/// Represents the Codiga user variables that allow user defined placeholders
+		/// </summary>
+		private class CodigaUserVariable
 		{
 			public string PlaceholderText{ get; set; }
 			public int Order{ get; set; }
@@ -80,6 +83,9 @@ namespace Extension.Xml
 		
 	}
 
+	/// <summary>
+	/// Represents the structure of a Codiga Recipe/Snippet
+	/// </summary>
 	public class CodigaSnippet
 	{
 		public string Shortcut { get; set; }

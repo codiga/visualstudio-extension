@@ -5,9 +5,9 @@ VisualStudioVersion = 17.3.32901.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "src\Tests\Tests.csproj", "{6A87D8AE-E191-4149-B2AD-C874482DE8E1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQLClient", "src\GraphQLClient\GraphQLClient.csproj", "{245FBDF8-A572-4387-8B8B-0A49FB66BF90}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extension", "src\Extension\Extension.csproj", "{65834349-0ABD-474E-BCAD-EADE07914A62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GraphQLClient", "src\GraphQLClient\GraphQLClient.csproj", "{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,14 +25,6 @@ Global
 		{6A87D8AE-E191-4149-B2AD-C874482DE8E1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6A87D8AE-E191-4149-B2AD-C874482DE8E1}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A87D8AE-E191-4149-B2AD-C874482DE8E1}.Release|x86.Build.0 = Release|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Debug|x86.Build.0 = Debug|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Release|Any CPU.Build.0 = Release|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Release|x86.ActiveCfg = Release|Any CPU
-		{245FBDF8-A572-4387-8B8B-0A49FB66BF90}.Release|x86.Build.0 = Release|Any CPU
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Debug|x86.ActiveCfg = Debug|x86
@@ -41,6 +33,14 @@ Global
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Release|x86.ActiveCfg = Release|x86
 		{65834349-0ABD-474E-BCAD-EADE07914A62}.Release|x86.Build.0 = Release|x86
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Debug|x86.Build.0 = Debug|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Release|x86.ActiveCfg = Release|Any CPU
+		{F342B1BB-577B-4D82-882C-C8EFDC97C3DF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

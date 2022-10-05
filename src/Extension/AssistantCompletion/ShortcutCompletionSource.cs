@@ -1,4 +1,4 @@
-﻿using Extension.Xml;
+﻿using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Core.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Extension.Caching;
 
 namespace Extension.AssistantCompletion
 {

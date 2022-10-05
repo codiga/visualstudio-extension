@@ -3,8 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Extension.Xml
+namespace Extension.SnippetFormats
 {
+	/// <summary>
+	/// Represents the XML snippet structure used by Viusal Studio for managing code snippets
+	/// </summary>
+	[XmlRoot(ElementName = "CodeSnippets", Namespace = "http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet")]
+	public class VisualStudioSnippet
+	{
+		[XmlElement(ElementName = "CodeSnippet")]
+		public CodeSnippet CodeSnippet { get; set; }
+	}
+
 	[XmlRoot(ElementName = "SnippetTypes")]
 	public class SnippetTypes
 	{
@@ -86,13 +96,4 @@ namespace Extension.Xml
 		[XmlAttribute(AttributeName = "Format")]
 		public string Format { get; set; }
 	}
-
-	[XmlRoot(ElementName = "CodeSnippets", Namespace = "http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet")]
-	public class VisualStudioSnippet
-	{
-		[XmlElement(ElementName = "CodeSnippet")]
-		public CodeSnippet CodeSnippet { get; set; }
-	}
-
-
 }

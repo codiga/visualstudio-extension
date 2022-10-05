@@ -1,15 +1,46 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using System.Linq;
 using Microsoft.VisualStudio.Text.Differencing;
 using Match = System.Text.RegularExpressions.Match;
 using System.Text;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
+using Microsoft.VisualStudio.Text.Adornments;
+using MSXML;
+using Microsoft.VisualStudio.Settings.Internal;
+using System.IO;
+using System.Xml;
 
 namespace Extension.SnippetFormats
 {
 
-	public static class SnippetUtil
+	public static class SnippetParser
 	{
+		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IList<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
+		{
+			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
+			
+			return vsSnippets.Select(s =>
+			{
+				// create IXMLDOMNode from snippet
+				using var sw = new StringWriter();
+				using var xw = XmlWriter.Create(sw, new XmlWriterSettings{Encoding = Encoding.UTF8});
+				serializer.Serialize(xw, s);
+				var xmlDoc = new DOMDocument();
+				xmlDoc.loadXML(sw.ToString());
+				var snippetNode = xmlDoc.documentElement.childNodes.nextNode();
+
+				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source);
+				// store the XMLNode in the property bag so the ExpansionClient can access that later
+				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
+
+				return item;
+
+			}).ToImmutableArray();
+		}
+
 		public static VisualStudioSnippet FromCodigaSnippet(CodigaSnippet codigaSnippet)
 		{
 			var vsSnippet = new VisualStudioSnippet
@@ -19,6 +50,9 @@ namespace Extension.SnippetFormats
 					Format = "1.0.0",
 					Header = new Header
 					{
+						Title = "tbd",
+						Author = "tbd",
+						Description = "tdb",
 						Shortcut = codigaSnippet.Shortcut,
 						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" }
 					},
@@ -55,18 +89,14 @@ namespace Extension.SnippetFormats
 					Default = variable.Default
 				});
 
-				builder.Replace(variable.PlaceholderText, $"\"$param{variable.Order}\"");
+				builder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");
 			}
 
-			// format code to match Visual Studio format
-			builder.Insert(0, "<![CDATA[");
-			builder.Append("]]>");
+			// TODO do this by stating serialization type in VisualStudioSnippet
+			//builder.Insert(0, @"<![CDATA[");
+			//builder.Append(@"]]>");
 
-			vsSnippet.CodeSnippet.Snippet.Code = new Code
-			{
-				Language = "CSharp",
-				Text = builder.ToString()
-			};
+			vsSnippet.CodeSnippet.Snippet.Code = new Code("CSharp", builder.ToString());
 
 			return vsSnippet;
 		}

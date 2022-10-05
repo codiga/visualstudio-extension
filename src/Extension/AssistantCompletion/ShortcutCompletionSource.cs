@@ -115,43 +115,11 @@ namespace Extension.AssistantCompletion
 
         public async Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken token)
         {
-            // See whether we are in the key or value portion of the pair
-            var lineStart = triggerLocation.GetContainingLine().Start;
-            var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
-            var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
 
-            return null;
-        }
+            var chachedSnippets = Cache.SnippetsForTesting;
+            var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
 
-		/// <summary>
-		/// Builds a <see cref="CompletionItem"/> based on <see cref="VisualStudioSnippet"/>
-		/// </summary>
-		private CompletionItem MakeItemFromSnippet(VisualStudioSnippet snippet)
-        {
-            ImageElement icon = null;
-            ImmutableArray<CompletionFilter> filters;
-
-            var item = new CompletionItem(snippet.CodeSnippet.Header.Shortcut, this);
-    //            displayText: snippet.CodeSnippet.Header.Shortcut,
-    //            source: this,
-    //            icon: icon,
-    //            filters: filters,
-    //            suffix: element.Symbol,
-    //            insertText: element.Name,
-    //            sortText: $"Element {element.AtomicNumber,3}",
-    //            filterText: $"{element.Name} {element.Symbol}",
-				//automationText: element.Name,
-				//attributeIcons: ImmutableArray<ImageElement>.Empty,
-    //            commitCharacters: new char[] { ' ', '\'', '"', ',', '.', ';', ':' }.ToImmutableArray(),
-    //            applicableToSpan: FindTokenSpanAtPosition(m_triggerLocation),
-    //            isCommittedAsSnippet: true,
-    //            isPreselected: false);
-
-			// Each completion item we build has a reference to the element in the property bag.
-			// We use this information when we construct the tooltip.
-			//item.Properties.AddProperty(nameof(ElementCatalog.Element), element);
-
-            return item;
+            return new CompletionContext(completionItems);
         }
 
         /// <summary>
@@ -159,7 +127,7 @@ namespace Extension.AssistantCompletion
         /// </summary>
         public async Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
         {
-            return null;
+	        return null;
         }
     }
 }

@@ -1,13 +1,39 @@
 ﻿using System.Xml;
 using Extension.SnippetFormats;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
+using Moq;
+using MSXML;
 
 namespace Tests
 {
     [TestFixture]
-	internal class SnippetUtilTest
+	internal class SnippetFormatsTest
 	{
+		[Test]
+		public void FromVisualStudioSnippets_should_return_CompletionItems()
+		{
+			// arrange
+			var snippets = new List<VisualStudioSnippet> { SnippetTestData.Snippet };
+			var completionSourceMock = new Mock<IAsyncCompletionSource>();
 
-        [Test]
+			// act
+			var completionItems = SnippetParser.FromVisualStudioSnippets(snippets, completionSourceMock.Object);
+
+			// assert
+			Assert.That(completionItems, Has.Exactly(1).Items);
+			var item = completionItems.Single();
+			Assert.That(item.DisplayText, Is.EqualTo(SnippetTestData.Snippet.CodeSnippet.Header.Shortcut));
+			var node = item.Properties.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
+			Assert.NotNull(node);
+
+			var expected = new MSXML.DOMDocument();
+			expected.loadXML(SnippetTestData.Xml);
+			var expectedSnippet = expected.documentElement.childNodes.nextNode();
+
+			// TODO deserialize and check
+		}
+
+		[Test]
         public void FromCodigaSnippet_should_convert_to_VisualStudioSnippet()
         {
             // arrange
@@ -23,10 +49,11 @@ namespace Tests
                                         }");
 
             // act
-            var vsSnippet = SnippetUtil.FromCodigaSnippet(snippet);
+            var vsSnippet = SnippetParser.FromCodigaSnippet(snippet);
 
             // assert
             Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
+			// TODO more assertion
         }
 
         [Test]
@@ -99,18 +126,14 @@ namespace Tests
 								Assembly = "System.Windows.Forms.dll"
 							}
 						},
-						Code = new Code
-						{
-							Language = "TestSnippets",
-							Text = "<![CDATA[MessageBox.Show(\"$param1$\");     MessageBox.Show(\"$param2$\");]]>"
-						}
+						Code = new Code("CSharp", "MessageBox.Show(\"$param1$\");     MessageBox.Show(\"$param2$\");")
 					}
 				}
 			};
 
 			public static string Xml = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>" +
-												"<CodeSnippets  xmlns=\"http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet\">" +
-												"  <CodeSnippet Format=\"1.0.0\">" +
+												"<CodeSnippets>" +
+												"  <CodeSnippet Format=\"1.0.0\" xmlns=\"http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet\">" +
 												"		<Header>" +
 												"            <Title>Test replacement fields</Title>" +
 												"            <Shortcut>test</Shortcut>" +

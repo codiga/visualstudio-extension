@@ -1,6 +1,7 @@
 ﻿using MSXML;
 using System;
 using System.Collections.Generic;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace Extension.SnippetFormats
@@ -68,7 +69,18 @@ namespace Extension.SnippetFormats
 		public string Language { get; set; }
 
 		[XmlText]
-		public string Text { get; set; }
+		public XmlNode[] CDataCode { get; set; }
+
+		public Code()
+		{
+			
+		}
+
+		public Code(string language, string codeString)
+		{
+			CDataCode = new XmlNode[] { new XmlDocument().CreateCDataSection(codeString) };
+			Language = language;
+		}
 	}
 
 	[XmlRoot(ElementName = "Snippet")]

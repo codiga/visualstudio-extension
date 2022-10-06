@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
+using GraphQLClient;
 
 namespace Extension.SearchWindow
 {
@@ -53,7 +54,7 @@ namespace Extension.SearchWindow
 			// Inside this method you can place any initialization code that does not require
 			// any Visual Studio service because at this point the package object is created but
 			// not sited yet inside Visual Studio environment. The place to do all the other
-			// initialization is the Initialize method.
+			// initialization is the Initialize method
 		}
 
 		#region Package Members
@@ -71,6 +72,7 @@ namespace Extension.SearchWindow
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			await SnippetSearchCommand.InitializeAsync(this);
+
 		}
 
 		public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)

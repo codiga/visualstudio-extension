@@ -23,6 +23,8 @@
     <RootNamespace>Extension</RootNamespace>
     <AssemblyName>Extension</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -55,12 +57,13 @@
     <Compile Include="AssistantCompletion\DefaultCompletionItemManager.cs" />
     <Compile Include="AssistantCompletion\DefaultCompletionItemManagerProvider.cs" />
     <Compile Include="AssistantCompletion\SnippetInsertion.cs" />
-    <Compile Include="Caching\SnippetCache.cs" />
     <Compile Include="AssistantCompletion\ExpansionClient.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionCommitManager.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionCommitManagerProvider.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionSource.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionSourceProvider.cs" />
+    <Compile Include="Caching\TextViewCreationListener.cs" />
+    <Compile Include="Caching\SnippetCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchWindow\SnippetSearch.cs" />
     <Compile Include="SearchWindow\SnippetSearchCommand.cs" />
@@ -126,17 +129,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="StrawberryShake.Core">
+      <Version>12.14.0</Version>
+    </PackageReference>
     <PackageReference Include="System.Xml.ReaderWriter">
       <Version>4.3.1</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\GraphQLClient\GraphQLClient.csproj">
-      <Project>{f342b1bb-577b-4d82-882c-c8efdc97c3df}</Project>
-      <Name>GraphQLClient</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Page Include="SearchWindow\SnippetSearchControl.xaml">
       <SubType>Designer</SubType>
@@ -157,6 +156,12 @@
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GraphQLClient\GraphQLClient.csproj">
+      <Project>{f342b1bb-577b-4d82-882c-c8efdc97c3df}</Project>
+      <Name>GraphQLClient</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />

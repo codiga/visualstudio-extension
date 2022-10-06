@@ -14,6 +14,7 @@ using Extension.SnippetFormats;
 using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
 using Microsoft.VisualStudio.Shell;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.Package;
 
 namespace Extension.AssistantCompletion
 {
@@ -25,9 +26,9 @@ namespace Extension.AssistantCompletion
 	[Export]
 	internal class ExpansionClient: IOleCommandTarget, IVsExpansionClient
 	{
-		private IVsExpansionSession m_currentExpansionSession;
-		private IOleCommandTarget m_nextCommandHandler;
-		private IVsTextView m_currentTextView;
+		private IVsExpansionSession _currentExpansionSession;
+		private IOleCommandTarget _nextCommandHandler;
+		private IVsTextView _currentTextView;
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -37,16 +38,16 @@ namespace Extension.AssistantCompletion
 		/// <returns></returns>
 		public int StartExpansion(IVsTextView vsTextView, CompletionItem completionItem)
 		{
-			m_currentTextView = vsTextView;
+			_currentTextView = vsTextView;
 
-			vsTextView.AddCommandFilter(this, out m_nextCommandHandler);
+			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 
 			vsTextView.GetBuffer(out var textLines);
 			var expansion = (IVsExpansion)textLines;
 
 			var position = new TextSpan();
 			vsTextView.GetCaretPos(out var startLine, out var endColumn);
-
+			// TODO replace "."
 			position.iStartIndex = endColumn;
 			position.iEndIndex = endColumn;
 			position.iStartLine = startLine;
@@ -61,14 +62,14 @@ namespace Extension.AssistantCompletion
 				pExpansionClient: this,
 				guidLang: Guid.Empty,
 				pszRelativePath: string.Empty,
-				out m_currentExpansionSession);
+				out _currentExpansionSession);
 
 			return VSConstants.S_OK;
 		} 
 
 		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
 		{
-			return m_nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
+			return _nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
 		}
 
 		/// <summary>
@@ -83,7 +84,7 @@ namespace Extension.AssistantCompletion
 		/// <exception cref="NotImplementedException"></exception>
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
 		{
-			if (m_currentExpansionSession == null)
+			if (_currentExpansionSession == null)
 				return VSConstants.S_OK;
 
 			//make a copy of this so we can look at it after forwarding some commands
@@ -102,27 +103,27 @@ namespace Extension.AssistantCompletion
 			{
 				if (nCmdID == (uint)VSConstants.VSStd2KCmdID.BACKTAB)
 				{
-					m_currentExpansionSession.GoToPreviousExpansionField();
+					_currentExpansionSession.GoToPreviousExpansionField();
 					return VSConstants.S_OK;
 				}
 				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 				{
 
-					m_currentExpansionSession.GoToNextExpansionField(0); //false to support cycling through all the fields
+					_currentExpansionSession.GoToNextExpansionField(0); //false to support cycling through all the fields
 					return VSConstants.S_OK;
 				}
 				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN || nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 				{
-					if (m_currentExpansionSession.EndCurrentExpansion(0) == VSConstants.S_OK)
+					if (_currentExpansionSession.EndCurrentExpansion(0) == VSConstants.S_OK)
 					{
-						m_currentExpansionSession = null;
+						_currentExpansionSession = null;
 						return VSConstants.S_OK;
 					}
 				}
 			}
 
 			//pass along the command so the char is added to the buffer
-			var result = m_nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+			var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 
 			return result;
 		}
@@ -141,7 +142,7 @@ namespace Extension.AssistantCompletion
 		public int EndExpansion()
 		{
 			// stop listening to input when the expansion is done
-			m_currentTextView.RemoveCommandFilter(this);
+			_currentTextView.RemoveCommandFilter(this);
 			return VSConstants.S_OK;
 		}
 

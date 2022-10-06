@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -12,13 +13,14 @@ using MSXML;
 using Microsoft.VisualStudio.Settings.Internal;
 using System.IO;
 using System.Xml;
+using GraphQLClient;
 
 namespace Extension.SnippetFormats
 {
 
 	public static class SnippetParser
 	{
-		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IList<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
+		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IEnumerable<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
 		{
 			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
 			
@@ -63,9 +65,14 @@ namespace Extension.SnippetFormats
 				}
 			};
 
+			var encoded = codigaSnippet.Code;
+			var base64bytes = Convert.FromBase64String(encoded);
+			var plainCode = Encoding.UTF8.GetString(base64bytes);
+
 			// get literals / user variables
+			// TODO fix does not work when no default value is provided
 			var re = new Regex(@"&\[USER_INPUT\:\d+\:[a-zA-Z0-9]*\]");
-			var matches = re.Matches(codigaSnippet.Code);
+			var matches = re.Matches(plainCode);
 
 			var userVariables = matches.Cast<Match>().Select(m => {
 
@@ -80,7 +87,7 @@ namespace Extension.SnippetFormats
 			}).OrderBy(v => v.Order);
 
 			// add literals and replace placeholder text
-			StringBuilder builder = new StringBuilder(codigaSnippet.Code);
+			StringBuilder builder = new StringBuilder(plainCode);
 			foreach (var variable in userVariables)
 			{
 				vsSnippet.CodeSnippet.Snippet.Declarations.Add(new Literal
@@ -92,11 +99,7 @@ namespace Extension.SnippetFormats
 				builder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");
 			}
 
-			// TODO do this by stating serialization type in VisualStudioSnippet
-			//builder.Insert(0, @"<![CDATA[");
-			//builder.Append(@"]]>");
-
-			vsSnippet.CodeSnippet.Snippet.Code = new Code("CSharp", builder.ToString());
+			vsSnippet.CodeSnippet.Snippet.Code = new Code(codigaSnippet.Language, builder.ToString());
 
 			return vsSnippet;
 		}
@@ -111,20 +114,5 @@ namespace Extension.SnippetFormats
 			public string Default { get; set; }
 		}
 		
-	}
-
-	/// <summary>
-	/// Represents the structure of a Codiga Recipe/Snippet
-	/// </summary>
-	public class CodigaSnippet
-	{
-		public string Shortcut { get; set; }
-		public string Code { get; set; }
-
-		public CodigaSnippet(string shortcut, string code)
-		{
-			Shortcut = shortcut;
-			Code = code;
-		}
 	}
 }

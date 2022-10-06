@@ -49,7 +49,6 @@ namespace Extension.AssistantCompletion
 
 			// use IVsEditorAdaptersFactoryService to get access to IVsTextview
 			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
-
 			// start a snippet session using in memory xml rather than .xml files
 			ExpansionClient.StartExpansion(vsTextView, item);
 

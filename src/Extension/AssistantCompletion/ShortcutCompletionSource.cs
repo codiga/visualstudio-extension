@@ -116,7 +116,7 @@ namespace Extension.AssistantCompletion
         public async Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken token)
         {
 
-            var chachedSnippets = Cache.SnippetsForTesting;
+            var chachedSnippets = Cache.GetSnippets();
             var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
 
             return new CompletionContext(completionItems);

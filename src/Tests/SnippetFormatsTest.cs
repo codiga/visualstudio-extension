@@ -1,5 +1,7 @@
-﻿using System.Xml;
+﻿using System.Text;
+using System.Xml;
 using Extension.SnippetFormats;
+using GraphQLClient;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Moq;
 using MSXML;
@@ -34,10 +36,14 @@ namespace Tests
 		}
 
 		[Test]
-        public void FromCodigaSnippet_should_convert_to_VisualStudioSnippet()
+        public void FromCodigaSnippet_should_convert_to_VisualStudioSnippet_with_two_user_variables()
         {
             // arrange
-            var snippet = new CodigaSnippet("nunittest", @"[Test]
+            var snippet = new CodigaSnippet
+            {
+	            Shortcut = "nunittest",
+	            Language = "Csharp",
+	            Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(@"[Test]
                                         public void &[USER_INPUT:1:Test]()
                                         {
                                             // arrange
@@ -46,14 +52,15 @@ namespace Tests
                                             &[USER_INPUT:2:act]
     
                                             // assert
-                                        }");
+                                        }"))
+            };
 
             // act
             var vsSnippet = SnippetParser.FromCodigaSnippet(snippet);
 
             // assert
             Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
-			// TODO more assertion
+            // TODO more assertion
         }
 
         [Test]

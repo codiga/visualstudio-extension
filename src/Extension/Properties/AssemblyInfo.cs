@@ -1,5 +1,6 @@
 ﻿using Extension;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle(Vsix.Name)]
@@ -15,6 +16,8 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion(Vsix.Version)]
 [assembly: AssemblyFileVersion(Vsix.Version)]
+
+[assembly: InternalsVisibleTo("Tests")]
 
 namespace System.Runtime.CompilerServices
 {

@@ -12,6 +12,77 @@ namespace Tests
 	internal class SnippetFormatsTest
 	{
 		[Test]
+		[TestCase("&[USER_INPUT:0]", ExpectedResult = "$end$")]
+		[TestCase("&[USER_INPUT:0] test &[USER_INPUT:1] test &[USER_INPUT:2]", ExpectedResult = "$end$ test $end$ test $end$")]
+		[TestCase("&[USER_INPUT:0:default]", ExpectedResult = "&[USER_INPUT:0:default]")]
+		[TestCase("&[USER_INPUT:0: ]", ExpectedResult = "$end$")]
+		[TestCase("&[USER_INPsUT:0:__ ::]", ExpectedResult = "&[USER_INPsUT:0:__ ::]")]
+		public string ReplaceUserCaretPositions_should_create_end_variable(string input)
+		{
+			// arrange
+			var builder = new StringBuilder(input);
+
+			// act
+			SnippetParser.ReplaceUserCaretPositions(builder);
+
+			// assert
+			return builder.ToString();
+		}
+
+		[Test]
+		[TestCase("&[USER_INPUT:0:default]", 1, ExpectedResult = "$param0$")]
+		[TestCase("&[USER_INPUT:0: ]", 1, ExpectedResult = "&[USER_INPUT:0: ]")]
+		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:1:default1] test &[USER_INPUT:2:default2]", 3, ExpectedResult = "$param0$ test $param1$ test $param2$")]
+		[TestCase("&[USER_INPUT:0]", 0, ExpectedResult = "&[USER_INPUT:0]")]
+		public string ReplaceUserVariables_should_replace_codiga_format_with_vs_fromat_and_add_literals(string input, int literalCount)
+		{
+			// arrange
+			var builder = new StringBuilder(input);
+			var vsSnippet = new VisualStudioSnippet
+			{
+				CodeSnippet = new CodeSnippet
+				{
+					Format = "1.0.0",
+					Header = new Header
+					{
+						Title = "tbd",
+						Author = "tbd",
+						Description = "tdb",
+						Shortcut = "test",
+						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" }
+					},
+
+					Snippet = new Snippet
+					{
+						Declarations = new List<Literal>()
+					}
+				}
+			};
+
+			// act
+			SnippetParser.ReplaceUserVariables(builder, vsSnippet);
+
+			// assert
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(literalCount).Items);
+			return builder.ToString();
+		}
+
+		[Test]
+		[TestCase("&[CODIGA_INDENT]", ExpectedResult = "\t")]
+		[TestCase("&[CODIGA_INDENT]&[CODIGA_INDENT]", ExpectedResult = "\t\t")]
+		public string ReplaceIndentation_should_replace_codiga_indention_with_tabs(string input)
+		{
+			// arrange
+			var builder = new StringBuilder(input);
+
+			// act
+			SnippetParser.ReplaceIndentation(builder);
+
+			// assert
+			return builder.ToString();
+		}
+
+		[Test]
 		public void FromVisualStudioSnippets_should_return_CompletionItems()
 		{
 			// arrange

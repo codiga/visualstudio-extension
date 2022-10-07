@@ -69,12 +69,30 @@ namespace Extension.SnippetFormats
 			var base64bytes = Convert.FromBase64String(encoded);
 			var plainCode = Encoding.UTF8.GetString(base64bytes);
 
-			// get literals / user variables
-			// TODO fix does not work when no default value is provided
-			var re = new Regex(@"&\[USER_INPUT\:\d+\:[a-zA-Z0-9]*\]");
-			var matches = re.Matches(plainCode);
+			var stringBuilder = new StringBuilder(plainCode);
 
-			var userVariables = matches.Cast<Match>().Select(m => {
+			ReplaceUserCaretPositions(stringBuilder);
+			ReplaceUserVariables(stringBuilder, vsSnippet);
+			ReplaceIndentation(stringBuilder);
+
+			vsSnippet.CodeSnippet.Snippet.Code = new Code(codigaSnippet.Language, stringBuilder.ToString());
+
+			return vsSnippet;
+		}
+
+		/// <summary>
+		/// Replaces Codiga user variables [USER_INPUT:order:default] with VS literals
+		/// </summary>
+		/// <param name="stringBuilder"></param>
+		/// <param name="vsSnippet"></param>
+		internal static void ReplaceUserVariables(StringBuilder stringBuilder, VisualStudioSnippet vsSnippet)
+		{
+			var plainCode = stringBuilder.ToString();
+
+			var userInputRegex = new Regex(@"&\[USER_INPUT\:\d+\:[a-zA-Z0-9]*\]");
+			var variablesMatches = userInputRegex.Matches(plainCode);
+
+			var userVariables = variablesMatches.Cast<Match>().Select(m => {
 
 				var parts = m.Value.Split(':');
 
@@ -87,21 +105,60 @@ namespace Extension.SnippetFormats
 			}).OrderBy(v => v.Order);
 
 			// add literals and replace placeholder text
-			StringBuilder builder = new StringBuilder(plainCode);
 			foreach (var variable in userVariables)
 			{
-				vsSnippet.CodeSnippet.Snippet.Declarations.Add(new Literal
+				var literal = new Literal
 				{
 					ID = $"param{variable.Order}",
 					Default = variable.Default
-				});
+				};
 
-				builder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");
+				if (!vsSnippet.CodeSnippet.Snippet.Declarations.Contains(literal))
+					vsSnippet.CodeSnippet.Snippet.Declarations.Add(literal);
+
+				stringBuilder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");
 			}
+		}
 
-			vsSnippet.CodeSnippet.Snippet.Code = new Code(codigaSnippet.Language, builder.ToString());
+		/// <summary>
+		/// Replaces Codiga user variables [USER_INPUT:order] without default with VS $end$
+		/// as Visual Studio does not support variables without default.
+		/// </summary>
+		/// <param name="stringBuilder"></param>
+		internal static void ReplaceUserCaretPositions(StringBuilder stringBuilder)
+		{
+			// Visual Studio only supports one $end$ variable
+			// which sets the selection at the end of the session
+			// so $end$ does not work with multiple caret positions
+			// whitespace default does not work for VS.
 
-			return vsSnippet;
+			//TODO better support variables without default: generate default default? $end$ destorys the order
+
+			var plainCode = stringBuilder.ToString();
+			var userCaretRegex = new Regex(@"&\[USER_INPUT\:\d+\]");
+			var caretMatches = userCaretRegex.Matches(plainCode);
+
+			foreach (Match match in caretMatches)
+			{
+				stringBuilder.Replace(match.Value, "$end$");
+			}
+		}
+
+		internal static void ReplaceIndentation(StringBuilder stringBuilder)
+		{
+			// TODO consider vs settings for tab/spacing
+			stringBuilder.Replace("&[CODIGA_INDENT]", "\t");
+		}
+
+		public static class SettingsProvider
+		{
+			
+
+			public class IndentationSettings
+			{
+				public int TabSize { get; set; }
+
+			}
 		}
 
 		/// <summary>

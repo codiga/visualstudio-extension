@@ -36,6 +36,7 @@ namespace Extension.Caching
 
 		public void StartPolling(string language)
 		{
+			//TODO check if polling for this language is already started
 			_pollTokenSource = new CancellationTokenSource();
 			PollSnippetsAsync(_pollTokenSource.Token);
 		}

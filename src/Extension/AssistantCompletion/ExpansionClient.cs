@@ -40,21 +40,26 @@ namespace Extension.AssistantCompletion
 		{
 			_currentTextView = vsTextView;
 
+			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 
 			vsTextView.GetBuffer(out var textLines);
 			var expansion = (IVsExpansion)textLines;
-
-			var position = new TextSpan();
 			vsTextView.GetCaretPos(out var startLine, out var endColumn);
-			// TODO replace "."
-			position.iStartIndex = endColumn;
-			position.iEndIndex = endColumn;
-			position.iStartLine = startLine;
-			position.iEndLine = startLine;
+
+			// replace the typed search text
+			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
+			var startIndex = line.IndexOf('.');
+
+			var position = new TextSpan
+			{
+				iStartIndex = startIndex,
+				iEndIndex = endColumn,
+				iStartLine = startLine,
+				iEndLine = startLine
+			};
 
 			var xmlSnippet = completionItem.Properties.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
-			var xml = xmlSnippet.xml;
 
 			expansion.InsertSpecificExpansion(
 				pSnippet: xmlSnippet,
@@ -148,6 +153,7 @@ namespace Extension.AssistantCompletion
 
 		public int IsValidType(IVsTextLines pBuffer, TextSpan[] ts, string[] rgTypes, int iCountTypes, out int pfIsValidType)
 		{
+			
 			pfIsValidType = 1;
 			return VSConstants.S_OK;
 		}

@@ -11,6 +11,8 @@ This section describes how you can build and debug the extension experimental in
 1. Open `Extension.sln` with Visual Studio
 2. Hit `Ctrl + F5` to bring up the experimental instance
 
+The experimental instace will have the extension automatically installed and updated.
+
 ## Test out the extension
 To see how the extension is working create or open a `.cs`-File and type `.` anywhere to bring up the shortcut completion window.
 

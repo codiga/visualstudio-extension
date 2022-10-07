@@ -4,6 +4,10 @@ Codiga extension for Visual Studio for the fastest code analysis and code snippe
 # Debug with the VS experimental instance 
 This section describes how you can build and debug the extension experimental instance of Visual Studio.
 
+### Prerequisites
+* Installation of Visual Studio ([Visual Studio 2022](https://visualstudio.microsoft.com/vs/) is recommended)
+
+### Start the experimental instance
 1. Open `Extension.sln` with Visual Studio
 2. Hit `Ctrl + F5` to bring up the experimental instance
 

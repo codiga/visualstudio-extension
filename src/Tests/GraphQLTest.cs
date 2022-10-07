@@ -3,6 +3,7 @@
 namespace Tests
 {
 	[TestFixture]
+	[Explicit("External API call")]
 	internal class GraphQLTest
 	{
 

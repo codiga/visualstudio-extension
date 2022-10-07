@@ -3,6 +3,7 @@
 namespace Tests;
 
 [TestFixture]
+[Explicit("External API call")]
 public class SnippetCacheTest
 {
 	[Test]

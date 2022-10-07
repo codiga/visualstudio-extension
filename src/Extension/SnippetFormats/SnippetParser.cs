@@ -37,6 +37,7 @@ namespace Extension.SnippetFormats
 				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source);
 				// store the XMLNode in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
+				// TODO metadata for completion set
 
 				return item;
 
@@ -47,6 +48,7 @@ namespace Extension.SnippetFormats
 		{
 			var vsSnippet = new VisualStudioSnippet
 			{
+				// TODO metdadata
 				CodeSnippet = new CodeSnippet
 				{
 					Format = "1.0.0",
@@ -78,6 +80,12 @@ namespace Extension.SnippetFormats
 			vsSnippet.CodeSnippet.Snippet.Code = new Code(codigaSnippet.Language, stringBuilder.ToString());
 
 			return vsSnippet;
+		}
+
+		public static bool IsStartOfLine(string textBeforeCaret)
+		{
+			var textWithoutIndent = textBeforeCaret.Replace("\t", "");
+			return string.IsNullOrEmpty(textWithoutIndent);
 		}
 
 		/// <summary>
@@ -146,7 +154,6 @@ namespace Extension.SnippetFormats
 
 		internal static void ReplaceIndentation(StringBuilder stringBuilder)
 		{
-			// TODO consider vs settings for tab/spacing
 			stringBuilder.Replace("&[CODIGA_INDENT]", "\t");
 		}
 

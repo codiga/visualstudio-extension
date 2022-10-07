@@ -37,29 +37,16 @@ namespace Extension.AssistantCompletion
                 return CompletionStartData.DoesNotParticipateInCompletion;
             }
 
-            //We don't trigger completion when user typed
-            //if (char.IsNumber(trigger.Character)         // a number
-            //    || char.IsPunctuation(trigger.Character) // punctuation
-            //    || trigger.Character == '\n'             // new line
-            //    || trigger.Reason == CompletionTriggerReason.Backspace
-            //    || trigger.Reason == CompletionTriggerReason.Deletion)
-            //{
-            //    return CompletionStartData.DoesNotParticipateInCompletion;
-            //}
+            var lineStart = triggerLocation.GetContainingLine().Start;
+            var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
+            var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
 
-            // We participate in completion and provide the "applicable to span".
-            // This span is used:
-            // 1. To search (filter) the list of all completion items
-            // 2. To highlight (bold) the matching part of the completion items
-            // 3. In standard cases, it is replaced by content of completion item upon commit.
+            if (!SnippetParser.IsStartOfLine(textBeforeCaret.Substring(0, textBeforeCaret.Length-1)))
+            {
+	            return CompletionStartData.DoesNotParticipateInCompletion;
+			}
 
-            // If you want to extend a language which already has completion, don't provide a span, e.g.
-            // return CompletionStartData.ParticipatesInCompletionIfAny
-
-            // If you provide a language, but don't have any items available at this location,
-            // consider providing a span for extenders who can't parse the codem e.g.
-            // return CompletionStartData(CompletionParticipation.DoesNotProvideItems, spanForOtherExtensions);
-            m_triggerLocation = triggerLocation;
+			m_triggerLocation = triggerLocation;
             var tokenSpan = FindTokenSpanAtPosition(triggerLocation);
             return new CompletionStartData(CompletionParticipation.ProvidesItems, tokenSpan);
         }

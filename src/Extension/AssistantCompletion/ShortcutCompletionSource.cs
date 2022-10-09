@@ -114,7 +114,11 @@ namespace Extension.AssistantCompletion
         /// </summary>
         public async Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
         {
-	        return null;
-        }
+			if (item.Properties.TryGetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Header.Description), out var description))
+			{
+				return description;
+			}
+			return null;
+		}
     }
 }

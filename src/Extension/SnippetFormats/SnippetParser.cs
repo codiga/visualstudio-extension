@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Settings.Internal;
 using System.IO;
 using System.Xml;
 using GraphQLClient;
+using Microsoft.VisualStudio.Core.Imaging;
 
 namespace Extension.SnippetFormats
 {
@@ -34,10 +35,14 @@ namespace Extension.SnippetFormats
 				xmlDoc.loadXML(sw.ToString());
 				var snippetNode = xmlDoc.documentElement.childNodes.nextNode();
 
-				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source);
+				var snippetMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.Snippet;
+				var imageElement = new ImageElement(new ImageId(snippetMoniker.Guid, snippetMoniker.Id));
+
+				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source, imageElement, ImmutableArray<CompletionFilter>.Empty, s.CodeSnippet.Header.Title);
 				// store the XMLNode in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
-				// TODO metadata for completion set
+				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
+				
 
 				return item;
 
@@ -54,9 +59,9 @@ namespace Extension.SnippetFormats
 					Format = "1.0.0",
 					Header = new Header
 					{
-						Title = "tbd",
-						Author = "tbd",
-						Description = "tdb",
+						Title = codigaSnippet.Name,
+						Author = "",
+						Description = codigaSnippet.Description,
 						Shortcut = codigaSnippet.Shortcut,
 						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" }
 					},

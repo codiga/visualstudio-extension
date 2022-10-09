@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GraphQLClient;
 using CodigaSnippet = GraphQLClient.CodigaSnippet;
+using EnvDTE;
 
 namespace Extension.Caching
 {
@@ -23,44 +24,50 @@ namespace Extension.Caching
 	{
 		private readonly CodigaClient _client;
 		private IDictionary<string, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
-		private CancellationTokenSource _pollTokenSource;
-
-		private long? LastTimeStamp { get; set; }
+		private IDictionary<string, PollingSession> _currentPollingSessions;
 
 		public SnippetCache()
 		{
 			_cachedSnippets = new Dictionary<string, IReadOnlyCollection<CodigaSnippet>>();
+			_currentPollingSessions = new Dictionary<string, PollingSession>();
 			_client = new CodigaClient();
 
 		}
 
 		public void StartPolling(string language)
 		{
-			//TODO check if polling for this language is already started
-			_pollTokenSource = new CancellationTokenSource();
-			PollSnippetsAsync(_pollTokenSource.Token);
+			var tokenSource = new CancellationTokenSource();
+			var session = new PollingSession
+			{
+				Source = tokenSource,
+				LastTimeStamp = null
+			};
+			_currentPollingSessions.Add(language, session);
+			PollSnippetsAsync(tokenSource.Token, language);
 		}
 
 		public void StopPolling()
 		{
-			_pollTokenSource.Cancel();
+			foreach (var session in _currentPollingSessions.Values)
+			{
+				session.Source.Cancel();
+			}
 		}
 
-		public async Task PollSnippetsAsync(CancellationToken cancellationToken)
+		public async Task PollSnippetsAsync(CancellationToken cancellationToken, string language)
 		{
 			while (true)
 			{
-				// TODO add support for different languages
-				var ts = await _client.GetRecipesForClientByShortcutLastTimestamp("Csharp");
-
-				if (LastTimeStamp == null || ts > LastTimeStamp)
+				var ts = await _client.GetRecipesForClientByShortcutLastTimestamp(language);
+				var lastTs = _currentPollingSessions[language].LastTimeStamp;
+				if (lastTs == null || ts > lastTs)
 				{
 					// TODO only add diff
-					var snippets = await _client.GetRecipesForClientByShortcutAsync("Csharp");
-					_cachedSnippets["Csharp"] = snippets;
-					LastTimeStamp = ts;
+					var snippets = await _client.GetRecipesForClientByShortcutAsync(language);
+					_cachedSnippets[language] = snippets;
+					_currentPollingSessions[language].LastTimeStamp = ts;
 				}
-				LastTimeStamp ??= ts;
+				_currentPollingSessions[language].LastTimeStamp ??= ts;
 
 				var task = Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
 
@@ -92,5 +99,12 @@ namespace Extension.Caching
 				.Select(SnippetParser.FromCodigaSnippet);
 			return snippets;
 		}
+	}
+
+	internal class PollingSession
+	{
+		public CancellationTokenSource Source { get; set; }
+
+		public long? LastTimeStamp { get; set; }
 	}
 }

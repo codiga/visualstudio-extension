@@ -21,7 +21,7 @@ public class SnippetCacheTest
 		var token = new CancellationTokenSource();
 
 		// act
-		cache.PollSnippetsAsync(token.Token);
+		cache.PollSnippetsAsync(token.Token, "Csharp");
 
 		// assert
 		await Task.Delay(15000);

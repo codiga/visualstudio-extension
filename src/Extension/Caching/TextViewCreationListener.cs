@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.Composition;
-using Extension.Caching;
+﻿using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
+using System.ComponentModel.Composition;
 
 namespace Extension.Caching
 {
@@ -25,8 +25,10 @@ namespace Extension.Caching
 			if (textView == null)
 				return;
 
-			// TODO check for language and start polling for each language + dependency
-			Cache.StartPolling("Csharp");
+			textViewAdapter.GetBuffer(out var buffer);
+			var type = AdapterService.GetDocumentBuffer(buffer).ContentType;
+			var codigaLanguage = CodigaLanguages.Parse(type);
+			Cache.StartPolling(codigaLanguage);
 		}
 	}
 }

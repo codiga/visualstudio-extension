@@ -56,7 +56,6 @@
   <ItemGroup>
     <Compile Include="AssistantCompletion\DefaultCompletionItemManager.cs" />
     <Compile Include="AssistantCompletion\DefaultCompletionItemManagerProvider.cs" />
-    <Compile Include="AssistantCompletion\SnippetInsertion.cs" />
     <Compile Include="AssistantCompletion\ExpansionClient.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionCommitManager.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionCommitManagerProvider.cs" />

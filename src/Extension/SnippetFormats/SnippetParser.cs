@@ -15,21 +15,22 @@ using System.IO;
 using System.Xml;
 using GraphQLClient;
 using Microsoft.VisualStudio.Core.Imaging;
+using Microsoft.VisualStudio.Utilities;
+using System.Web.UI.Design;
 
 namespace Extension.SnippetFormats
 {
-
 	public static class SnippetParser
 	{
 		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IEnumerable<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
 		{
 			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
-			
+
 			return vsSnippets.Select(s =>
 			{
 				// create IXMLDOMNode from snippet
 				using var sw = new StringWriter();
-				using var xw = XmlWriter.Create(sw, new XmlWriterSettings{Encoding = Encoding.UTF8});
+				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
 				serializer.Serialize(xw, s);
 				var xmlDoc = new DOMDocument();
 				xmlDoc.loadXML(sw.ToString());
@@ -42,7 +43,7 @@ namespace Extension.SnippetFormats
 				// store the XMLNode in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
-				
+
 
 				return item;
 
@@ -89,7 +90,7 @@ namespace Extension.SnippetFormats
 
 		public static bool IsStartOfLine(string textBeforeCaret)
 		{
-			var textWithoutIndent = textBeforeCaret.Replace("\t", "");
+			var textWithoutIndent = textBeforeCaret.Replace("\t", "").Replace(" ", "");
 			return string.IsNullOrEmpty(textWithoutIndent);
 		}
 
@@ -162,26 +163,65 @@ namespace Extension.SnippetFormats
 			stringBuilder.Replace("&[CODIGA_INDENT]", "\t");
 		}
 
-		public static class SettingsProvider
-		{
-			
-
-			public class IndentationSettings
-			{
-				public int TabSize { get; set; }
-
-			}
-		}
-
 		/// <summary>
 		/// Represents the Codiga user variables that allow user defined placeholders
 		/// </summary>
 		private class CodigaUserVariable
 		{
-			public string PlaceholderText{ get; set; }
-			public int Order{ get; set; }
+			public string PlaceholderText { get; set; }
+			public int Order { get; set; }
 			public string Default { get; set; }
 		}
-		
+
+	}
+
+	public static class CodigaLanguages
+	{
+		public enum LanguageEnumeration
+		{
+			Unknown,
+			Coldfusion,
+			Docker,
+			Objectivec,
+			Terraform,
+			Json,
+			Yaml,
+			Typescript,
+			Swift,
+			Solidity,
+			Sql,
+			Shell,
+			Scala,
+			Rust,
+			Ruby,
+			Php,
+			Python,
+			Perl,
+			Kotlin,
+			Javascript,
+			Java,
+			Html,
+			Haskell,
+			Go,
+			Dart,
+			Csharp,
+			Css,
+			Cpp,
+			C,
+			Apex
+		}
+
+		public static string Parse(IContentType contentType)
+		{
+			return contentType.TypeName switch
+			{
+				"CSharp" => "Csharp",
+				"CSS" => "Css",
+				"HTML" => "Html",
+				"HTMLProjection" => "Html",
+				"JSON" => "Json",
+				_ => throw new ArgumentException($"{contentType.TypeName} not supported")
+			};
+		}
 	}
 }

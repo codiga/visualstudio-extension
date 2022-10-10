@@ -17,16 +17,25 @@ The experimental instance will have the extension automatically installed and up
 To see how the extension is working create or open a `.cs`-File and type `.` anywhere to bring up the shortcut completion window.
 
 # Build and test
-> **_NOTE: this does not work at the moment as dotnet command failes_**
 
 This section describes how you can build and test the extension with your local Visual Studio installation.
 ### Prerequisites
 * Installation of Visual Studio ([Visual Studio 2022](https://visualstudio.microsoft.com/vs/) is recommended)
+* MSBuild version `17.3.1`
+
+MSBuild can be found in this folder for a standard installation:
+
+ `C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin`
+  
+  You might want to add this folder to your PATH.
 ### Build the extension
 To build the extension navigate to the project root and execute
 
-`dotnet build .\Extension.sln`
+`msbuild .\Extension.sln`
 ### Run unit tests
+
+>_**Note: Does not work at the moment.**_
+
 To run the unit tests execute
 
 `dotnet test .\Extension.sln`

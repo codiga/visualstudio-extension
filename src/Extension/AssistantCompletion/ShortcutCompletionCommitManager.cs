@@ -56,10 +56,10 @@ namespace Extension.AssistantCompletion
 			// start a snippet session using in memory xml rather than .xml files
 			ExpansionClient.StartExpansion(vsTextView, item);
 
-			if(item.Properties.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id))
-			{
-				CodigaClient.RecordRecipeAccessAsync(id, "");
-			}
+			//if(item.Properties.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id))
+			//{
+			//	CodigaClient.RecordRecipeAccessAsync(id, "");
+			//}
 
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;

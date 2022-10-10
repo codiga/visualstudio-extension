@@ -42,7 +42,7 @@ namespace Extension.AssistantCompletion
             var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
             var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
 
-            if (!SnippetParser.IsStartOfLine(textBeforeCaret.Substring(0, textBeforeCaret.Length-1)))
+            if (!EditorUtils.IsStartOfLine(textBeforeCaret.Substring(0, textBeforeCaret.Length-1)))
             {
 	            return CompletionStartData.DoesNotParticipateInCompletion;
 			}

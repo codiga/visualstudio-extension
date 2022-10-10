@@ -43,7 +43,9 @@ namespace Extension.SnippetFormats
 				// store the XMLNode, description and id in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
-				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
+				
+				// enable to send mutation
+				//item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
 
 				// add first snippet field to handle selection later
 				if(s.CodeSnippet.Snippet.Declarations.Any())
@@ -93,11 +95,7 @@ namespace Extension.SnippetFormats
 			return vsSnippet;
 		}
 
-		public static bool IsStartOfLine(string textBeforeCaret)
-		{
-			var textWithoutIndent = textBeforeCaret.Replace("\t", "").Replace(" ", "");
-			return string.IsNullOrEmpty(textWithoutIndent);
-		}
+
 
 		/// <summary>
 		/// Replaces Codiga user variables [USER_INPUT:order:default] with VS literals

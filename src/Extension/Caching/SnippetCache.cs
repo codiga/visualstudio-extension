@@ -22,6 +22,9 @@ namespace Extension.Caching
 	[Export]
 	public class SnippetCache : ISnippetCache
 	{
+		public const int PollIntervalInSeconds = 10;
+		public const int IdleIntervalInMinutes = 10;
+
 		private readonly CodigaClient _client;
 		private IDictionary<string, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
 		private IDictionary<string, PollingSession> _currentPollingSessions;
@@ -31,7 +34,6 @@ namespace Extension.Caching
 			_cachedSnippets = new Dictionary<string, IReadOnlyCollection<CodigaSnippet>>();
 			_currentPollingSessions = new Dictionary<string, PollingSession>();
 			_client = new CodigaClient();
-
 		}
 
 		public void StartPolling(string language)
@@ -39,12 +41,17 @@ namespace Extension.Caching
 			var tokenSource = new CancellationTokenSource();
 			var session = new PollingSession
 			{
+				Language = language,
 				Source = tokenSource,
 				LastTimeStamp = null
 			};
+
+			session.IdleTimerElapsed += Session_IdleTimerElapsed; ;
+
 			_currentPollingSessions.Add(language, session);
 			PollSnippetsAsync(tokenSource.Token, language);
 		}
+
 
 		public void StopPolling()
 		{
@@ -52,24 +59,50 @@ namespace Extension.Caching
 			{
 				session.Source.Cancel();
 			}
+
+			_currentPollingSessions.Clear();
+		}
+
+		public void StopPolling(string language)
+		{
+			if (_currentPollingSessions.TryGetValue(language, out var session))
+			{
+				session.Source.Cancel();
+				_currentPollingSessions.Remove(language);
+			}
+		}
+
+		public void ReportActivity(string language)
+		{
+			if (_currentPollingSessions.TryGetValue(language, out var session))
+			{
+				session.ResetTimer();
+			}
+			else
+			{
+				StartPolling(language);
+			}
 		}
 
 		public async Task PollSnippetsAsync(CancellationToken cancellationToken, string language)
 		{
 			while (true)
 			{
+				if (!_currentPollingSessions.TryGetValue(language, out var session))
+					return;
+
 				var ts = await _client.GetRecipesForClientByShortcutLastTimestamp(language);
-				var lastTs = _currentPollingSessions[language].LastTimeStamp;
+				var lastTs = session.LastTimeStamp;
 				if (lastTs == null || ts > lastTs)
 				{
 					// TODO only add diff
 					var snippets = await _client.GetRecipesForClientByShortcutAsync(language);
 					_cachedSnippets[language] = snippets;
-					_currentPollingSessions[language].LastTimeStamp = ts;
+					session.LastTimeStamp = ts;
 				}
-				_currentPollingSessions[language].LastTimeStamp ??= ts;
+				session.LastTimeStamp ??= ts;
 
-				var task = Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+				var task = Task.Delay(TimeSpan.FromSeconds(PollIntervalInSeconds), cancellationToken);
 
 				try
 				{
@@ -99,12 +132,54 @@ namespace Extension.Caching
 				.Select(SnippetParser.FromCodigaSnippet);
 			return snippets;
 		}
+
+		private void Session_IdleTimerElapsed(object sender, EventArgs e)
+		{
+			var session = (PollingSession)sender;
+			if (!_currentPollingSessions.ContainsKey(session.Language))
+				return;
+
+			StopPolling(session.Language);
+			session.IdleTimerElapsed -= Session_IdleTimerElapsed;
+		}
 	}
 
+	/// <summary>
+	/// Represents a running session for polling snippets from the Codiga API.
+	/// </summary>
 	internal class PollingSession
 	{
+		public string Language { get; set; }
+
 		public CancellationTokenSource Source { get; set; }
 
 		public long? LastTimeStamp { get; set; }
+
+		private System.Timers.Timer IdleTimer { get; }
+
+		public event EventHandler<EventArgs> IdleTimerElapsed;
+
+		public PollingSession()
+		{
+			IdleTimer = new System.Timers.Timer(TimeSpan.FromMinutes(SnippetCache.IdleIntervalInMinutes).TotalMilliseconds);
+			IdleTimer.AutoReset = true;
+			IdleTimer.Elapsed += IdleTimer_Elapsed;
+		}
+
+		private void IdleTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			IdleTimerElapsed?.Invoke(this, new EventArgs());
+		}
+
+		public void StartTimer()
+		{
+			IdleTimer.Start();
+		}
+
+		public void ResetTimer()
+		{
+			IdleTimer.Stop();
+			IdleTimer.Start();
+		}
 	}
 }

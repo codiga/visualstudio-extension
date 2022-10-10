@@ -56,9 +56,9 @@ namespace Extension.AssistantCompletion
 				iStartLine = startLine,
 				iEndLine = startLine
 			};
-			
-			_firstUserVariable = completionItem.Properties
-				.GetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations));
+
+			completionItem.Properties
+				.TryGetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations), out _firstUserVariable);
 
 			var xmlSnippet = completionItem.Properties
 				.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
@@ -197,6 +197,9 @@ namespace Extension.AssistantCompletion
 			var snippetSpan = snippetSpans[0];
 			_currentTextView.SetSelection(snippetSpan.iStartLine, snippetSpan.iStartIndex, snippetSpan.iEndLine, snippetSpan.iEndIndex);
 			VS.Commands.ExecuteAsync("Edit.FormatSelection").GetAwaiter().GetResult();
+
+			if(string.IsNullOrEmpty(_firstUserVariable))
+				return VSConstants.S_OK;
 
 			// reapply the selection to the first user variable
 			// we can't use GoToNextExpansionField because this only works if the caret is already placed in one of the fields.

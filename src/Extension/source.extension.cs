@@ -7,8 +7,8 @@ namespace Extension
 {
     internal sealed partial class Vsix
     {
-        public const string Id = "Extension.2c544927-3588-41b4-9bfe-e80a0b99df80";
-        public const string Name = "Extension";
+        public const string Id = "Codiga.2c544927-3588-41b4-9bfe-e80a0b99df80";
+        public const string Name = "Codiga";
         public const string Description = @"Empty VSIX Project.";
         public const string Language = "en-US";
         public const string Version = "1.0";

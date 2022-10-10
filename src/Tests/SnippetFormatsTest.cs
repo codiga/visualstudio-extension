@@ -34,6 +34,8 @@ namespace Tests
 		[TestCase("&[USER_INPUT:0: ]", 1, ExpectedResult = "&[USER_INPUT:0: ]")]
 		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:1:default1] test &[USER_INPUT:2:default2]", 3, ExpectedResult = "$param0$ test $param1$ test $param2$")]
 		[TestCase("&[USER_INPUT:0]", 0, ExpectedResult = "&[USER_INPUT:0]")]
+		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:0:default1] test &[USER_INPUT:0:default2]", 1, ExpectedResult = "$param0$ test $param0$ test $param0$")]
+
 		public string ReplaceUserVariables_should_replace_codiga_format_with_vs_fromat_and_add_literals(string input, int literalCount)
 		{
 			// arrange

@@ -1,20 +1,14 @@
-﻿using Microsoft.VisualStudio;
+﻿using Community.VisualStudio.Toolkit;
+using Extension.SnippetFormats;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using MSXML;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Extension.SnippetFormats;
-using static Microsoft.VisualStudio.Shell.ThreadedWaitDialogHelper;
-using Microsoft.VisualStudio.Shell;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Package;
 
 namespace Extension.AssistantCompletion
 {
@@ -24,11 +18,14 @@ namespace Extension.AssistantCompletion
 	/// A session ends as soon as the user commits the snippet insertion.
 	/// </summary>
 	[Export]
-	internal class ExpansionClient: IOleCommandTarget, IVsExpansionClient
+	internal class ExpansionClient : IOleCommandTarget, IVsExpansionClient
 	{
 		private IVsExpansionSession _currentExpansionSession;
 		private IOleCommandTarget _nextCommandHandler;
 		private IVsTextView _currentTextView;
+
+		private string _firstUserVariable;
+		private TextSpan _endSpan;
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -39,6 +36,7 @@ namespace Extension.AssistantCompletion
 		public int StartExpansion(IVsTextView vsTextView, CompletionItem completionItem)
 		{
 			_currentTextView = vsTextView;
+			_endSpan = new TextSpan();
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -46,11 +44,11 @@ namespace Extension.AssistantCompletion
 			vsTextView.GetBuffer(out var textLines);
 			var expansion = (IVsExpansion)textLines;
 			vsTextView.GetCaretPos(out var startLine, out var endColumn);
-
+			
 			// replace the typed search text
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
 			var startIndex = line.IndexOf('.');
-
+			
 			var position = new TextSpan
 			{
 				iStartIndex = startIndex,
@@ -58,19 +56,24 @@ namespace Extension.AssistantCompletion
 				iStartLine = startLine,
 				iEndLine = startLine
 			};
+			
+			_firstUserVariable = completionItem.Properties
+				.GetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations));
 
-			var xmlSnippet = completionItem.Properties.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
+			var xmlSnippet = completionItem.Properties
+				.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
 
+			textLines.GetLanguageServiceID(out var languageServiceId);
 			expansion.InsertSpecificExpansion(
 				pSnippet: xmlSnippet,
 				tsInsertPos: position,
 				pExpansionClient: this,
-				guidLang: Guid.Empty,
+				guidLang: languageServiceId,
 				pszRelativePath: string.Empty,
 				out _currentExpansionSession);
 
 			return VSConstants.S_OK;
-		} 
+		}
 
 		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
 		{
@@ -114,10 +117,12 @@ namespace Extension.AssistantCompletion
 				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 				{
 
-					_currentExpansionSession.GoToNextExpansionField(0); //false to support cycling through all the fields
+					_currentExpansionSession
+						.GoToNextExpansionField(0); //false to support cycling through all the fields
 					return VSConstants.S_OK;
 				}
-				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN || nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
+				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN ||
+				         nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 				{
 					if (_currentExpansionSession.EndCurrentExpansion(0) == VSConstants.S_OK)
 					{
@@ -133,7 +138,8 @@ namespace Extension.AssistantCompletion
 			return result;
 		}
 
-		public int GetExpansionFunction(IXMLDOMNode xmlFunctionNode, string bstrFieldName, out IVsExpansionFunction pFunc)
+		public int GetExpansionFunction(IXMLDOMNode xmlFunctionNode, string bstrFieldName,
+			out IVsExpansionFunction pFunc)
 		{
 			pFunc = null;
 			return VSConstants.S_OK;
@@ -141,6 +147,7 @@ namespace Extension.AssistantCompletion
 
 		public int FormatSpan(IVsTextLines pBuffer, TextSpan[] ts)
 		{
+			// NOTE: How to get the LanguageService here to call Source.Reformat?
 			return VSConstants.S_OK;
 		}
 
@@ -151,9 +158,10 @@ namespace Extension.AssistantCompletion
 			return VSConstants.S_OK;
 		}
 
-		public int IsValidType(IVsTextLines pBuffer, TextSpan[] ts, string[] rgTypes, int iCountTypes, out int pfIsValidType)
+		public int IsValidType(IVsTextLines pBuffer, TextSpan[] ts, string[] rgTypes, int iCountTypes,
+			out int pfIsValidType)
 		{
-			
+
 			pfIsValidType = 1;
 			return VSConstants.S_OK;
 		}
@@ -169,13 +177,52 @@ namespace Extension.AssistantCompletion
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Get triggered after the snippet code is inserted into the editor.
+		/// I use this to perform formatting on the inserted snippet as FormatSpan() did not work.
+		/// </summary>
+		/// <param name="pSession"></param>
+		/// <returns></returns>
 		public int OnAfterInsertion(IVsExpansionSession pSession)
 		{
+			// save the end position of the cursor before formatting as that will change it
+			var endSpans = new[] { new TextSpan() };
+			pSession.GetEndSpan(endSpans);
+			var endSpan = endSpans[0];
+			_endSpan = endSpan;
+
+			//select the span and execute format command
+			var snippetSpans = new[] { new TextSpan() };
+			pSession.GetSnippetSpan(snippetSpans);
+			var snippetSpan = snippetSpans[0];
+			_currentTextView.SetSelection(snippetSpan.iStartLine, snippetSpan.iStartIndex, snippetSpan.iEndLine, snippetSpan.iEndIndex);
+			VS.Commands.ExecuteAsync("Edit.FormatSelection").GetAwaiter().GetResult();
+
+			// reapply the selection to the first user variable
+			// we can't use GoToNextExpansionField because this only works if the caret is already placed in one of the fields.
+			var fieldSpans = new[] { new TextSpan() };
+			pSession.GetFieldSpan(_firstUserVariable, fieldSpans);
+			var fieldSpan = fieldSpans[0];
+			_currentTextView.SetSelection(fieldSpan.iStartLine, fieldSpan.iStartIndex, fieldSpan.iEndLine, fieldSpan.iEndIndex);
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Gets called after done editing user variables. We use this to set the correct $end$ cursor position
+		/// as the default behaviour is broken due to the reformatting in OnAfterInsertion
+		/// </summary>
+		/// <param name="pBuffer"></param>
+		/// <param name="ts"></param>
+		/// <returns></returns>
 		public int PositionCaretForEditing(IVsTextLines pBuffer, TextSpan[] ts)
 		{
+			var endSpans = new[] { new TextSpan() };
+			_currentExpansionSession.GetEndSpan(endSpans);
+			var updatedEndSpan = endSpans[0];
+
+			// TODO add one indent
+			_endSpan.iStartIndex = updatedEndSpan.iStartIndex;
+			_currentTextView.SetCaretPos(_endSpan.iStartLine, _endSpan.iStartIndex);
 			return VSConstants.S_OK;
 		}
 

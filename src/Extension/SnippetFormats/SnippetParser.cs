@@ -40,10 +40,13 @@ namespace Extension.SnippetFormats
 				var imageElement = new ImageElement(new ImageId(snippetMoniker.Guid, snippetMoniker.Id));
 
 				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source, imageElement, ImmutableArray<CompletionFilter>.Empty, s.CodeSnippet.Header.Title);
-				// store the XMLNode in the property bag so the ExpansionClient can access that later
+				// store the XMLNode and description in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
 
+				// add first snippet field to handle selection later
+				if(s.CodeSnippet.Snippet.Declarations.Any())
+					item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Declarations),s.CodeSnippet.Snippet.Declarations.First().ID);
 
 				return item;
 
@@ -127,7 +130,7 @@ namespace Extension.SnippetFormats
 					Default = variable.Default
 				};
 
-				if (!vsSnippet.CodeSnippet.Snippet.Declarations.Contains(literal))
+				if (!vsSnippet.CodeSnippet.Snippet.Declarations.Any(l => l.ID == literal.ID))
 					vsSnippet.CodeSnippet.Snippet.Declarations.Add(literal);
 
 				stringBuilder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");

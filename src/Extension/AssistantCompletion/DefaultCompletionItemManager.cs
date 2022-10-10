@@ -24,6 +24,8 @@ namespace Extension.AssistantCompletion
         Task<FilteredCompletionModel> IAsyncCompletionItemManager.UpdateCompletionListAsync
             (IAsyncCompletionSession session, AsyncCompletionSessionDataSnapshot data, CancellationToken token)
         {
+
+            // TODO clean up and test
             var view = session.TextView;
             // Filter by text
             var filterText = session.ApplicableToSpan.GetText(data.Snapshot);

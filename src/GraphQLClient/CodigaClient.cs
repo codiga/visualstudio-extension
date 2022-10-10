@@ -15,6 +15,9 @@ namespace GraphQLClient
 		private static string ShortcutLastTimestampQuery =>
 			"query GetRecipesForClientByShortcutLastTimestamp($fingerprint: String, $dependencies: [String!]!, $language: LanguageEnumeration!){\r\n  getRecipesForClientByShortcutLastTimestamp(fingerprint: $fingerprint, dependencies:$dependencies, language:$language)\r\n}";
 
+		private static string RecordAccessMutation =>
+			"mutation RecordAccess ($recipeId: Long!, $fingerprint: String) {\r\n recordAccess(accessType:Cli, actionType:AssistantRecipeUse, recipeId: $recipeId, userFingerprint: $fingerprint)\r\n}";
+
 		public CodigaClient()
 		{
 			_client = new GraphQLHttpClient("https://api.codiga.io/graphql", new SystemTextJsonSerializer());
@@ -41,7 +44,7 @@ namespace GraphQLClient
 			return result.Data.GetRecipesForClientByShortcut;
 		}
 
-		public async Task<long> GetRecipesForClientByShortcutLastTimestamp(string language)
+		public async Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
@@ -50,10 +53,20 @@ namespace GraphQLClient
 			variablesDict["language"] = language;
 
 			var request = new GraphQLHttpRequest(ShortcutLastTimestampQuery, variables);
-
 			var result = await _client.SendQueryAsync<GetRecipesByShortcutLastTimestampResult>(request);
 
 			return result.Data.GetRecipesForClientByShortcutLastTimestamp;
+		}
+
+		public async Task RecordRecipeAccessAsync(long recipeId, string fingerprint)
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["recipeId"] = recipeId;
+
+			var request = new GraphQLHttpRequest(RecordAccessMutation, variables);
+			var result = await _client.SendMutationAsync<dynamic>(request);
 		}
 	}
 

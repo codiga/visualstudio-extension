@@ -40,9 +40,10 @@ namespace Extension.SnippetFormats
 				var imageElement = new ImageElement(new ImageId(snippetMoniker.Guid, snippetMoniker.Id));
 
 				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source, imageElement, ImmutableArray<CompletionFilter>.Empty, s.CodeSnippet.Header.Title);
-				// store the XMLNode and description in the property bag so the ExpansionClient can access that later
+				// store the XMLNode, description and id in the property bag so the ExpansionClient can access that later
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
+				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
 
 				// add first snippet field to handle selection later
 				if(s.CodeSnippet.Snippet.Declarations.Any())
@@ -63,6 +64,7 @@ namespace Extension.SnippetFormats
 					Format = "1.0.0",
 					Header = new Header
 					{
+						Id = codigaSnippet.Id,
 						Title = codigaSnippet.Name,
 						Author = "",
 						Description = codigaSnippet.Description,

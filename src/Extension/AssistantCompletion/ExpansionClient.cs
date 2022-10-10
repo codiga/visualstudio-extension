@@ -9,6 +9,7 @@ using MSXML;
 using System;
 using System.ComponentModel.Composition;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Extension.AssistantCompletion
 {
@@ -58,7 +59,7 @@ namespace Extension.AssistantCompletion
 			};
 
 			completionItem.Properties
-				.TryGetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations), out _firstUserVariable);
+				.TryGetProperty(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations), out _firstUserVariable);
 
 			var xmlSnippet = completionItem.Properties
 				.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));

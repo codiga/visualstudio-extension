@@ -28,6 +28,9 @@ namespace Extension.SnippetFormats
 	[XmlRoot(ElementName = "Header")]
 	public class Header
 	{
+		[XmlIgnore]
+		public long Id { get; set; }
+
 		[XmlElement(ElementName = "Title")]
 		public string Title { get; set; }
 

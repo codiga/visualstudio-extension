@@ -91,7 +91,7 @@ namespace Extension.Caching
 				if (!_currentPollingSessions.TryGetValue(language, out var session))
 					return;
 
-				var ts = await _client.GetRecipesForClientByShortcutLastTimestamp(language);
+				var ts = await _client.GetRecipesForClientByShortcutLastTimestampAsync(language);
 				var lastTs = session.LastTimeStamp;
 				if (lastTs == null || ts > lastTs)
 				{

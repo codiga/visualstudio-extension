@@ -27,10 +27,23 @@ namespace Tests
 			var client = new CodigaClient();
 
 			// act
-			var ts = await client.GetRecipesForClientByShortcutLastTimestamp("Csharp");
+			var ts = await client.GetRecipesForClientByShortcutLastTimestampAsync("Csharp");
 
 			// assert
 			Assert.NotNull(ts);
+		}
+
+		[Test]
+		public async Task RecordRecipeAccess_should_record_access()
+		{
+			// arrange
+			var client = new CodigaClient();
+			var snippets = await client.GetRecipesForClientByShortcutAsync("Csharp");
+
+			// act
+			await client.RecordRecipeAccessAsync(snippets.First().Id, "");
+
+			// assert
 		}
 	}
 }

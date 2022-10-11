@@ -6,10 +6,11 @@ jobs:
   Build:
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build Solution
-        run: msbuild .\Extension.sln /t:Rebuild
+        run: msbuild Extension.sln /t:Rebuild
         env: 
           DeployExtension: False
       - name: Install NUnit.ConsoleRunner

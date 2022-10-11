@@ -106,7 +106,7 @@ namespace Extension.SnippetFormats
 		{
 			var plainCode = stringBuilder.ToString();
 
-			var userInputRegex = new Regex(@"&\[USER_INPUT\:\d+\:[a-zA-Z0-9]*\]");
+			var userInputRegex = new Regex(@"&\[USER_INPUT\:\d+\:[a-zA-Z0-9_]*\]");
 			var variablesMatches = userInputRegex.Matches(plainCode);
 
 			var userVariables = variablesMatches.Cast<Match>().Select(m => {

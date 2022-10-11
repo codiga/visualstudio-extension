@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Remove="queries\GetFileData.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <GraphQLConfig Include="queries\GetFileData.graphql" />
     <GraphQLConfig Include="queries\GetProjects.graphql" />
     <GraphQLConfig Include="queries\GetRecipesForClient.graphql" />
@@ -28,14 +24,6 @@
     <GraphQLConfig Include="queries\RecordAccess.graphql" />
     <GraphQLConfig Include="queries\RecordRecipeUse.graphql" />
     <GraphQLConfig Include="queries\RemoveViolationToIgnore.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Remove="queries\GetProjects.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Remove="queries\GetRecipesForClient.graphql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,23 +39,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Remove="queries\GetUser.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Remove="queries\IgnoreViolation.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Remove="queries\RecordAccess.graphql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <AdditionalFiles Remove="queries\RecordRecipeUse.graphql" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Remove="queries\RemoveViolationToIgnore.graphql" />
+    <None Remove="Queries\GetRecipesForClientByShortcut.graphql" />
+    <None Remove="Queries\GetRecipesForClientByShortcutLastTimestamp.graphql" />
+    <None Remove="Queries\GetRecipesForClientSemantic.graphql" />
+    <None Remove="Queries\RecordRecipeUse.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Queries\GetRecipesForClientByShortcut.graphql" />
+    <EmbeddedResource Include="Queries\GetRecipesForClientByShortcutLastTimestamp.graphql" />
+    <EmbeddedResource Include="Queries\GetRecipesForClientSemantic.graphql" />
+    <EmbeddedResource Include="Queries\RecordRecipeUse.graphql" />
   </ItemGroup>
 
 </Project>

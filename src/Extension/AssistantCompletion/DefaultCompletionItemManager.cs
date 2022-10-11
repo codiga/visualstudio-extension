@@ -32,7 +32,7 @@ namespace Extension.AssistantCompletion
             if (string.IsNullOrWhiteSpace(filterText))
             {
                 // There is no text filtering. Just apply user filters, sort alphabetically and return.
-                IEnumerable<CompletionItem> listFiltered = data.InitialSortedList;
+                IEnumerable<CompletionItem> listFiltered = data.InitialSortedItemList;
                 if (data.SelectedFilters.Any(n => n.IsSelected))
                 {
                     listFiltered = listFiltered.Where(n => ShouldBeInCompletionList(n, data.SelectedFilters));
@@ -48,9 +48,9 @@ namespace Extension.AssistantCompletion
                 filterText,
                 new PatternMatcherCreationOptions(System.Globalization.CultureInfo.CurrentCulture, PatternMatcherCreationFlags.IncludeMatchedSpans));
 
-            var matches = data.InitialSortedList
-                // Perform pattern matching
-                .Select(completionItem => (completionItem, patternMatcher.TryMatch(completionItem.FilterText)))
+            var matches = data.InitialSortedItemList
+				// Perform pattern matching
+				.Select(completionItem => (completionItem, patternMatcher.TryMatch(completionItem.FilterText)))
                 // Pick only items that were matched, unless length of filter text is 1
                 .Where(n => (filterText.Length == 1 || n.Item2.HasValue));
 
@@ -121,7 +121,7 @@ namespace Extension.AssistantCompletion
         Task<ImmutableArray<CompletionItem>> IAsyncCompletionItemManager.SortCompletionListAsync
             (IAsyncCompletionSession session, AsyncCompletionSessionInitialDataSnapshot data, CancellationToken token)
         {
-            return Task.FromResult(data.InitialList.OrderBy(n => n.SortText).ToImmutableArray());
+            return Task.FromResult(data.InitialItemList.OrderBy(n => n.SortText).ToImmutableArray());
         }
 
         #region Filtering

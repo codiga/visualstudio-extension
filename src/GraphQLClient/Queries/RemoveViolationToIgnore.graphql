@@ -1,3 +1,0 @@
-mutation RemoveViolationToIgnore ($projectId: Long!, $rule: String!, $tool: String!, $language: LanguageEnumeration!, $filename: String) {
-    removeViolationToIgnore(projectId: $projectId, rule: $rule, tool: $tool, language: $language, filename: $filename)
-}

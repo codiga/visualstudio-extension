@@ -9,21 +9,14 @@ namespace GraphQLClient
 	{
 		private readonly GraphQLHttpClient _client;
 
-		private static string ShortcutQuery =>
-			"query GetRecipesForClientByShortcut($fingerprint: String, $filename: String, $term: String, $dependencies: [String!]!, $parameters: String, $language: LanguageEnumeration!, $onlyPublic: Boolean, $onlyPrivate: Boolean, $onlySubscribed: Boolean){\r\n  getRecipesForClientByShortcut(fingerprint: $fingerprint, term: $term, filename: $filename, dependencies:$dependencies, parameters:$parameters, language:$language, onlyPublic: $onlyPublic, onlyPrivate: $onlyPrivate, onlySubscribed: $onlySubscribed){\r\n    id\r\n    name\r\n    code\r\n    keywords\r\n    imports\r\n    language\r\n    description\r\n    shortcut\r\n  }\r\n}";
-
-		private static string ShortcutLastTimestampQuery =>
-			"query GetRecipesForClientByShortcutLastTimestamp($fingerprint: String, $dependencies: [String!]!, $language: LanguageEnumeration!){\r\n  getRecipesForClientByShortcutLastTimestamp(fingerprint: $fingerprint, dependencies:$dependencies, language:$language)\r\n}";
-
-		private static string RecordAccessMutation =>
-			"mutation RecordAccess ($recipeId: Long!, $fingerprint: String) {\r\n recordAccess(accessType:Cli, actionType:AssistantRecipeUse, recipeId: $recipeId, userFingerprint: $fingerprint)\r\n}";
+		
 
 		public CodigaClient()
 		{
 			_client = new GraphQLHttpClient("https://api.codiga.io/graphql", new SystemTextJsonSerializer());
 		}
 
-		public async Task<IReadOnlyCollection<CodigaSnippet>> GetRecipesForClientByShortcutAsync(string language)
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
@@ -37,8 +30,7 @@ namespace GraphQLClient
 			variablesDict["onlyPrivate"] = null;
 			variablesDict["onlySubscribed"] = false;
 
-
-			var request = new GraphQLHttpRequest(ShortcutQuery, variables);
+			var request = new GraphQLHttpRequest(QueryProvider.ShortcutQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesByShortcutResult>(request);
 
 			return result.Data.GetRecipesForClientByShortcut;
@@ -52,32 +44,38 @@ namespace GraphQLClient
 			variablesDict["dependencies"] = "";
 			variablesDict["language"] = language;
 
-			var request = new GraphQLHttpRequest(ShortcutLastTimestampQuery, variables);
+			var request = new GraphQLHttpRequest(QueryProvider.ShortcutLastTimestampQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesByShortcutLastTimestampResult>(request);
-
 			return result.Data.GetRecipesForClientByShortcutLastTimestamp;
 		}
 
-		public async Task RecordRecipeAccessAsync(long recipeId, string fingerprint)
+		public async Task<string> RecordRecipeUseAsync(long recipeId, string fingerprint)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
 			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
 			variablesDict["recipeId"] = recipeId;
 
-			var request = new GraphQLHttpRequest(RecordAccessMutation, variables);
-			var result = await _client.SendMutationAsync<dynamic>(request);
+			var request = new GraphQLHttpRequest(QueryProvider.RecordRecipeUseMutation, variables);
+			var result = await _client.SendMutationAsync<RecordRecipeUseMutationResult>(request);
+			
+			return result.Data.RecordAccess;
 		}
 	}
 
 	internal class GetRecipesByShortcutResult
 	{
-		public IReadOnlyCollection<CodigaSnippet> GetRecipesForClientByShortcut { get; set; }
+		public IReadOnlyCollection<CodigaSnippet>? GetRecipesForClientByShortcut { get; set; }
 	}
 
 	internal class GetRecipesByShortcutLastTimestampResult
 	{
 		public long GetRecipesForClientByShortcutLastTimestamp { get; set; }
+	}
+
+	internal class RecordRecipeUseMutationResult
+	{
+		public string? RecordAccess { get; set; }
 	}
 
 	/// <summary>
@@ -103,12 +101,12 @@ namespace GraphQLClient
 		/// <summary>
 		/// keywords
 		/// </summary>
-		public IReadOnlyList<string> Keywords { get; set; }
+		public IReadOnlyList<string>? Keywords { get; set; }
 
 		/// <summary>
 		/// imports to add when adding the recipe
 		/// </summary>
-		public IReadOnlyList<string> Imports { get; set; }
+		public IReadOnlyList<string>? Imports { get; set; }
 
 		/// <summary>
 		/// language of the recipe

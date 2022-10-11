@@ -37,16 +37,16 @@ namespace Tests
 		}
 
 		[Test]
-		public async Task RecordRecipeAccess_should_record_access()
+		public async Task RecordRecipeUse_should_record_access()
 		{
 			// arrange
 			var client = new CodigaClient();
-			var snippets = await client.GetRecipesForClientByShortcutAsync("Csharp");
 
 			// act
-			await client.RecordRecipeAccessAsync(snippets.First().Id, "");
+			var result = await client.RecordRecipeUseAsync(9260, "");
 
 			// assert
+			Assert.That(result, Is.EqualTo("ok"));
 		}
 	}
 }

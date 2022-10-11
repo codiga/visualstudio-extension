@@ -1,4 +1,4 @@
-name: CI on Push and Pull Request
+name: Build and Test
 
 on: [push, pull_request]
 

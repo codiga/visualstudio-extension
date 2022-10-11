@@ -1,10 +1,15 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Xml;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Moq;
 using MSXML;
+using NUnit.Framework;
 
 namespace Tests
 {

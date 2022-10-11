@@ -1,31 +1,35 @@
 ﻿using Extension.Caching;
+using NUnit.Framework;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Tests;
-
-[TestFixture]
-[Explicit("External API call")]
-public class SnippetCacheTest
+namespace Tests
 {
-	[Test]
-	public void SnippetCache_should_setup_api_client()
+	[TestFixture]
+	[Explicit("External API call")]
+	public class SnippetCacheTest
 	{
-		// act
-		var cache = new SnippetCache();
-	}
+		[Test]
+		public void SnippetCache_should_setup_api_client()
+		{
+			// act
+			var cache = new SnippetCache();
+		}
 
-	[Test]
-	public async Task PollSnippetsFromServer_should_poll_snippets()
-	{
-		// arrange
-		var cache = new SnippetCache();
-		var token = new CancellationTokenSource();
+		[Test]
+		public async Task PollSnippetsFromServer_should_poll_snippets()
+		{
+			// arrange
+			var cache = new SnippetCache();
+			var token = new CancellationTokenSource();
 
-		// act
-		cache.PollSnippetsAsync(token.Token, "Csharp");
+			// act
+			cache.PollSnippetsAsync(token.Token, "Csharp");
 
-		// assert
-		await Task.Delay(15000);
+			// assert
+			await Task.Delay(15000);
 
-		var snippets = cache.GetSnippets("Csharp");
+			var snippets = cache.GetSnippets("Csharp");
+		}
 	}
 }

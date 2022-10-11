@@ -9,12 +9,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.0.2
-      - name: Setup Nuget
-        uses: Nuget/setup-nuget@v1.0.5
-      - name: Restore nuget packages
-        run: nuget restore Extension.sln
       - name: Build Solution
-        run: msbuild Extension.sln /t:Rebuild
+        run: msbuild Extension.sln /t:restore
         env: 
           DeployExtension: False
       - name: Install NUnit.ConsoleRunner

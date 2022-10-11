@@ -1,6 +1,8 @@
 # visualstudio-extension
 Codiga extension for Visual Studio for the fastest code analysis and code snippets management
 
+![example workflow](https://github.com/codiga/visualstudio-extension/workflows/main.yml/badge.svg)
+
 # Debug with the VS experimental instance 
 This section describes how you can build and debug the extension experimental instance of Visual Studio.
 

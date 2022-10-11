@@ -1,5 +1,6 @@
 ﻿using Community.VisualStudio.Toolkit;
 using Extension.SnippetFormats;
+using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -28,6 +29,8 @@ namespace Extension.AssistantCompletion
 		private string _firstUserVariable;
 		private TextSpan _endSpan;
 
+		private CodigaClient _client;
+
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
 		/// </summary>
@@ -38,6 +41,7 @@ namespace Extension.AssistantCompletion
 		{
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();
+			_client ??= new CodigaClient();
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -50,6 +54,10 @@ namespace Extension.AssistantCompletion
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
 			var startIndex = line.IndexOf('.');
 			
+			// get indention
+			// indent code
+			// parse to xml
+
 			var position = new TextSpan
 			{
 				iStartIndex = startIndex,
@@ -72,6 +80,12 @@ namespace Extension.AssistantCompletion
 				guidLang: languageServiceId,
 				pszRelativePath: string.Empty,
 				out _currentExpansionSession);
+
+			if(completionItem.Properties
+				.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id))
+			{
+				ReportUsage(id);
+			}
 
 			return VSConstants.S_OK;
 		}
@@ -233,6 +247,11 @@ namespace Extension.AssistantCompletion
 		public int OnItemChosen(string pszTitle, string pszPath)
 		{
 			return VSConstants.S_OK;
+		}
+
+		private void ReportUsage(long id)
+		{
+			_client.RecordRecipeUseAsync(id);
 		}
 	}
 }

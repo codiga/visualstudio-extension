@@ -22,16 +22,13 @@ namespace Extension.AssistantCompletion
         [Import]
         internal ExpansionClient ExpansionClient;
 
-        //[Import]
-        //internal CodigaClient CodigaClient;
-
 		public IAsyncCompletionCommitManager GetOrCreate(ITextView textView)
         {
             if (cache.TryGetValue(textView, out var itemSource))
                 return itemSource;
 
             // pass factory service to allow the commit manager to access IVS interfaces through ITextView
-            var manager = new ShortcutCompletionCommitManager(EditorAdaptersFactoryService, ExpansionClient, null);
+            var manager = new ShortcutCompletionCommitManager(EditorAdaptersFactoryService, ExpansionClient);
 
             textView.Closed += (o, e) => cache.Remove(textView); // clean up memory as files are closed
             cache.Add(textView, manager);

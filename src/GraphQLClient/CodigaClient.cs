@@ -9,8 +9,6 @@ namespace GraphQLClient
 	{
 		private readonly GraphQLHttpClient _client;
 
-		
-
 		public CodigaClient()
 		{
 			_client = new GraphQLHttpClient("https://api.codiga.io/graphql", new SystemTextJsonSerializer());
@@ -49,7 +47,7 @@ namespace GraphQLClient
 			return result.Data.GetRecipesForClientByShortcutLastTimestamp;
 		}
 
-		public async Task<string> RecordRecipeUseAsync(long recipeId, string fingerprint)
+		public async Task<string> RecordRecipeUseAsync(long recipeId)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;

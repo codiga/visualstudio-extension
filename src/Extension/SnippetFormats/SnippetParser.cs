@@ -44,8 +44,8 @@ namespace Extension.SnippetFormats
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
 				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
 				
-				// enable to send mutation
-				//item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
+				// enable to send usage mutation
+				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
 
 				// add first snippet field to handle selection later
 				if(s.CodeSnippet.Snippet.Declarations.Any())

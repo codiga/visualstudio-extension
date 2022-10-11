@@ -43,7 +43,7 @@ namespace Tests
 			var client = new CodigaClient();
 
 			// act
-			var result = await client.RecordRecipeUseAsync(9260, "");
+			var result = await client.RecordRecipeUseAsync(9260);
 
 			// assert
 			Assert.That(result, Is.EqualTo("ok"));

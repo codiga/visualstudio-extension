@@ -24,14 +24,12 @@ namespace Extension.AssistantCompletion
 
         public IVsEditorAdaptersFactoryService VsEditorAdapter { get; }
 		public ExpansionClient ExpansionClient { get; }
-		public CodigaClient CodigaClient { get; }
 
-		public ShortcutCompletionCommitManager(IVsEditorAdaptersFactoryService vsEditorAdapter, ExpansionClient expansionClient, CodigaClient codigaClient)
+		public ShortcutCompletionCommitManager(IVsEditorAdaptersFactoryService vsEditorAdapter, ExpansionClient expansionClient)
 		{
 			// Use property here as we cannot import MEF Service here.
 			VsEditorAdapter = vsEditorAdapter;
 			ExpansionClient = expansionClient;
-			CodigaClient = codigaClient;
 		}
 
 		public bool ShouldCommitCompletion(IAsyncCompletionSession session, SnapshotPoint location, char typedChar, CancellationToken token)
@@ -55,11 +53,6 @@ namespace Extension.AssistantCompletion
 			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
 			// start a snippet session using in memory xml rather than .xml files
 			ExpansionClient.StartExpansion(vsTextView, item);
-
-			//if(item.Properties.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id))
-			//{
-			//	CodigaClient.RecordRecipeAccessAsync(id, "");
-			//}
 
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;

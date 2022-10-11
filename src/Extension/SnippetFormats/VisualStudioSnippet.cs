@@ -31,12 +31,24 @@ namespace Extension.SnippetFormats
 		[XmlIgnore]
 		public long Id { get; set; }
 
+		/// <summary>
+		/// Required element. The friendly name of the code snippet. 
+		/// There must be exactly one Title element in a Header element.
+		/// </summary>
 		[XmlElement(ElementName = "Title")]
 		public string Title { get; set; }
 
+		/// <summary>
+		/// Specifies the shortcut text used to insert the snippet. 
+		/// The text value of a Shortcut element can only contain alphanumeric characters, and underscores ( _ ).
+		/// Underscore (_) is not supported characters in C++ snippet shortcuts.
+		/// </summary>
 		[XmlElement(ElementName = "Shortcut")]
 		public string Shortcut { get; set; }
 
+		/// <summary>
+		/// Specifies descriptive information about the contents of an IntelliSense Code Snippet.
+		/// </summary>
 		[XmlElement(ElementName = "Description")]
 		public string Description { get; set; }
 

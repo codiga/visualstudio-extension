@@ -133,7 +133,7 @@ namespace Extension.SnippetFormats
 				if (!vsSnippet.CodeSnippet.Snippet.Declarations.Any(l => l.ID == literal.ID))
 					vsSnippet.CodeSnippet.Snippet.Declarations.Add(literal);
 
-				stringBuilder.Replace(variable.PlaceholderText, $"$param{variable.Order}$");
+				stringBuilder.Replace(variable.PlaceholderText, $"${literal.ID}$");
 			}
 		}
 
@@ -223,7 +223,7 @@ namespace Extension.SnippetFormats
 				"HTML" => "Html",
 				"HTMLProjection" => "Html",
 				"JSON" => "Json",
-				_ => throw new ArgumentException($"{contentType.TypeName} not supported")
+				_ => "unknown"
 			};
 		}
 	}

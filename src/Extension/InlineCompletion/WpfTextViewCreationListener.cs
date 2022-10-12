@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Text.Editor;
+﻿using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 
@@ -11,11 +12,8 @@ namespace Extension.InlineCompletion
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("text")]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	internal sealed class TextAdornment1TextViewCreationListener : IWpfTextViewCreationListener
+	internal sealed class WpfTextViewCreationListener : IWpfTextViewCreationListener
 	{
-		// Disable "Field is never assigned to..." and "Field is never used" compiler's warnings. Justification: the field is used by MEF.
-#pragma warning disable 649, 169
-
 		/// <summary>
 		/// Defines the adornment layer for the adornment. This layer is ordered
 		/// after the selection layer in the Z-order
@@ -25,9 +23,8 @@ namespace Extension.InlineCompletion
 		[Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
 		private AdornmentLayerDefinition editorAdornmentLayer;
 
-#pragma warning restore 649, 169
-
-		#region IWpfTextViewCreationListener
+		[Import]
+		internal IVsEditorAdaptersFactoryService AdapterService = null;
 
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
@@ -36,10 +33,10 @@ namespace Extension.InlineCompletion
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView)
 		{
+			var vsTextView = AdapterService.GetViewAdapter(textView);
+			new InlineCompletionClient(textView, vsTextView);
 			// The adornment will listen to any event that changes the layout (text changes, scrolling, etc)
-			new TextAdornment1(textView);
 		}
 
-		#endregion
 	}
 }

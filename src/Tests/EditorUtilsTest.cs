@@ -31,5 +31,18 @@ namespace Tests
 			// act & assert
 			return EditorUtils.IsStartOfLine(line);
 		}
+
+		[Test]
+		[TestCase("//read file", ExpectedResult = true)]
+		[TestCase("// read file async", ExpectedResult = true)]
+		[TestCase("//read", ExpectedResult = false)]
+		[TestCase("// read", ExpectedResult = false)]
+		[TestCase("var test = \"test\";", ExpectedResult = false)]
+		[TestCase("var test = \"test\"; // inline comment", ExpectedResult = false)]
+		public bool IsSemanticSearchComment_should_consider_keyword_count(string line)
+		{
+			// act & assert
+			return EditorUtils.IsSemanticSearchComment(line);
+		}
 	}
 }

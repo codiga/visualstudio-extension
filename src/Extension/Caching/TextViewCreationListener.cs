@@ -7,6 +7,8 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
 
 namespace Extension.Caching
 {
@@ -29,15 +31,18 @@ namespace Extension.Caching
 				return;
 			textView.Closed += TextView_Closed;
 			textView.TextBuffer.Changed += TextBuffer_Changed;
-			var type = textView.TextBuffer.ContentType;
-			var codigaLanguage = CodigaLanguages.Parse(type);
+			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
+			var ext = Path.GetExtension(path);
+			var codigaLanguage = CodigaLanguages.Parse(ext);
 			Cache.StartPolling(codigaLanguage);
 		}
 
 		private void TextBuffer_Changed(object sender, Microsoft.VisualStudio.Text.TextContentChangedEventArgs e)
 		{
 			var buffer = (ITextBuffer)sender;
-			var codigaLanguage = CodigaLanguages.Parse(buffer.ContentType);
+			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
+			var ext = Path.GetExtension(path);
+			var codigaLanguage = CodigaLanguages.Parse(ext);
 			Cache.ReportActivity(codigaLanguage);
 		}
 
@@ -45,7 +50,9 @@ namespace Extension.Caching
 		{
 			var textView = (ITextView)sender;
 			var type = textView.TextBuffer.ContentType;
-			var codigaLanguage = CodigaLanguages.Parse(type);
+			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
+			var ext = Path.GetExtension(path);
+			var codigaLanguage = CodigaLanguages.Parse(ext);
 			Cache.StopPolling(codigaLanguage);
 			textView.TextBuffer.Changed -= TextBuffer_Changed;
 			textView.Closed -= TextView_Closed;

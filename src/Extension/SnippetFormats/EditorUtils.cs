@@ -10,13 +10,14 @@ namespace Extension.SnippetFormats
 	{
 		public static bool IsStartOfLine(string textBeforeCaret)
 		{
-			var textWithoutIndent = textBeforeCaret.Replace("\t", "").Replace(" ", "");
-			return string.IsNullOrEmpty(textWithoutIndent);
+			return string.IsNullOrEmpty(textBeforeCaret.Trim());
 		}
 
 		public static bool IsComment(string line)
 		{
-			return false;
+			// TODO add support for all languages
+			line = line.Trim();
+			return line.StartsWith("//");
 		}
 	}
 }

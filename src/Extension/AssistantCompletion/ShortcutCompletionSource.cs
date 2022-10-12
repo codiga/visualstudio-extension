@@ -15,6 +15,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Extension.Caching;
 using Community.VisualStudio.Toolkit;
+using System.IO;
 
 namespace Extension.AssistantCompletion
 {
@@ -104,8 +105,9 @@ namespace Extension.AssistantCompletion
         public async Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken token)
         {
 			var doc = await VS.Documents.GetActiveDocumentViewAsync();
-			var type = doc.TextBuffer.ContentType;
-			var chachedSnippets = Cache.GetSnippets(CodigaLanguages.Parse(type));
+			var path = doc.Document.FilePath;
+            var ext = Path.GetExtension(path);
+			var chachedSnippets = Cache.GetSnippets(CodigaLanguages.Parse(ext));
             var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
 
             return new CompletionContext(completionItems);

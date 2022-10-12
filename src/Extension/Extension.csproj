@@ -65,6 +65,8 @@
     <Compile Include="AssistantCompletion\ShortcutCompletionSourceProvider.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
+    <Compile Include="InlineCompletion\TextAdornment1.cs" />
+    <Compile Include="InlineCompletion\TextAdornment1TextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchWindow\SnippetSearch.cs" />
     <Compile Include="SearchWindow\SnippetSearchCommand.cs" />
@@ -99,6 +101,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Design" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Drawing" />
@@ -165,9 +168,7 @@
       <Name>GraphQLClient</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="InlineCompletion\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

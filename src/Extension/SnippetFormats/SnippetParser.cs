@@ -214,15 +214,14 @@ namespace Extension.SnippetFormats
 			Apex
 		}
 
-		public static string Parse(IContentType contentType)
+		public static string Parse(string extension)
 		{
-			return contentType.TypeName switch
+			return extension switch
 			{
-				"CSharp" => "Csharp",
-				"CSS" => "Css",
-				"HTML" => "Html",
-				"HTMLProjection" => "Html",
-				"JSON" => "Json",
+				".cs" => "Csharp",
+				".css" => "Css",
+				".html" => "Html",
+				".json" => "Json",
 				_ => "unknown"
 			};
 		}

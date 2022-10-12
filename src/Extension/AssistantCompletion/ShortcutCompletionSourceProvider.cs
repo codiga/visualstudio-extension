@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Extension.Caching;
+using System.Windows.Controls;
 
 namespace Extension.AssistantCompletion
 {

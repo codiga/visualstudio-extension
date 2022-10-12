@@ -81,6 +81,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SnippetSearchPackage.vsct</DependentUpon>
     </Compile>
+    <Compile Include="EditorSettings.cs" />
     <Compile Include="SnippetFormats\EditorUtils.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>

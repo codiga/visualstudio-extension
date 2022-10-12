@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO.Pipelines;
+using System.Numerics;
 using System.Windows.Ink;
 using System.Xml;
 using System.Xml.Serialization;
@@ -18,9 +20,18 @@ namespace Extension.SnippetFormats
 		public CodeSnippet CodeSnippet { get; set; }
 	}
 
+	/// <summary>
+	/// Specifies how Visual Studio inserts the code snippet.
+	/// </summary>
 	[XmlRoot(ElementName = "SnippetTypes")]
 	public class SnippetTypes
 	{
+		/// <summary>
+		/// The text value must be one of the following values:
+		/// "SurroundsWith": allows the code snippet to be placed around a selected piece of code.
+		/// "Expansion": allows the code snippet to be inserted at the cursor.
+		/// "Refactoring": specifies that the code snippet is used during C# refactoring. Refactoring cannot be used in custom code snippets.
+		/// </summary>
 		[XmlElement(ElementName = "SnippetType")]
 		public string SnippetType { get; set; }
 	}
@@ -52,11 +63,21 @@ namespace Extension.SnippetFormats
 		[XmlElement(ElementName = "Description")]
 		public string Description { get; set; }
 
+		/// <summary>
+		/// Specifies the name of the snippet author. 
+		/// The Code Snippets Manager displays the name stored in the Author element of the code snippet.
+		/// </summary>
 		[XmlElement(ElementName = "Author")]
 		public string Author { get; set; }
 
 		[XmlElement(ElementName = "SnippetTypes")]
 		public SnippetTypes SnippetTypes { get; set; }
+
+		/// <summary>
+		/// Groups individual Keyword elements.
+		/// </summary>
+		[XmlArrayItem("Keyword")]
+		public List<Keyword> Keywords { get; set; }
 	}
 
 	[XmlRoot(ElementName = "Literal")]
@@ -82,6 +103,18 @@ namespace Extension.SnippetFormats
 		/// </summary>
 		[XmlElement(ElementName = "Default")]
 		public string Default { get; set; }
+	}
+
+	/// <summary>
+	/// Specifies a custom keyword for the code snippet. 
+	/// The code snippet keywords are used by Visual Studio
+	/// and represent a standard way for online content providers to add custom keywords for searching or categorization.
+	/// </summary>
+	[XmlRoot(ElementName = "Keyword")]
+	public class Keyword
+	{
+		[XmlText]
+		public string Text { get; set; }
 	}
 
 	[XmlRoot(ElementName = "Reference")]

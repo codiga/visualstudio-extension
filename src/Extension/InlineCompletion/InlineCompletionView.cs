@@ -1,4 +1,8 @@
-﻿using Extension.SnippetFormats;
+﻿using Community.VisualStudio.Toolkit;
+using EnvDTE;
+using Extension.SnippetFormats;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell.Settings;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
@@ -6,6 +10,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
@@ -40,6 +45,11 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		private readonly Pen _pen;
 
+		private TextBlock _instructions;
+		private TextBlock _snippetPreview;
+
+		private string _initCode;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
 		/// </summary>
@@ -69,40 +79,65 @@ namespace Extension.InlineCompletion
 		/// Adds the scarlet box behind the 'a' characters within the given line
 		/// </summary>
 		/// <param name="line">Line to add the adornments</param>
-		internal void CreateCompletionView(ITextViewLine line)
+		internal void CreateCompletionView(ITextViewLine line, string initCode)
 		{
 			_line = line;
 			_view.LayoutChanged += OnLayoutChanged;
+			_initCode = initCode;
 		}
 
-		private void DrawCompletionView()
+		private void DrawCompletionInstructions()
 		{
 			var geometry = _view.TextViewLines.GetMarkerGeometry(_line.Extent);
 
 			var textBlock = new TextBlock
 			{
 				Width = 300,
-				Background = Brushes.DarkOrange,
+				Background = Brushes.Gray,
 				Height = geometry.Bounds.Height,
 				Opacity = 0.5,
 				Text = "[←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
-
+			_instructions = textBlock;
 			Canvas.SetLeft(textBlock, 200);
 			Canvas.SetTop(textBlock, geometry.Bounds.Top);
 			
 			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, _line.Extent, null, textBlock, (tag, ui) => { });
 		}
 
+		private void DrawSnippetPreview(string code)
+		{
+			var geometry = _view.TextViewLines.GetMarkerGeometry(_line.Extent);
+
+			var textBlock = new TextBlock
+			{
+				Width = 600,
+				Background = Brushes.Black,
+				Foreground = Brushes.White,
+				Height = 300,
+				Opacity = 0.5,
+				Text = code
+			};
+			_snippetPreview = textBlock;
+			Canvas.SetLeft(textBlock, geometry.Bounds.Left);
+			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
+
+			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, _line.Extent, null, textBlock, (tag, ui) => { });
+		}
+
 		private void OnLayoutChanged(object sender, TextViewLayoutChangedEventArgs e)
 		{
-			if(_layer.IsEmpty)
-				DrawCompletionView();
+			if (_layer.IsEmpty)
+			{
+				DrawCompletionInstructions();
+				DrawSnippetPreview(_initCode);
+			}
 		}
 
 		internal void UpdateSnippetPreview(string code)
 		{
-			var layer1 = _layer;
+			_layer.RemoveAdornment(_snippetPreview);
+			DrawSnippetPreview(code);
 		}
 
 		internal void RemoveVisuals()

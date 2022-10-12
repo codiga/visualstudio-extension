@@ -1,7 +1,11 @@
-﻿using Microsoft.VisualStudio.Editor;
+﻿using Extension.Caching;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using System.Linq;
 
 namespace Extension.InlineCompletion
 {
@@ -26,6 +30,9 @@ namespace Extension.InlineCompletion
 		[Import]
 		internal IVsEditorAdaptersFactoryService AdapterService = null;
 
+		[Import]
+		internal SnippetCache Cache;
+
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
 		/// Instantiates a TextAdornment1 manager when the textView is created.
@@ -34,7 +41,11 @@ namespace Extension.InlineCompletion
 		public void TextViewCreated(IWpfTextView textView)
 		{
 			var vsTextView = AdapterService.GetViewAdapter(textView);
-			new InlineCompletionClient(textView, vsTextView);
+			new InlineCompletionClient(textView, vsTextView, Cache);
+			var tabSize = textView.Options.GetOptionValue(DefaultOptions.TabSizeOptionId);
+				
+			var options = textView.Options.SupportedOptions.ToList();
+			
 			// The adornment will listen to any event that changes the layout (text changes, scrolling, etc)
 		}
 

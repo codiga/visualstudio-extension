@@ -1,4 +1,5 @@
-﻿using Extension.SnippetFormats;
+﻿using Extension.Caching;
+using Extension.SnippetFormats;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text.Editor;
@@ -18,12 +19,20 @@ namespace Extension.InlineCompletion
 		private InlineCompletionView _completionView;
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
+		private ListNavigator<string> _snippetNavigator;
 
-		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView)
+		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, SnippetCache cache)
 		{
 			_textView = textView;
 			_vsTextView = vsTextView;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
+
+			_snippetNavigator = new ListNavigator<string>(new[]
+			{
+				"public void MyMethod1()\n{\nblabla\nblabla\n}",
+				"public void MyMethod2()\n{\nyadada\nyada\n}",
+				"public void MyMethod3()\n{\ntext\n}"
+			});
 		}
 
 		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
@@ -74,7 +83,7 @@ namespace Extension.InlineCompletion
 			_completionView = new InlineCompletionView(_textView);
 			var caretPos = _textView.Caret.Position.BufferPosition;
 			var currentLine = _textView.TextViewLines.Single(l => caretPos.Position >= l.Start && caretPos.Position <= l.End);
-			_completionView.CreateCompletionView(currentLine);
+			_completionView.CreateCompletionView(currentLine, _snippetNavigator.First());
 
 			return VSConstants.S_OK;
 		}
@@ -104,14 +113,14 @@ namespace Extension.InlineCompletion
 			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.RIGHT)
 			{
 				// get next snippet
-				_completionView.UpdateSnippetPreview("TODO");
+				_completionView.UpdateSnippetPreview(_snippetNavigator.Next());
 				return VSConstants.S_OK;
 			}
 
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.LEFT)
 			{
 				// get previous snippet
-				_completionView.UpdateSnippetPreview("TODO");
+				_completionView.UpdateSnippetPreview(_snippetNavigator.Previous());
 				return VSConstants.S_OK;
 			}
 

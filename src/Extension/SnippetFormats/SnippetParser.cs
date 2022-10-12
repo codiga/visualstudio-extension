@@ -71,7 +71,8 @@ namespace Extension.SnippetFormats
 						Author = "",
 						Description = codigaSnippet.Description,
 						Shortcut = codigaSnippet.Shortcut,
-						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" }
+						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" },
+						Keywords = new List<Keyword>(codigaSnippet.Keywords.Select(k => new Keyword { Text = k}))
 					},
 					Snippet = new Snippet
 					{

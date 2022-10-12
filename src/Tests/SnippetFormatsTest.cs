@@ -120,8 +120,12 @@ namespace Tests
             // arrange
             var snippet = new CodigaSnippet
             {
+				Id = 99,
 	            Shortcut = "nunittest",
-	            Language = "Csharp",
+				Name = "NUnit Test",
+				Description = "Creates NUnit Test",
+				Language = "Csharp",
+				Keywords = new string[] {"Add", "NUnit", "Test" },
 	            Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(@"[Test]
                                         public void &[USER_INPUT:1:Test_method]()
                                         {
@@ -137,8 +141,22 @@ namespace Tests
             // act
             var vsSnippet = SnippetParser.FromCodigaSnippet(snippet);
 
-            // assert
-            Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
+			// assert
+			Assert.That(vsSnippet.CodeSnippet.Header.Id, Is.EqualTo(99));
+			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("nunittest"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("NUnit Test"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Creates NUnit Test"));
+
+			Assert.That(vsSnippet.CodeSnippet.Header.Keywords, Has.Exactly(3).Items);
+			var keyword1 = vsSnippet.CodeSnippet.Header.Keywords[0];
+			var keyword2 = vsSnippet.CodeSnippet.Header.Keywords[1];
+			var keyword3 = vsSnippet.CodeSnippet.Header.Keywords[2];
+
+			Assert.That(keyword1.Text, Is.EqualTo("Add"));
+			Assert.That(keyword2.Text, Is.EqualTo("NUnit"));
+			Assert.That(keyword3.Text, Is.EqualTo("Test"));
+
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
 			var param1 = vsSnippet.CodeSnippet.Snippet.Declarations.First();
 			var param2 = vsSnippet.CodeSnippet.Snippet.Declarations.Last();
 			Assert.That(param1.ID, Is.EqualTo("param1"));
@@ -146,6 +164,7 @@ namespace Tests
 			Assert.That(param2.ID, Is.EqualTo("param2"));
 			Assert.That(param2.Default, Is.EqualTo("act"));
 
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Csharp"));
 			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CDataCode.First().Value.Contains("$param1$"));
 			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CDataCode.First().Value.Contains("$param2$"));
         }

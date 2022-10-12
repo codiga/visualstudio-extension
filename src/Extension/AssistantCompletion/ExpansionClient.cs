@@ -1,16 +1,12 @@
 ﻿using Community.VisualStudio.Toolkit;
-using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using MSXML;
 using System;
 using System.ComponentModel.Composition;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace Extension.AssistantCompletion
 {
@@ -37,11 +33,12 @@ namespace Extension.AssistantCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, CompletionItem completionItem)
+		public int StartExpansion(IVsTextView vsTextView, IXMLDOMNode snippetXml, long snippetId, string firstUserVariable)
 		{
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();
 			_client ??= new CodigaClient();
+			_firstUserVariable = firstUserVariable;
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -66,26 +63,16 @@ namespace Extension.AssistantCompletion
 				iEndLine = startLine
 			};
 
-			completionItem.Properties
-				.TryGetProperty(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations), out _firstUserVariable);
-
-			var xmlSnippet = completionItem.Properties
-				.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
-
 			textLines.GetLanguageServiceID(out var languageServiceId);
 			expansion.InsertSpecificExpansion(
-				pSnippet: xmlSnippet,
+				pSnippet: snippetXml,
 				tsInsertPos: position,
 				pExpansionClient: this,
 				guidLang: languageServiceId,
 				pszRelativePath: string.Empty,
 				out _currentExpansionSession);
-
-			if(completionItem.Properties
-				.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id))
-			{
-				ReportUsage(id);
-			}
+			
+			ReportUsage(snippetId);
 
 			return VSConstants.S_OK;
 		}

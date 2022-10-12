@@ -1,7 +1,10 @@
 ﻿using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
+using System;
 using System.Collections.Generic;
+using System.Reactive;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace GraphQLClient
 {
@@ -59,11 +62,36 @@ namespace GraphQLClient
 			
 			return result.Data.RecordAccess;
 		}
-	}
 
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic)
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["filename"] = "";
+			variablesDict["term"] = keywords;
+			variablesDict["dependencies"] = "";
+			variablesDict["parameters"] = "";
+			variablesDict["languages"] = languages;
+			variablesDict["onlyPublic"] = onlyPublic;
+			variablesDict["onlyPrivate"] = null;
+			variablesDict["onlySubscribed"] = false;
+			variablesDict["howmany"] = 100;
+			variablesDict["skip"] = 0;
+
+			var request = new GraphQLHttpRequest(QueryProvider.SemanticQuery, variables);
+			var result = await _client.SendQueryAsync<GetRecipesSemanticResult>(request);
+			return result.Data.AssistantRecipesSemanticSearch;
+		}
+	}
 	internal class GetRecipesByShortcutResult
 	{
 		public IReadOnlyCollection<CodigaSnippet>? GetRecipesForClientByShortcut { get; set; }
+	}
+
+	internal class GetRecipesSemanticResult
+	{
+		public IReadOnlyCollection<CodigaSnippet>? AssistantRecipesSemanticSearch { get; set; }
 	}
 
 	internal class GetRecipesByShortcutLastTimestampResult

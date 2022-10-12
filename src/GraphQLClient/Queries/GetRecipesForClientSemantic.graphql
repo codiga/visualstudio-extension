@@ -3,7 +3,6 @@ query GetRecipesForClientSemantic($term: String, $onlyPublic: Boolean, $onlyPriv
     id
     name
     code
-    jetbrainsFormat
     presentableFormat
     keywords
     imports

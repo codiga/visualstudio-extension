@@ -53,12 +53,10 @@ namespace Extension.AssistantCompletion
 			// use IVsEditorAdaptersFactoryService to get access to IVsTextview
 			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
 
-			item.Properties.TryGetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code), out var xmlSnippet);
-			item.Properties.TryGetProperty<string>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Declarations), out var firstUserVariable);
-			item.Properties.TryGetProperty<long>(nameof(VisualStudioSnippet.CodeSnippet.Header.Id), out var id);
+			item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet), out var snippet);
 
 			// start a snippet session using in memory xml rather than .xml files
-			ExpansionClient.StartExpansion(vsTextView, xmlSnippet, id, firstUserVariable);
+			ExpansionClient.StartExpansion(vsTextView, snippet);
 
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;

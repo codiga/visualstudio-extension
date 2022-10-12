@@ -24,33 +24,15 @@ namespace Extension.SnippetFormats
 	{
 		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IEnumerable<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
 		{
-			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
-
 			return vsSnippets.Select(s =>
 			{
-				// create IXMLDOMNode from snippet
-				using var sw = new StringWriter();
-				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
-				serializer.Serialize(xw, s);
-				var xmlDoc = new DOMDocument();
-				xmlDoc.loadXML(sw.ToString());
-				var snippetNode = xmlDoc.documentElement.childNodes.nextNode();
-
 				var snippetMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.Snippet;
 				var imageElement = new ImageElement(new ImageId(snippetMoniker.Guid, snippetMoniker.Id));
 
 				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source, imageElement, ImmutableArray<CompletionFilter>.Empty, s.CodeSnippet.Header.Title);
-				// store the XMLNode, description and id in the property bag so the ExpansionClient can access that later
-				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Code), snippetNode);
-				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Description), s.CodeSnippet.Header.Description);
-				
-				// enable to send usage mutation
-				item.Properties.AddProperty(nameof(s.CodeSnippet.Header.Id), s.CodeSnippet.Header.Id);
 
-				// add first snippet field to handle selection later
-				if(s.CodeSnippet.Snippet.Declarations.Any())
-					item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet.Declarations),s.CodeSnippet.Snippet.Declarations.First().ID);
-
+				// store the snippet, in the property bag so the ExpansionClient can access that later
+				item.Properties.AddProperty(nameof(s.CodeSnippet.Snippet), s);
 				return item;
 
 			}).ToImmutableArray();

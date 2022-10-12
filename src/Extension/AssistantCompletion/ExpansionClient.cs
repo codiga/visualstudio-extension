@@ -1,12 +1,18 @@
 ﻿using Community.VisualStudio.Toolkit;
+using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Settings.Internal;
 using Microsoft.VisualStudio.TextManager.Interop;
 using MSXML;
 using System;
 using System.ComponentModel.Composition;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Xml;
 
 namespace Extension.AssistantCompletion
 {
@@ -33,12 +39,12 @@ namespace Extension.AssistantCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, IXMLDOMNode snippetXml, long snippetId, string firstUserVariable)
+		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet)
 		{
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();
 			_client ??= new CodigaClient();
-			_firstUserVariable = firstUserVariable;
+			_firstUserVariable = snippet.CodeSnippet.Snippet.Declarations.First().ID;
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -62,8 +68,21 @@ namespace Extension.AssistantCompletion
 				iStartLine = startLine,
 				iEndLine = startLine
 			};
-
+			
 			textLines.GetLanguageServiceID(out var languageServiceId);
+
+			// create IXMLDOMNode from snippet
+			IXMLDOMNode snippetXml;
+			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
+			using (var sw = new StringWriter())
+			{
+				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
+				serializer.Serialize(xw, snippet);
+				var xmlDoc = new DOMDocument();
+				xmlDoc.loadXML(sw.ToString());
+				snippetXml = xmlDoc.documentElement.childNodes.nextNode();
+			}
+
 			expansion.InsertSpecificExpansion(
 				pSnippet: snippetXml,
 				tsInsertPos: position,
@@ -72,7 +91,7 @@ namespace Extension.AssistantCompletion
 				pszRelativePath: string.Empty,
 				out _currentExpansionSession);
 			
-			ReportUsage(snippetId);
+			ReportUsage(snippet.CodeSnippet.Header.Id);
 
 			return VSConstants.S_OK;
 		}

@@ -104,14 +104,8 @@ namespace Tests
 			Assert.That(completionItems, Has.Exactly(1).Items);
 			var item = completionItems.Single();
 			Assert.That(item.DisplayText, Is.EqualTo(SnippetTestData.Snippet.CodeSnippet.Header.Shortcut));
-			var node = item.Properties.GetProperty<IXMLDOMNode>(nameof(VisualStudioSnippet.CodeSnippet.Snippet.Code));
-			Assert.NotNull(node);
-
-			var expected = new MSXML.DOMDocument();
-			expected.loadXML(SnippetTestData.Xml);
-			var expectedSnippet = expected.documentElement.childNodes.nextNode();
-
-			// TODO deserialize and check
+			var snippet = item.Properties.GetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet));
+			Assert.NotNull(snippet);
 		}
 
 		[Test]

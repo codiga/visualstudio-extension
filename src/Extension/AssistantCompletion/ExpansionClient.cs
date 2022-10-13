@@ -28,7 +28,7 @@ namespace Extension.AssistantCompletion
 		private IOleCommandTarget _nextCommandHandler;
 		private IVsTextView _currentTextView;
 
-		private string _firstUserVariable;
+		private string? _firstUserVariable;
 		private TextSpan _endSpan;
 
 		private CodigaClient _client;
@@ -44,7 +44,7 @@ namespace Extension.AssistantCompletion
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();
 			_client ??= new CodigaClient();
-			_firstUserVariable = snippet.CodeSnippet.Snippet.Declarations.First().ID;
+			_firstUserVariable = snippet.CodeSnippet.Snippet.Declarations.FirstOrDefault()?.ID;
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -54,20 +54,20 @@ namespace Extension.AssistantCompletion
 			vsTextView.GetCaretPos(out var startLine, out var endColumn);
 			
 			// replace the typed search text
-			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
-			var startIndex = line.IndexOf('.');
-			
+			textLines.GetLineText(startLine, 0, startLine, endColumn, out var currentLine);
+
+			var startIndex = currentLine.IndexOf(currentLine.Trim().First());
+			var position = new TextSpan
+			{
+				iStartLine = startLine,
+				iStartIndex = startIndex,
+				iEndLine = startLine,
+				iEndIndex = endColumn,
+			};
+		
 			// get indention
 			// indent code
 			// parse to xml
-
-			var position = new TextSpan
-			{
-				iStartIndex = startIndex,
-				iEndIndex = endColumn,
-				iStartLine = startLine,
-				iEndLine = startLine
-			};
 			
 			textLines.GetLanguageServiceID(out var languageServiceId);
 

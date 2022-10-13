@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Numerics;
 using System.Windows.Ink;
 using System.Xml;
@@ -157,6 +158,20 @@ namespace Extension.SnippetFormats
 		/// </summary>
 		[XmlText]
 		public XmlNode[] CDataCode { get; set; }
+
+		[XmlIgnore]
+		public string CodeString
+		{
+			get
+			{
+				return CDataCode.First().Value;
+			}
+
+			set
+			{
+				CDataCode = new XmlNode[] { new XmlDocument().CreateCDataSection(value) };
+			}
+		}
 
 		public Code()
 		{

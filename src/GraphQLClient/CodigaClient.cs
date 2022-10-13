@@ -63,7 +63,7 @@ namespace GraphQLClient
 			return result.Data.RecordAccess;
 		}
 
-		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic)
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
@@ -76,8 +76,8 @@ namespace GraphQLClient
 			variablesDict["onlyPublic"] = onlyPublic;
 			variablesDict["onlyPrivate"] = null;
 			variablesDict["onlySubscribed"] = false;
-			variablesDict["howmany"] = 100;
-			variablesDict["skip"] = 0;
+			variablesDict["howmany"] = howMany;
+			variablesDict["skip"] = skip;
 
 			var request = new GraphQLHttpRequest(QueryProvider.SemanticQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesSemanticResult>(request);

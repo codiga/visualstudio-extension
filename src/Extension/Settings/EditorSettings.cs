@@ -1,7 +1,10 @@
 ﻿using Community.VisualStudio.Toolkit;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.Settings;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -11,16 +14,42 @@ using System.Threading.Tasks;
 
 namespace Extension
 {
-	internal static class EditorSettings
+	public class EditorSettings
 	{
-		private static IEnumerable<EditorOptionDefinition> Options { get; }
+		public string FontFamily { get; }
+		public short FontSize { get; }
+		public int TabSize { get; }
+		public bool UseSpace { get; }
+		public int IndentSize { get; }
 
-		//public static int IndentSize => Options
-
-		static EditorSettings()
+		internal EditorSettings(short fontSize, string fontFamily, int tabSize, bool useSpace, int indentSize)
 		{
-			//Options = VS.Documents.GetActiveDocumentViewAsync().Result.TextView.Options.;
+			FontSize = fontSize;
+			FontFamily = fontFamily;
+			TabSize = tabSize;
+			UseSpace = useSpace;
+			IndentSize = indentSize;
+		}
+	}
 
+	public static class EditorSettingsProvider
+	{
+		public static EditorSettings GetCurrentEditorSettings(DTE dte, IWpfTextView wpfTextView)
+		{
+			ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			});
+
+			var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
+			var fontSize = (short)propertiesList.Item("FontSize").Value;
+			var fontFamily = (string)propertiesList.Item("FontFamily").Value;
+
+			var tabSize = wpfTextView.Options.GetOptionValue(DefaultOptions.TabSizeOptionId);
+			var useSpace = wpfTextView.Options.GetOptionValue(DefaultOptions.ConvertTabsToSpacesOptionId);
+			var indentSize = wpfTextView.Options.GetOptionValue(DefaultOptions.IndentSizeOptionId);
+
+			return new EditorSettings(fontSize, fontFamily, tabSize, useSpace, indentSize);
 		}
 	}
 }

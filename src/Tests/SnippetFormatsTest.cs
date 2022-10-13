@@ -159,8 +159,8 @@ namespace Tests
 			Assert.That(param2.Default, Is.EqualTo("act"));
 
 			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Csharp"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CDataCode.First().Value.Contains("$param1$"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CDataCode.First().Value.Contains("$param2$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
         }
 
         [Test]

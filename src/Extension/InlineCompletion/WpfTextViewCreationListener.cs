@@ -1,6 +1,10 @@
-﻿using Extension.Caching;
+﻿using Community.VisualStudio.Toolkit;
+using EnvDTE;
+using Extension.AssistantCompletion;
+using Extension.Caching;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
@@ -31,7 +35,7 @@ namespace Extension.InlineCompletion
 		internal IVsEditorAdaptersFactoryService AdapterService = null;
 
 		[Import]
-		internal SnippetCache Cache;
+		internal ExpansionClient ExpansionClient;
 
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
@@ -41,11 +45,14 @@ namespace Extension.InlineCompletion
 		public void TextViewCreated(IWpfTextView textView)
 		{
 			var vsTextView = AdapterService.GetViewAdapter(textView);
-			new InlineCompletionClient(textView, vsTextView, Cache);
-			var tabSize = textView.Options.GetOptionValue(DefaultOptions.TabSizeOptionId);
-				
-			var options = textView.Options.SupportedOptions.ToList();
+			var vssp = VS.GetMefService<SVsServiceProvider>();
+			var dte = (_DTE)vssp.GetService(typeof(_DTE));
+
+			var settings = EditorSettingsProvider.GetCurrentEditorSettings(dte, textView);
+
+			new InlineCompletionClient(textView, vsTextView, ExpansionClient, settings);
 			
+
 			// The adornment will listen to any event that changes the layout (text changes, scrolling, etc)
 		}
 

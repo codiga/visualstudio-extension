@@ -1,6 +1,8 @@
 ﻿using GraphQLClient;
 using NUnit.Framework;
+using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using static Extension.SnippetFormats.CodigaLanguages;
@@ -58,11 +60,14 @@ namespace Tests
 			// arrange
 			var client = new CodigaClient();
 			var languages = new ReadOnlyCollection<string>(new[] { "Csharp" });
-
+			var watch = new Stopwatch();
+			watch.Start();
 			// act
-			var result = await client.GetRecipesForClientSemanticAsync("add test", languages, true);
+			var result = await client.GetRecipesForClientSemanticAsync("add test", languages, true, 10, 0);
 
 			// assert
+			var time = watch.Elapsed;
+			TestContext.WriteLine($"Took {time.Milliseconds}ms");
 			Assert.NotNull(result);
 			Assert.IsNotEmpty(result);
 		}

@@ -1,15 +1,22 @@
-﻿using Extension.Caching;
+﻿using Extension.AssistantCompletion;
+using Extension.Caching;
 using Extension.SnippetFormats;
+using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Extension.InlineCompletion
 {
@@ -19,20 +26,19 @@ namespace Extension.InlineCompletion
 		private InlineCompletionView _completionView;
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
-		private ListNavigator<string> _snippetNavigator;
+		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
+		private CodigaClient _apiClient;
+		private ExpansionClient _expansionClient;
+		private readonly EditorSettings _settings;
 
-		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, SnippetCache cache)
+		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, EditorSettings settings)
 		{
 			_textView = textView;
 			_vsTextView = vsTextView;
+			_apiClient ??= new CodigaClient();
+			_expansionClient = expansionClient;
+			_settings = settings;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
-
-			_snippetNavigator = new ListNavigator<string>(new[]
-			{
-				"public void MyMethod1()\n{\nblabla\nblabla\n}",
-				"public void MyMethod2()\n{\nyadada\nyada\n}",
-				"public void MyMethod3()\n{\ntext\n}"
-			});
 		}
 
 		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
@@ -68,6 +74,7 @@ namespace Extension.InlineCompletion
 			_vsTextView.GetCaretPos(out var startLine, out var endColumn);
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
 
+
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
 				&& EditorUtils.IsSemanticSearchComment(line)
 				&& _completionView == null;
@@ -79,18 +86,37 @@ namespace Extension.InlineCompletion
 			}
 
 			// start inline completion session
+			// query snippets based on keywords
+			var term = line.Replace("//", "").Trim();
+			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
+			var languages = new ReadOnlyCollection<string>(new[] { language });
+
+			_apiClient.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
+				.ContinueWith(OnQueryFinished);
+
 			// create adornment
-			_completionView = new InlineCompletionView(_textView);
+			_completionView = new InlineCompletionView(_textView, _settings);
+
 			var caretPos = _textView.Caret.Position.BufferPosition;
 			var currentLine = _textView.TextViewLines.Single(l => caretPos.Position >= l.Start && caretPos.Position <= l.End);
-			_completionView.CreateCompletionView(currentLine, _snippetNavigator.First());
+			_completionView.CreateCompletionView(currentLine, null);
 
 			return VSConstants.S_OK;
 		}
 
 		private int CommitCurrentSnippet()
 		{
+			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem);
 			return VSConstants.S_OK;
+		}
+
+		private async Task OnQueryFinished(Task<IReadOnlyCollection<CodigaSnippet>> result)
+		{
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			var snippets = result.Result.Select(SnippetParser.FromCodigaSnippet);
+			// get snippet code
+			_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
+			_completionView.UpdateSnippetPreview(_snippetNavigator.First().CodeSnippet.Snippet.Code.CodeString, 1, _snippetNavigator.Count);
 		}
 
 		private int HandleSessionCommand(uint nCmdID)
@@ -113,14 +139,20 @@ namespace Extension.InlineCompletion
 			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.RIGHT)
 			{
 				// get next snippet
-				_completionView.UpdateSnippetPreview(_snippetNavigator.Next());
+				var next = _snippetNavigator.Next();
+				var i = _snippetNavigator.IndexOf(next);
+				var c = _snippetNavigator.Count;
+				_completionView.UpdateSnippetPreview(next.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
 				return VSConstants.S_OK;
 			}
 
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.LEFT)
 			{
 				// get previous snippet
-				_completionView.UpdateSnippetPreview(_snippetNavigator.Previous());
+				var previous = _snippetNavigator.Previous();
+				var i = _snippetNavigator.IndexOf(previous);
+				var c = _snippetNavigator.Count;
+				_completionView.UpdateSnippetPreview(previous.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
 				return VSConstants.S_OK;
 			}
 

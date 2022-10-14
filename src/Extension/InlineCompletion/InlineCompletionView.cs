@@ -132,8 +132,6 @@ namespace Extension.InlineCompletion
 				Text = content
 			};
 
-			;
-			var h = GetDeviceIndependentFontSize(textBlock.GetDpiX());
 			Canvas.SetLeft(textBlock, onlyTextG.Bounds.Left);
 			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
 
@@ -211,8 +209,6 @@ namespace Extension.InlineCompletion
 		private ITextSnapshot EnsureSpaceFor(int linesOfCode, ITextViewLine startLine)
 		{
 			var newLines = new string('\n', linesOfCode);
-			//startLine.
-			//_view.TextViewLines.
 
 			var caretPos = _view.Caret.Position.BufferPosition;
 			var edit = _view.TextBuffer.CreateEdit();

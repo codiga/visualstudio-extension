@@ -1,9 +1,12 @@
 ﻿using Community.VisualStudio.Toolkit;
+using EnvDTE;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Settings.Internal;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using MSXML;
 using System;
@@ -64,11 +67,10 @@ namespace Extension.AssistantCompletion
 				iEndLine = startLine,
 				iEndIndex = endColumn,
 			};
-		
-			// get indention
-			// indent code
-			// parse to xml
-			
+
+			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.CodeString, currentLine);
+			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
+
 			textLines.GetLanguageServiceID(out var languageServiceId);
 
 			// create IXMLDOMNode from snippet
@@ -198,55 +200,13 @@ namespace Extension.AssistantCompletion
 			return VSConstants.S_OK;
 		}
 
-		/// <summary>
-		/// Get triggered after the snippet code is inserted into the editor.
-		/// I use this to perform formatting on the inserted snippet as FormatSpan() did not work.
-		/// </summary>
-		/// <param name="pSession"></param>
-		/// <returns></returns>
 		public int OnAfterInsertion(IVsExpansionSession pSession)
 		{
-			// save the end position of the cursor before formatting as that will change it
-			var endSpans = new[] { new TextSpan() };
-			pSession.GetEndSpan(endSpans);
-			var endSpan = endSpans[0];
-			_endSpan = endSpan;
-
-			//select the span and execute format command
-			var snippetSpans = new[] { new TextSpan() };
-			pSession.GetSnippetSpan(snippetSpans);
-			var snippetSpan = snippetSpans[0];
-			_currentTextView.SetSelection(snippetSpan.iStartLine, snippetSpan.iStartIndex, snippetSpan.iEndLine, snippetSpan.iEndIndex);
-			VS.Commands.ExecuteAsync("Edit.FormatSelection").GetAwaiter().GetResult();
-
-			if(string.IsNullOrEmpty(_firstUserVariable))
-				return VSConstants.S_OK;
-
-			// reapply the selection to the first user variable
-			// we can't use GoToNextExpansionField because this only works if the caret is already placed in one of the fields.
-			var fieldSpans = new[] { new TextSpan() };
-			pSession.GetFieldSpan(_firstUserVariable, fieldSpans);
-			var fieldSpan = fieldSpans[0];
-			_currentTextView.SetSelection(fieldSpan.iStartLine, fieldSpan.iStartIndex, fieldSpan.iEndLine, fieldSpan.iEndIndex);
 			return VSConstants.S_OK;
 		}
 
-		/// <summary>
-		/// Gets called after done editing user variables. We use this to set the correct $end$ cursor position
-		/// as the default behaviour is broken due to the reformatting in OnAfterInsertion
-		/// </summary>
-		/// <param name="pBuffer"></param>
-		/// <param name="ts"></param>
-		/// <returns></returns>
 		public int PositionCaretForEditing(IVsTextLines pBuffer, TextSpan[] ts)
 		{
-			var endSpans = new[] { new TextSpan() };
-			_currentExpansionSession.GetEndSpan(endSpans);
-			var updatedEndSpan = endSpans[0];
-
-			// TODO add one indent
-			_endSpan.iStartIndex = updatedEndSpan.iStartIndex;
-			_currentTextView.SetCaretPos(_endSpan.iStartLine, _endSpan.iStartIndex);
 			return VSConstants.S_OK;
 		}
 
@@ -255,9 +215,26 @@ namespace Extension.AssistantCompletion
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Report snippet usage to the Codiga API to update snippet statistics
+		/// </summary>
+		/// <param name="id"></param>
 		private void ReportUsage(long id)
 		{
 			_client.RecordRecipeUseAsync(id);
+		}
+
+		/// <summary>
+		/// Formats snippet code based on the indention of the passed base line
+		/// </summary>
+		/// <param name="snippetCode"></param>
+		/// <param name="baseLine"></param>
+		/// <returns></returns>
+		private string FormatSnippet(string snippetCode, string baseLine)
+		{
+			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
 		}
 	}
 }

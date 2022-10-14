@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Text.Editor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Extension.SnippetFormats
 {
@@ -47,8 +49,20 @@ namespace Extension.SnippetFormats
 		}
 
 		/// <summary>
-		/// Returns a new indented code block based on the given settings.
-		/// The first line of the code block is expexted to be indented already.
+		/// Returns a new indented code block based on the given IndentationSettings.
+		/// The first line of the code block won't be indented as the editor should take care of that.
+		/// </summary>
+		/// <param name="code"></param>
+		/// <param name="settings"></param>
+		/// <returns></returns>
+		public static string IndentCodeBlock(string code, int indentLevel, IndentationSettings settings)
+		{
+			return IndentCodeBlock(code, indentLevel, settings.IndentSize, settings.TabSize, settings.UseSpace);
+		}
+
+		/// <summary>
+		/// Returns a new indented code block based on the given parameters.
+		/// The first line of the code block won't be indented as the editor should take care of that.
 		/// </summary>
 		/// <param name="code"></param>
 		/// <param name="indentSize"></param>
@@ -58,24 +72,7 @@ namespace Extension.SnippetFormats
 		public static string IndentCodeBlock(string code, int indentLevel, int indentSize, int tabSize, bool useSpace)
 		{
 			var lines = code.Split('\n');
-			string spaceIndent = new string(' ', indentSize);
-			string tabIndent = new string('\t', indentSize / tabSize);
-			string finalIndent;
-
-			if (useSpace)
-			{
-				finalIndent = string.Concat(Enumerable.Repeat(spaceIndent, indentLevel));
-			}
-			else
-			{
-				var tabs = string.Concat(Enumerable.Repeat(tabIndent, indentLevel));
-				string spaces = "";
-
-				if(tabSize > indentSize)
-					spaces = string.Concat(Enumerable.Repeat(spaceIndent, indentLevel));
-
-				finalIndent = tabs + spaces;
-			}
+			string finalIndent = GetIndent(indentLevel, indentSize, tabSize, useSpace);
 
 			for (int i = 1; i < lines.Length; i++)
 			{
@@ -87,6 +84,25 @@ namespace Extension.SnippetFormats
 			return indentedCode;
 		}
 
+		/// <summary>
+		/// Calculates the indention level based on the given line and IndentationSettings.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="settings"></param>
+		/// <returns></returns>
+		public static int GetIndentLevel(string line, IndentationSettings settings)
+		{
+			return GetIndentLevel(line, settings.IndentSize, settings.TabSize, settings.UseSpace);
+		}
+
+		/// <summary>
+		/// Calculates the indention level based on the given line and parameters.
+		/// </summary>
+		/// <param name="line"></param>
+		/// <param name="indentSize"></param>
+		/// <param name="tabSize"></param>
+		/// <param name="useSpace"></param>
+		/// <returns></returns>
 		public static int GetIndentLevel(string line, int indentSize, int tabSize, bool useSpace)
 		{
 			//get non text chararcters
@@ -107,8 +123,34 @@ namespace Extension.SnippetFormats
 			{
 				indentLevel = (tabCount * tabSize + spaceCount) / indentSize;
 			}
-
 			return indentLevel;
+		}
+
+		public static string GetIndent(int level, IndentationSettings settings)
+		{
+			return GetIndent(level, settings.IndentSize, settings.TabSize, settings.UseSpace);
+		}
+
+		public static string GetIndent(int level, int indentSize, int tabSize, bool useSpace)
+		{
+			int totalIndentSize = level * indentSize;
+			string finalIndent;
+
+			if (useSpace)
+			{
+				finalIndent = new string(' ', totalIndentSize);
+			}
+			else
+			{
+				string tabIndent = new string('\t', totalIndentSize / tabSize);
+
+				if (tabSize > indentSize)
+					finalIndent = new string(' ', totalIndentSize);
+				else
+					finalIndent = tabIndent + new string(' ', totalIndentSize % tabSize);
+			}
+
+			return finalIndent;
 		}
 	}
 }

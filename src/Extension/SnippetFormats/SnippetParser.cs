@@ -17,6 +17,8 @@ using GraphQLClient;
 using Microsoft.VisualStudio.Core.Imaging;
 using Microsoft.VisualStudio.Utilities;
 using System.Web.UI.Design;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Media;
 
 namespace Extension.SnippetFormats
 {
@@ -38,7 +40,7 @@ namespace Extension.SnippetFormats
 			}).ToImmutableArray();
 		}
 
-		public static VisualStudioSnippet FromCodigaSnippet(CodigaSnippet codigaSnippet)
+		public static VisualStudioSnippet FromCodigaSnippet(CodigaSnippet codigaSnippet, IndentationSettings settings)
 		{
 			var vsSnippet = new VisualStudioSnippet
 			{
@@ -71,7 +73,7 @@ namespace Extension.SnippetFormats
 
 			ReplaceUserCaretPositions(stringBuilder);
 			ReplaceUserVariables(stringBuilder, vsSnippet);
-			ReplaceIndentation(stringBuilder);
+			ReplaceIndentation(stringBuilder, settings);
 
 			vsSnippet.CodeSnippet.Snippet.Code = new Code(codigaSnippet.Language, stringBuilder.ToString());
 
@@ -144,9 +146,25 @@ namespace Extension.SnippetFormats
 			}
 		}
 
-		internal static void ReplaceIndentation(StringBuilder stringBuilder)
+		/// <summary>
+		/// Replaces Codiga Indention &[CODIGA_INDENT] with indention from the editor settings.
+		/// Currently only supports 3 levels of indention.
+		/// </summary>
+		/// <param name="stringBuilder"></param>
+		/// <param name="settings"></param>
+		internal static void ReplaceIndentation(StringBuilder stringBuilder, IndentationSettings settings)
 		{
-			stringBuilder.Replace("&[CODIGA_INDENT]", "\t");
+			// Visual Studio supports defining tab size and indent size seperatly
+			// so one codiga indent can not always be replaced with one VS indent 1:1
+
+			// TODO replace hard coded level with algorithm
+			var vsIndentLevel1 = EditorUtils.GetIndent(1, settings);
+			var vsIndentLevel2 = EditorUtils.GetIndent(2, settings);
+			var vsIndentLevel3 = EditorUtils.GetIndent(3, settings);
+
+			stringBuilder.Replace("&[CODIGA_INDENT]&[CODIGA_INDENT]&[CODIGA_INDENT]", vsIndentLevel3);
+			stringBuilder.Replace("&[CODIGA_INDENT]&[CODIGA_INDENT]", vsIndentLevel2);
+			stringBuilder.Replace("&[CODIGA_INDENT]", vsIndentLevel1);
 		}
 
 		/// <summary>

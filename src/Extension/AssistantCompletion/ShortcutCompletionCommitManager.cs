@@ -2,11 +2,14 @@
 using System.Collections.Immutable;
 using System.ComponentModel.Composition;
 using System.Threading;
+using Community.VisualStudio.Toolkit;
+using EnvDTE;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -54,6 +57,9 @@ namespace Extension.AssistantCompletion
 			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
 
 			item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet), out var snippet);
+
+			// get current editor settings to be able to format the code correctly
+
 
 			// start a snippet session using in memory xml rather than .xml files
 			ExpansionClient.StartExpansion(vsTextView, snippet);

@@ -48,7 +48,7 @@ namespace Extension.InlineCompletion
 			var vssp = VS.GetMefService<SVsServiceProvider>();
 			var dte = (_DTE)vssp.GetService(typeof(_DTE));
 
-			var settings = EditorSettingsProvider.GetCurrentEditorSettings(dte, textView);
+			var settings = EditorSettingsProvider.GetCurrentFontSettings(dte);
 
 			new InlineCompletionClient(textView, vsTextView, ExpansionClient, settings);
 			

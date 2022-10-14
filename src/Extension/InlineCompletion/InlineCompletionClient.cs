@@ -29,9 +29,9 @@ namespace Extension.InlineCompletion
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 		private CodigaClient _apiClient;
 		private ExpansionClient _expansionClient;
-		private readonly EditorSettings _settings;
+		private readonly FontSettings _settings;
 
-		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, EditorSettings settings)
+		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, FontSettings settings)
 		{
 			_textView = textView;
 			_vsTextView = vsTextView;
@@ -113,7 +113,8 @@ namespace Extension.InlineCompletion
 		private async Task OnQueryFinished(Task<IReadOnlyCollection<CodigaSnippet>> result)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			var snippets = result.Result.Select(SnippetParser.FromCodigaSnippet);
+			var setting = EditorSettingsProvider.GetCurrentIndentationSettings();
+			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
 			// get snippet code
 			_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
 			_completionView.UpdateSnippetPreview(_snippetNavigator.First().CodeSnippet.Snippet.Code.CodeString, 1, _snippetNavigator.Count);

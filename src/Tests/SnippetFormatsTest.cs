@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Extension;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
@@ -76,15 +77,29 @@ namespace Tests
 		}
 
 		[Test]
-		[TestCase("&[CODIGA_INDENT]", ExpectedResult = "\t")]
-		[TestCase("&[CODIGA_INDENT]&[CODIGA_INDENT]", ExpectedResult = "\t\t")]
-		public string ReplaceIndentation_should_replace_codiga_indention_with_tabs(string input)
+		// even tabs
+		[TestCase("&[CODIGA_INDENT]", 4, 4, false,  ExpectedResult = "\t")]
+		[TestCase("&[CODIGA_INDENT]", 2, 2, false,  ExpectedResult = "\t")]
+		[TestCase("&[CODIGA_INDENT]", 8, 8, false,  ExpectedResult = "\t")]
+		[TestCase("&[CODIGA_INDENT]&[CODIGA_INDENT]", 4, 4, false, ExpectedResult = "\t\t")]
+		// spaces
+		[TestCase("&[CODIGA_INDENT]", 4, 4, true, ExpectedResult = "    ")]
+		[TestCase("&[CODIGA_INDENT]", 2, 2, true, ExpectedResult = "  ")]
+		[TestCase("&[CODIGA_INDENT]", 8, 8, true, ExpectedResult = "        ")]
+		[TestCase("&[CODIGA_INDENT]&[CODIGA_INDENT]", 4, 4, true, ExpectedResult = "        ")]
+		// mixed
+		[TestCase("&[CODIGA_INDENT]", 2, 4, false, ExpectedResult = "  ")]
+		[TestCase("&[CODIGA_INDENT]", 2, 2, false, ExpectedResult = "\t")]
+		[TestCase("&[CODIGA_INDENT]", 6, 4, false, ExpectedResult = "\t  ")]
+		[TestCase("&[CODIGA_INDENT]&[CODIGA_INDENT]", 6, 4, false, ExpectedResult = "\t\t\t")]
+		public string ReplaceIndentation_should_replace_codiga_indention_with_tabs(string input, int indentSize, int tabSize, bool useSpace)
 		{
 			// arrange
 			var builder = new StringBuilder(input);
+			var settings = new IndentationSettings(indentSize, tabSize, useSpace);
 
 			// act
-			SnippetParser.ReplaceIndentation(builder);
+			SnippetParser.ReplaceIndentation(builder, settings);
 
 			// assert
 			return builder.ToString();
@@ -133,7 +148,7 @@ namespace Tests
             };
 
             // act
-            var vsSnippet = SnippetParser.FromCodigaSnippet(snippet);
+            var vsSnippet = SnippetParser.FromCodigaSnippet(snippet, new IndentationSettings(4, 4, false));
 
 			// assert
 			Assert.That(vsSnippet.CodeSnippet.Header.Id, Is.EqualTo(99));

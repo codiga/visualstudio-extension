@@ -14,9 +14,8 @@ namespace Extension.Caching
 {
 	interface ISnippetCache
 	{
-		public IEnumerable<VisualStudioSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies);
-		public IEnumerable<VisualStudioSnippet> GetSnippets(string language);
-		public IEnumerable<VisualStudioSnippet> GetSnippets();
+		public IEnumerable<CodigaSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies);
+		public IEnumerable<CodigaSnippet> GetSnippets(string language);
 	}
 
 	[Export]
@@ -115,22 +114,14 @@ namespace Extension.Caching
 			}
 		}
 
-		public IEnumerable<VisualStudioSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies)
+		public IEnumerable<CodigaSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies)
 		{
 			throw new NotImplementedException();
 		}
 
-		public IEnumerable<VisualStudioSnippet> GetSnippets(string language)
+		public IEnumerable<CodigaSnippet> GetSnippets(string language)
 		{
-			return _cachedSnippets[language].Select(SnippetParser.FromCodigaSnippet);
-		}
-
-		public IEnumerable<VisualStudioSnippet> GetSnippets()
-		{
-			var snippets = _cachedSnippets.Values
-				.SelectMany(s => s)
-				.Select(SnippetParser.FromCodigaSnippet);
-			return snippets;
+			return _cachedSnippets[language];
 		}
 
 		private void Session_IdleTimerElapsed(object sender, EventArgs e)

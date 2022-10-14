@@ -41,12 +41,14 @@ namespace Extension
 		public string FontFamily { get; }
 		public short FontSize { get; }
 		public Color CommentColor { get; }
+		public Color TextBackgroundColor { get; }
 
-		internal FontSettings(short fontSize, string fontFamily, Color commentColor)
+		internal FontSettings(short fontSize, string fontFamily, Color commentColor, Color textBackgroundColor)
 		{
 			FontSize = fontSize;
 			FontFamily = fontFamily;
 			CommentColor = commentColor;
+			TextBackgroundColor = textBackgroundColor;
 		}
 	}
 
@@ -71,10 +73,13 @@ namespace Extension
 			var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
 			var commentColor = Color.FromRgb(colorBytes[2], colorBytes[1], colorBytes[0]);
 
+			var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
+			var bgColorBytes = BitConverter.GetBytes(textItem.Background);
+			var bbgColor = Color.FromRgb(bgColorBytes[2], bgColorBytes[1], bgColorBytes[0]);
 			var fontSize = (short)propertiesList.Item("FontSize").Value;
 			var fontFamily = (string)propertiesList.Item("FontFamily").Value;
 
-			return new FontSettings(fontSize, fontFamily, commentColor);
+			return new FontSettings(fontSize, fontFamily, commentColor, bbgColor);
 		}
 
 		/// <summary>

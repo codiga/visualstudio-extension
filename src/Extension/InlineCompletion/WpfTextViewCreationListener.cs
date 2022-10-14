@@ -28,7 +28,7 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		[Export(typeof(AdornmentLayerDefinition))]
 		[Name("TextAdornment1")]
-		[Order(After = PredefinedAdornmentLayers.Selection, Before = PredefinedAdornmentLayers.Text)]
+		[Order(After = PredefinedAdornmentLayers.Text)]
 		private AdornmentLayerDefinition editorAdornmentLayer;
 
 		[Import]

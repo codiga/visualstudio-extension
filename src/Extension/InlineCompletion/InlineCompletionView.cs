@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Text;
+﻿using Microsoft.VisualStudio.Package;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -40,6 +41,7 @@ namespace Extension.InlineCompletion
 		private int _totalSnippets = 0;
 		private double _fontSize;
 		private SolidColorBrush _textBrush;
+		private SolidColorBrush _textBackgroundBrush;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
@@ -53,12 +55,14 @@ namespace Extension.InlineCompletion
 			}
 
 			_layer = view.GetAdornmentLayer("TextAdornment1");
+			
 			_view = view;
 			_settings = settings;
 			_currentCode = initCode;
 			_triggeringCaret = caretPos;
 			_fontSize = GetFontSize(settings.FontFamily, settings.FontSize);
 			_textBrush = new SolidColorBrush(_settings.CommentColor);
+			_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
 
 			var lc = new LengthConverter();
 			var fontSize = (double)lc.ConvertFrom($"{_settings.FontSize}pt");
@@ -120,18 +124,19 @@ namespace Extension.InlineCompletion
 			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
 
 			double height = loc * geometry.Bounds.Height;
-			var brush = new SolidColorBrush(_settings.CommentColor);
 
 			var textBlock = new TextBlock
 			{
 				Width = 1000,
 				Foreground = _textBrush,
+				Opacity = 1,
+				Background = _textBackgroundBrush,
 				FontFamily = new FontFamily(_settings.FontFamily),
 				FontSize = _fontSize,
 				Height = height,
 				Text = content
 			};
-
+			//var c = new EditorControl();
 			Canvas.SetLeft(textBlock, onlyTextG.Bounds.Left);
 			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
 

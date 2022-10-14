@@ -116,6 +116,7 @@ namespace Extension.InlineCompletion
 			}
 			var loc = content.Split('\n').Length;
 
+			//TODO ensure space
 			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
 
 			double height = loc * geometry.Bounds.Height;
@@ -128,7 +129,6 @@ namespace Extension.InlineCompletion
 				FontFamily = new FontFamily(_settings.FontFamily),
 				FontSize = _fontSize,
 				Height = height,
-				
 				Text = content
 			};
 
@@ -200,11 +200,6 @@ namespace Extension.InlineCompletion
 			var textBlockSize = f.Height - descend;
 
 			return textBlockSize;
-		}
-
-		private double GetDeviceIndependentFontSize(double dpiX)
-		{
-			return 0;
 		}
 
 		/// <summary>

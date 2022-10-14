@@ -1,5 +1,6 @@
 ﻿using Community.VisualStudio.Toolkit;
 using EnvDTE;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Shell.Settings;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace Extension
 {
@@ -38,12 +40,13 @@ namespace Extension
 	{
 		public string FontFamily { get; }
 		public short FontSize { get; }
+		public Color CommentColor { get; }
 
-		// TODO comment color
-		internal FontSettings(short fontSize, string fontFamily)
+		internal FontSettings(short fontSize, string fontFamily, Color commentColor)
 		{
 			FontSize = fontSize;
 			FontFamily = fontFamily;
+			CommentColor = commentColor;
 		}
 	}
 
@@ -61,12 +64,17 @@ namespace Extension
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
-
 			var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
+
+			var itemsList = (FontsAndColorsItems)propertiesList.Item("FontsAndColorsItems").Object;
+			var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
+			var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
+			var commentColor = Color.FromRgb(colorBytes[2], colorBytes[1], colorBytes[0]);
+
 			var fontSize = (short)propertiesList.Item("FontSize").Value;
 			var fontFamily = (string)propertiesList.Item("FontFamily").Value;
 
-			return new FontSettings(fontSize, fontFamily);
+			return new FontSettings(fontSize, fontFamily, commentColor);
 		}
 
 		/// <summary>

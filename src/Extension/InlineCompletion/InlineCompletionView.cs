@@ -1,11 +1,14 @@
 ﻿using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
+using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Brushes = System.Windows.Media.Brushes;
 using FontFamily = System.Windows.Media.FontFamily;
 using FontStyle = System.Drawing.FontStyle;
@@ -30,17 +33,19 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		private readonly IWpfTextView _view;
 		private readonly FontSettings _settings;
-		private ITextViewLine _line;
+		private int _triggeringCaret;
 
 		private string? _currentCode;
 		private int _currentSnippet = 0;
 		private int _totalSnippets = 0;
+		private double _fontSize;
+		private SolidColorBrush _textBrush;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
 		/// </summary>
 		/// <param name="view">Text view to create the adornment for</param>
-		public InlineCompletionView(IWpfTextView view, FontSettings settings)
+		public InlineCompletionView(IWpfTextView view, FontSettings settings, string? initCode, int caretPos)
 		{
 			if (view == null)
 			{
@@ -48,16 +53,21 @@ namespace Extension.InlineCompletion
 			}
 
 			_layer = view.GetAdornmentLayer("TextAdornment1");
-
 			_view = view;
 			_settings = settings;
+			_currentCode = initCode;
+			_triggeringCaret = caretPos;
+			_fontSize = GetFontSize(settings.FontFamily, settings.FontSize);
+			_textBrush = new SolidColorBrush(_settings.CommentColor);
+
+			var lc = new LengthConverter();
+			var fontSize = (double)lc.ConvertFrom($"{_settings.FontSize}pt");
+			var textSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 		}
 
-		internal void CreateCompletionView(ITextViewLine line, string? initCode)
+		internal void StartDrawingCompletionView()
 		{
-			_line = line;
 			_view.LayoutChanged += OnLayoutChanged;
-			_currentCode = initCode;
 		}
 
 		/// <summary>
@@ -65,23 +75,22 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		private void DrawCompletionInstructions()
 		{
-			var geometry = _view.TextViewLines.GetMarkerGeometry(_line.Extent);
-			var textSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
-			
+			var triggeringLine = GetTriggeringLine();
+			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
 			var textBlock = new TextBlock
 			{
-				Width = 600,
-				Foreground = Brushes.White,
+				Width = 600, //TODO calculate
+				Foreground = _textBrush,
 				Height = geometry.Bounds.Height,
 				FontFamily = new FontFamily(_settings.FontFamily),
-				FontSize = textSize,
+				FontSize = _fontSize,
 				Text = $"[{_currentSnippet}/{_totalSnippets}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
 
-			Canvas.SetLeft(textBlock, 200);
+			Canvas.SetLeft(textBlock, geometry.Bounds.Width + geometry.Bounds.Height);
 			Canvas.SetTop(textBlock, geometry.Bounds.Top);
 			
-			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, _line.Extent, Instructions_Tag, textBlock, (tag, ui) => { });
+			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Instructions_Tag, textBlock, (tag, ui) => { });
 		}
 
 		/// <summary>
@@ -89,16 +98,17 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		private void DrawSnippetPreview()
 		{
-			var geometry = _view.TextViewLines.GetMarkerGeometry(_line.Extent);
-			
-			var wholeLineSpan = new SnapshotSpan(_line.Snapshot, new Microsoft.VisualStudio.Text.Span(_line.Start, _line.Length));
+			var triggeringLine = GetTriggeringLine();
+			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
+			var caretPos = _view.Caret.Position.BufferPosition;
+
+			var wholeLineSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start, triggeringLine.Length));
 			var lineText = wholeLineSpan.GetText();
 			var firstChar = wholeLineSpan.GetText().Trim().First();
 			var position = lineText.IndexOf(firstChar);
-			var onlyTextSpan = new SnapshotSpan(_line.Snapshot, new Microsoft.VisualStudio.Text.Span(_line.Start + position, _line.Length));
+			var onlyTextSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, triggeringLine.Length));
 			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(onlyTextSpan);
 
-			var fontSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 			var content = _currentCode;
 			if(_currentCode == null)
 			{
@@ -106,22 +116,28 @@ namespace Extension.InlineCompletion
 			}
 			var loc = content.Split('\n').Length;
 
+			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
+
 			double height = loc * geometry.Bounds.Height;
+			var brush = new SolidColorBrush(_settings.CommentColor);
+
 			var textBlock = new TextBlock
 			{
 				Width = 1000,
-				Foreground = Brushes.White,
+				Foreground = _textBrush,
 				FontFamily = new FontFamily(_settings.FontFamily),
-				FontSize = fontSize,
-				FontWeight = FontWeights.Light,
-				FontStyle = FontStyles.Normal,
+				FontSize = _fontSize,
 				Height = height,
+				
 				Text = content
 			};
+
+			;
+			var h = GetDeviceIndependentFontSize(textBlock.GetDpiX());
 			Canvas.SetLeft(textBlock, onlyTextG.Bounds.Left);
 			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
 
-			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, _line.Extent, Preview_Tag, textBlock, (tag, ui) => { });
+			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Preview_Tag, textBlock, (tag, ui) => { });
 		}
 
 		/// <summary>
@@ -186,14 +202,33 @@ namespace Extension.InlineCompletion
 			return textBlockSize;
 		}
 
-		private ITextSnapshot AssureSpaceFor(int linesOfCode)
+		private double GetDeviceIndependentFontSize(double dpiX)
 		{
+			return 0;
+		}
+
+		/// <summary>
+		/// Ensures that there is enough space below the starting line for the given lines of code.
+		/// </summary>
+		/// <param name="linesOfCode"></param>
+		/// <param name="startLine"></param>
+		/// <returns></returns>
+		private ITextSnapshot EnsureSpaceFor(int linesOfCode, ITextViewLine startLine)
+		{
+			var newLines = new string('\n', linesOfCode);
+			//startLine.
+			//_view.TextViewLines.
+
 			var caretPos = _view.Caret.Position.BufferPosition;
 			var edit = _view.TextBuffer.CreateEdit();
-			var newLines = new string('\n', linesOfCode);
 			edit.Insert(caretPos.Position, newLines);
+			var newSpan = edit.Apply();
+			return null; ;
+		}
 
-			return edit.Apply();
+		private ITextViewLine GetTriggeringLine()
+		{
+			return _view.TextViewLines.Single(l => _triggeringCaret >= l.Start && _triggeringCaret <= l.End);
 		}
 	}
 }

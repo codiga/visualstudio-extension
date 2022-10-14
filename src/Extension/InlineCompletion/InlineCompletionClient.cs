@@ -79,6 +79,7 @@ namespace Extension.InlineCompletion
 				&& EditorUtils.IsSemanticSearchComment(line)
 				&& _completionView == null;
 
+			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
 			if (!shouldTriggerCompletion)
 			{
 				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
@@ -94,12 +95,10 @@ namespace Extension.InlineCompletion
 			_apiClient.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
-			// create adornment
-			_completionView = new InlineCompletionView(_textView, _settings);
-
-			var caretPos = _textView.Caret.Position.BufferPosition;
-			var currentLine = _textView.TextViewLines.Single(l => caretPos.Position >= l.Start && caretPos.Position <= l.End);
-			_completionView.CreateCompletionView(currentLine, null);
+			var caretPos = _textView.Caret.Position.BufferPosition.Position;
+			_completionView = new InlineCompletionView(_textView, _settings, null, caretPos);
+			// start drawing the adornments
+			_completionView.StartDrawingCompletionView();
 
 			return VSConstants.S_OK;
 		}

@@ -207,6 +207,19 @@ namespace Tests
 			Assert.That(expectedSnippet.xml, Is.EqualTo(actualSnippet.xml));
 		}
 
+		[Test]
+		public void GetPreviewCode_should_replace_all_vs_literals()
+		{
+			// arrange
+			var snippet = SnippetTestData.Snippet;
+
+			// act
+			var preview = SnippetParser.GetPreviewCode(snippet);
+
+			// assert
+			Assert.That(preview, Is.EqualTo("MessageBox.Show(\"first\");     MessageBox.Show(\"second\");"));
+		}
+
 		private static class SnippetTestData
 		{
 			public static VisualStudioSnippet Snippet => new VisualStudioSnippet

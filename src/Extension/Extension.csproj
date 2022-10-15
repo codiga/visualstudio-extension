@@ -65,6 +65,9 @@
     <Compile Include="AssistantCompletion\ShortcutCompletionSourceProvider.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
+    <Compile Include="InlineCompletion\PreviewClassifier.cs" />
+    <Compile Include="InlineCompletion\PreviewClassifierFormat.cs" />
+    <Compile Include="InlineCompletion\PreviewClassifierProvider.cs" />
     <Compile Include="InlineCompletion\InlineCompletionClient.cs" />
     <Compile Include="InlineCompletion\InlineCompletionView.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />

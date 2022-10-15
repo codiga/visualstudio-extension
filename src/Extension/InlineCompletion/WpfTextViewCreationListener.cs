@@ -37,6 +37,9 @@ namespace Extension.InlineCompletion
 		[Import]
 		internal ExpansionClient ExpansionClient;
 
+		[Import]
+		internal InlineCompletionClient InlineCompletionClient;
+
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
 		/// Instantiates a TextAdornment1 manager when the textView is created.
@@ -45,15 +48,8 @@ namespace Extension.InlineCompletion
 		public void TextViewCreated(IWpfTextView textView)
 		{
 			var vsTextView = AdapterService.GetViewAdapter(textView);
-			var vssp = VS.GetMefService<SVsServiceProvider>();
-			var dte = (_DTE)vssp.GetService(typeof(_DTE));
 
-			var settings = EditorSettingsProvider.GetCurrentFontSettings(dte);
-
-			new InlineCompletionClient(textView, vsTextView, ExpansionClient, settings);
-			
-
-			// The adornment will listen to any event that changes the layout (text changes, scrolling, etc)
+			InlineCompletionClient.Initialize(textView, vsTextView, ExpansionClient);
 		}
 
 	}

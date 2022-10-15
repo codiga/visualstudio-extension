@@ -168,6 +168,25 @@ namespace Extension.SnippetFormats
 		}
 
 		/// <summary>
+		/// Gets the snippet code string and replaces all VS literals with their default value
+		/// so that the preview is valid code.
+		/// </summary>
+		/// <param name="vsSnippetCode"></param>
+		/// <returns></returns>
+		internal static string GetPreviewCode(VisualStudioSnippet vsSnippet)
+		{
+			var literals = vsSnippet.CodeSnippet.Snippet.Declarations;
+			var sb = new StringBuilder(vsSnippet.CodeSnippet.Snippet.Code.CodeString);
+
+			foreach (var literal in literals)
+			{
+				sb.Replace($"${literal.ID}$", literal.Default);
+			}
+
+			return sb.ToString();
+		}
+
+		/// <summary>
 		/// Represents the Codiga user variables that allow user defined placeholders
 		/// </summary>
 		private class CodigaUserVariable

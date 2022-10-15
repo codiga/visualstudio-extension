@@ -218,7 +218,6 @@ namespace Extension.InlineCompletion
 			var caretPos = _view.Caret.Position.BufferPosition;
 			var edit = _view.TextBuffer.CreateEdit();
 			edit.Insert(caretPos.Position, newLines);
-			var newSpan = edit.Apply();
 			return null; ;
 		}
 

@@ -66,27 +66,27 @@ namespace Extension
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
-				// Get TextEditor properties
-				var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
+			// Get TextEditor properties
+			var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
 				
-				// Get the items that are shown in the dialog in VS
-				var itemsList = (FontsAndColorsItems)propertiesList.Item("FontsAndColorsItems").Object;
+			// Get the items that are shown in the dialog in VS
+			var itemsList = (FontsAndColorsItems)propertiesList.Item("FontsAndColorsItems").Object;
 
-				// Get color for comments
-				var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
-				var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
-				var commentColor = Color.FromRgb(colorBytes[0], colorBytes[1], colorBytes[2]);
+			// Get color for comments
+			var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
+			var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
+			var commentColor = Color.FromRgb(colorBytes[0], colorBytes[1], colorBytes[2]);
 
-				// Get editor BG
-				var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
-				var bgColorBytes = BitConverter.GetBytes(textItem.Background);
-				var bbgColor = Color.FromRgb(bgColorBytes[0], bgColorBytes[1], bgColorBytes[2]);
+			// Get editor BG
+			var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
+			var bgColorBytes = BitConverter.GetBytes(textItem.Background);
+			var bbgColor = Color.FromRgb(bgColorBytes[0], bgColorBytes[1], bgColorBytes[2]);
 
-				// Get font size in points
-				var fontSize = (short)propertiesList.Item("FontSize").Value;
+			// Get font size in points
+			var fontSize = (short)propertiesList.Item("FontSize").Value;
 
-				// Get current font family
-				var fontFamily = (string)propertiesList.Item("FontFamily").Value;
+			// Get current font family
+			var fontFamily = (string)propertiesList.Item("FontFamily").Value;
 
 			return new FontSettings(fontSize, fontFamily, commentColor, bbgColor);
 		}

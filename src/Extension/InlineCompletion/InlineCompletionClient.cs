@@ -1,25 +1,25 @@
 ﻿using Extension.AssistantCompletion;
-using Extension.Caching;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Threading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Extension.InlineCompletion
 {
+	[Export]
 	internal class InlineCompletionClient : IOleCommandTarget
 	{
 		private IOleCommandTarget _nextCommandHandler;
@@ -29,15 +29,20 @@ namespace Extension.InlineCompletion
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 		private CodigaClient _apiClient;
 		private ExpansionClient _expansionClient;
-		private readonly FontSettings _settings;
 
-		public InlineCompletionClient(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, FontSettings settings)
+		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
+		public SnapshotSpan CurrentInstructtionSpan { get; private set; }
+
+		public InlineCompletionClient()
+		{
+			_apiClient ??= new CodigaClient();
+		}
+
+		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient)
 		{
 			_textView = textView;
 			_vsTextView = vsTextView;
-			_apiClient ??= new CodigaClient();
 			_expansionClient = expansionClient;
-			_settings = settings;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 		}
 
@@ -65,7 +70,7 @@ namespace Extension.InlineCompletion
 				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
 			}
 
-			if(_completionView != null)
+			if(CurrentSnippetSpan != null)
 			{
 				return HandleSessionCommand(nCmdID);
 			}
@@ -96,9 +101,27 @@ namespace Extension.InlineCompletion
 				.ContinueWith(OnQueryFinished);
 
 			var caretPos = _textView.Caret.Position.BufferPosition.Position;
-			_completionView = new InlineCompletionView(_textView, _settings, null, caretPos);
+			
+			using (var edit = _textView.TextBuffer.CreateEdit())
+			{
+				edit.Replace(new Span(caretPos, 1), "\n");
+				edit.Apply();
+			}
+
+			caretPos = _textView.Caret.Position.BufferPosition.Position;
+			//EditorUtils.GetIndentLevel
+
+			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
+			{
+				CurrentSnippetSpan = readEdit.CreateReadOnlyRegion(new Span(caretPos, 1));
+				readEdit.Apply();
+			}
+
+			CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, "fetching snippets...");
+
+			//_completionView = new InlineCompletionView(_textView, _settings, null, caretPos);
 			// start drawing the adornments
-			_completionView.StartDrawingCompletionView();
+			//_completionView.StartDrawingCompletionView();
 
 			return VSConstants.S_OK;
 		}
@@ -114,25 +137,30 @@ namespace Extension.InlineCompletion
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			var setting = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
-			// get snippet code
 			_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
-			_completionView.UpdateSnippetPreview(_snippetNavigator.First().CodeSnippet.Snippet.Code.CodeString, 1, _snippetNavigator.Count);
+
+			var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
+			CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
 		}
 
 		private int HandleSessionCommand(uint nCmdID)
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
-				_completionView.RemoveVisuals();
-				_completionView = null;
+				//_completionView.RemoveVisuals();
+				//_completionView = null;
+				RemovePreview(CurrentSnippetSpan);
+				CurrentSnippetSpan = null;
 				CommitCurrentSnippet();
 				return VSConstants.S_OK;
 			}
 
 			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 			{
-				_completionView.RemoveVisuals();
-				_completionView = null;
+				//_completionView.RemoveVisuals();
+				//_completionView = null;
+				RemovePreview(CurrentSnippetSpan);
+				CurrentSnippetSpan = null;
 				return VSConstants.S_OK;
 			}
 
@@ -142,7 +170,11 @@ namespace Extension.InlineCompletion
 				var next = _snippetNavigator.Next();
 				var i = _snippetNavigator.IndexOf(next);
 				var c = _snippetNavigator.Count;
-				_completionView.UpdateSnippetPreview(next.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+
+				var previewCode = SnippetParser.GetPreviewCode(next);
+				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
+				//_completionView.UpdateSnippetPreview(next.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+
 				return VSConstants.S_OK;
 			}
 
@@ -152,11 +184,61 @@ namespace Extension.InlineCompletion
 				var previous = _snippetNavigator.Previous();
 				var i = _snippetNavigator.IndexOf(previous);
 				var c = _snippetNavigator.Count;
-				_completionView.UpdateSnippetPreview(previous.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+
+				var previewCode = SnippetParser.GetPreviewCode(previous); 
+				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
+				//_completionView.UpdateSnippetPreview(previous.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+
 				return VSConstants.S_OK;
 			}
 
 			return VSConstants.S_OK;
+		}
+
+		private void RemovePreview(IReadOnlyRegion readOnlyRegion)
+		{
+			using var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit();
+			var spanToDelete = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
+			readEdit.RemoveReadOnlyRegion(readOnlyRegion);
+			readEdit.Apply();
+
+			using var edit = _textView.TextBuffer.CreateEdit();
+			var newLineSnippet = edit.Delete(spanToDelete);
+			var snapshot = edit.Apply();
+		}
+
+		private IReadOnlyRegion InsertSnippetCodePreview(IReadOnlyRegion readOnlyRegion, string snippetCode)
+		{
+			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
+
+			// remove current read only region
+			ITextSnapshot currentSnapshot;
+			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
+			{
+				readEdit.RemoveReadOnlyRegion(readOnlyRegion);
+				currentSnapshot = readEdit.Apply();
+			}
+
+			// replace snippet with new snippet
+			using (var edit = _textView.TextBuffer.CreateEdit())
+			{
+				edit.Replace(spanToReplace, snippetCode);
+				currentSnapshot = edit.Apply();
+			}
+			
+			var newSpan = new Span(spanToReplace.Start, snippetCode.Length);
+			var snapSpan = new SnapshotSpan(currentSnapshot, newSpan);
+
+			// create read only region for the new snippet
+			IReadOnlyRegion newRegion;
+			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
+			{
+				newRegion = readEdit.CreateReadOnlyRegion(newSpan);
+
+				readEdit.Apply();
+			}
+
+			return newRegion;
 		}
 	}
 }

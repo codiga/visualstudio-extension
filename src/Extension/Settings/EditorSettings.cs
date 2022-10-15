@@ -66,18 +66,27 @@ namespace Extension
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
-			var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
+				// Get TextEditor properties
+				var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
+				
+				// Get the items that are shown in the dialog in VS
+				var itemsList = (FontsAndColorsItems)propertiesList.Item("FontsAndColorsItems").Object;
 
-			var itemsList = (FontsAndColorsItems)propertiesList.Item("FontsAndColorsItems").Object;
-			var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
-			var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
-			var commentColor = Color.FromRgb(colorBytes[2], colorBytes[1], colorBytes[0]);
+				// Get color for comments
+				var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
+				var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
+				var commentColor = Color.FromRgb(colorBytes[2], colorBytes[1], colorBytes[0]);
 
-			var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
-			var bgColorBytes = BitConverter.GetBytes(textItem.Background);
-			var bbgColor = Color.FromRgb(bgColorBytes[2], bgColorBytes[1], bgColorBytes[0]);
-			var fontSize = (short)propertiesList.Item("FontSize").Value;
-			var fontFamily = (string)propertiesList.Item("FontFamily").Value;
+				// Get editor BG
+				var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
+				var bgColorBytes = BitConverter.GetBytes(textItem.Background);
+				var bbgColor = Color.FromRgb(bgColorBytes[2], bgColorBytes[1], bgColorBytes[0]);
+
+				// Get font size in points
+				var fontSize = (short)propertiesList.Item("FontSize").Value;
+
+				// Get current font family
+				var fontFamily = (string)propertiesList.Item("FontFamily").Value;
 
 			return new FontSettings(fontSize, fontFamily, commentColor, bbgColor);
 		}

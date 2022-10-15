@@ -75,12 +75,12 @@ namespace Extension
 				// Get color for comments
 				var commentItem = itemsList.Cast<ColorableItems>().Single(i => i.Name=="Comment");
 				var colorBytes = BitConverter.GetBytes(commentItem.Foreground);
-				var commentColor = Color.FromRgb(colorBytes[2], colorBytes[1], colorBytes[0]);
+				var commentColor = Color.FromRgb(colorBytes[0], colorBytes[1], colorBytes[2]);
 
 				// Get editor BG
 				var textItem = itemsList.Cast<ColorableItems>().Single(i => i.Name == "Plain Text");
 				var bgColorBytes = BitConverter.GetBytes(textItem.Background);
-				var bbgColor = Color.FromRgb(bgColorBytes[2], bgColorBytes[1], bgColorBytes[0]);
+				var bbgColor = Color.FromRgb(bgColorBytes[0], bgColorBytes[1], bgColorBytes[2]);
 
 				// Get font size in points
 				var fontSize = (short)propertiesList.Item("FontSize").Value;

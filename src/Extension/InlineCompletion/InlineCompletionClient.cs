@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -32,6 +33,7 @@ namespace Extension.InlineCompletion
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 		private CodigaClient _apiClient;
 		private ExpansionClient _expansionClient;
+		private int triggerIndentationLevel = 0;
 
 		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
 		public SnapshotSpan CurrentInstructtionSpan { get; private set; }
@@ -115,8 +117,8 @@ namespace Extension.InlineCompletion
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
 				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-				var indentLevel = EditorUtils.GetIndentLevel(line, settings);
-				var indent = EditorUtils.GetIndent(indentLevel, settings);
+				triggerIndentationLevel = EditorUtils.GetIndentLevel(line, settings);
+				var indent = EditorUtils.GetIndent(triggerIndentationLevel, settings);
 				edit.Replace(new Span(caretPos, 1), "\n" + indent);
 				edit.Apply();
 			}
@@ -161,7 +163,10 @@ namespace Extension.InlineCompletion
 			{
 				//_completionView.RemoveVisuals();
 				//_completionView = null;
+				var start = CurrentSnippetSpan.Span.GetStartPoint(_textView.TextBuffer.CurrentSnapshot);
 				RemovePreview(CurrentSnippetSpan);
+				var startPosition = new SnapshotSpan(_textView.TextBuffer.CurrentSnapshot, new Span(start.Position, 0));
+				_textView.Selection.Select(startPosition, false);
 				CurrentSnippetSpan = null;
 				CommitCurrentSnippet();
 				return VSConstants.S_OK;
@@ -221,13 +226,7 @@ namespace Extension.InlineCompletion
 
 		private IReadOnlyRegion InsertSnippetCodePreview(IReadOnlyRegion readOnlyRegion, string snippetCode)
 		{
-			var caretPos = _textView.Caret.Position.BufferPosition.Position;
-			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
-			var line = lineSnapshot.GetText();
-
-			var indentedCode = FormatSnippet(snippetCode, line);
-
-			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
+			var indentedCode = FormatSnippet(snippetCode);
 
 			// remove current read only region
 			ITextSnapshot currentSnapshot;
@@ -237,6 +236,7 @@ namespace Extension.InlineCompletion
 				currentSnapshot = readEdit.Apply();
 			}
 
+			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
 			// replace snippet with new snippet
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
@@ -259,11 +259,10 @@ namespace Extension.InlineCompletion
 			return newRegion;
 		}
 
-		private string FormatSnippet(string snippetCode, string baseLine)
+		private string FormatSnippet(string snippetCode)
 		{
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
-			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, triggerIndentationLevel, settings);
 		}
 	}
 }

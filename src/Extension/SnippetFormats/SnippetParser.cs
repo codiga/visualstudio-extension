@@ -182,6 +182,7 @@ namespace Extension.SnippetFormats
 			{
 				sb.Replace($"${literal.ID}$", literal.Default);
 			}
+			sb.Replace("$end$", "");
 
 			return sb.ToString();
 		}

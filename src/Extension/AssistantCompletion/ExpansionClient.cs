@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Shapes;
 using System.Xml;
 
 namespace Extension.AssistantCompletion
@@ -59,7 +60,15 @@ namespace Extension.AssistantCompletion
 			// replace the typed search text
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var currentLine);
 
-			var startIndex = currentLine.IndexOf(currentLine.Trim().First());
+			int startIndex;
+			if (currentLine.Any(c => c != ' ' && c != '\t'))
+			{
+				startIndex = currentLine.IndexOf(currentLine.Trim().First());
+			}
+			else
+			{
+				startIndex = endColumn;
+			}
 			var position = new TextSpan
 			{
 				iStartLine = startLine,

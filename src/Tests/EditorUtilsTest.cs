@@ -48,6 +48,7 @@ namespace Tests
 		[Test]
 		// use tabs
 		[TestCase("\t\tpublic void main()", 4, 4, false, ExpectedResult = 2)]
+		[TestCase("\t\t", 4, 4, false, ExpectedResult = 2)]
 		[TestCase("\tpublic void main()", 4, 4, false, ExpectedResult = 1)]
 		[TestCase("\tpublic void main()", 2, 4, false, ExpectedResult = 2)]
 		[TestCase("\t\tpublic void main()", 2, 4, false, ExpectedResult = 4)]
@@ -95,7 +96,7 @@ namespace Tests
 			Assert.That(indented, Is.EqualTo("\tpublic void main()\n" +
 											 "\t{\n" +
 											 "\t\t\n" +
-											 "\t}"));
+											 "\t}\n"));
 		}
 
 		[Test]
@@ -120,7 +121,7 @@ namespace Tests
 			Assert.That(indented, Is.EqualTo("    public void main()\n" +
 											 "    {\n" +
 											 "        \n" +
-											 "    }"));
+											 "    }\n"));
 					}
 
 		[Test]
@@ -145,7 +146,7 @@ namespace Tests
 			Assert.That(indented, Is.EqualTo("  public void main()\n" +
 											 "  {\n" +
 											 "    \n" +
-											 "  }"));
+											 "  }\n"));
 		}
 	}
 }

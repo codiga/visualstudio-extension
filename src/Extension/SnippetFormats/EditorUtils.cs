@@ -74,10 +74,11 @@ namespace Extension.SnippetFormats
 			var lines = code.Split('\n');
 			string finalIndent = GetIndent(indentLevel, indentSize, tabSize, useSpace);
 
+			lines[0] = lines[0] + "\n";
 			for (int i = 1; i < lines.Length; i++)
 			{
-				lines[i - 1] = lines[i - 1] + "\n";
 				lines[i] = lines[i].Insert(0, finalIndent);
+				lines[i] = lines[i] + "\n";
 			}
 
 			var indentedCode = string.Concat(lines);
@@ -106,8 +107,18 @@ namespace Extension.SnippetFormats
 		public static int GetIndentLevel(string line, int indentSize, int tabSize, bool useSpace)
 		{
 			//get non text chararcters
-			var firstCharIndex = line.IndexOf(line.Trim().First());
-			var indentChars = line.Substring(0, firstCharIndex);
+			string indentChars = string.Empty;
+
+			if(line.Any(c => c != ' ' && c != '\t'))
+			{
+				var firstCharIndex = line.IndexOf(line.Trim().First());
+				indentChars = line.Substring(0, firstCharIndex);
+			}
+			else
+			{
+				indentChars = line;
+			}
+			
 			var charCounts = indentChars.GroupBy(c => c)
 				.Select(c => new { Char = c.Key, Count = c.Count() });
 			

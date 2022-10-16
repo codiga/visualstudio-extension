@@ -16,6 +16,7 @@ namespace Extension.InlineCompletion
 		/// Classification type.
 		/// </summary>
 		private readonly IClassificationType classificationType;
+		private readonly ILayeredClassificationType layeredClassificationType;
 		private readonly InlineCompletionClient client;
 
 		/// <summary>
@@ -25,6 +26,7 @@ namespace Extension.InlineCompletion
 		internal PreviewClassifier(IClassificationTypeRegistryService registry, InlineCompletionClient client)
 		{
 			this.classificationType = registry.GetClassificationType("PreviewClassifier");
+			//layeredClassificationType = registry.CreateClassificationType(ClassificationLayer.Semantic, "PreviewClassifier", new List<IClassificationType> { });
 			this.client = client;
 		}
 
@@ -65,7 +67,7 @@ namespace Extension.InlineCompletion
 		}
 	}
 
-	internal static class EditorClassifier1ClassificationDefinition
+	internal static class PreviewClassificationDefinition
 	{
 		/// <summary>
 		/// Defines the "PreviewClassifier" classification type.

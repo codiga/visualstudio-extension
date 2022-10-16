@@ -1,4 +1,6 @@
-﻿using Extension.AssistantCompletion;
+﻿using Community.VisualStudio.Toolkit;
+using EnvDTE;
+using Extension.AssistantCompletion;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
@@ -15,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Extension.InlineCompletion
@@ -75,9 +78,13 @@ namespace Extension.InlineCompletion
 				return HandleSessionCommand(nCmdID);
 			}
 
-			_vsTextView.GetBuffer(out var textLines);
-			_vsTextView.GetCaretPos(out var startLine, out var endColumn);
-			textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
+			//_vsTextView.GetBuffer(out var textLines);
+			//_vsTextView.GetCaretPos(out var startLine, out var endColumn);
+			//textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
+
+			var caretPos = _textView.Caret.Position.BufferPosition.Position;
+			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
+			var line = lineSnapshot.GetText();
 
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
@@ -97,19 +104,24 @@ namespace Extension.InlineCompletion
 			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
 			var languages = new ReadOnlyCollection<string>(new[] { language });
 
+			var vssp = VS.GetMefService<SVsServiceProvider>();
+			var dte = (_DTE)vssp.GetService(typeof(_DTE));
+
+
+
 			_apiClient.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
-			var caretPos = _textView.Caret.Position.BufferPosition.Position;
-			
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
-				edit.Replace(new Span(caretPos, 1), "\n");
+				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+				var indentLevel = EditorUtils.GetIndentLevel(line, settings);
+				var indent = EditorUtils.GetIndent(indentLevel, settings);
+				edit.Replace(new Span(caretPos, 1), "\n" + indent);
 				edit.Apply();
 			}
 
 			caretPos = _textView.Caret.Position.BufferPosition.Position;
-			//EditorUtils.GetIndentLevel
 
 			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
 			{
@@ -209,6 +221,12 @@ namespace Extension.InlineCompletion
 
 		private IReadOnlyRegion InsertSnippetCodePreview(IReadOnlyRegion readOnlyRegion, string snippetCode)
 		{
+			var caretPos = _textView.Caret.Position.BufferPosition.Position;
+			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
+			var line = lineSnapshot.GetText();
+
+			var indentedCode = FormatSnippet(snippetCode, line);
+
 			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
 
 			// remove current read only region
@@ -222,11 +240,11 @@ namespace Extension.InlineCompletion
 			// replace snippet with new snippet
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
-				edit.Replace(spanToReplace, snippetCode);
+				edit.Replace(spanToReplace, indentedCode);
 				currentSnapshot = edit.Apply();
 			}
 			
-			var newSpan = new Span(spanToReplace.Start, snippetCode.Length);
+			var newSpan = new Span(spanToReplace.Start, indentedCode.Length);
 			var snapSpan = new SnapshotSpan(currentSnapshot, newSpan);
 
 			// create read only region for the new snippet
@@ -239,6 +257,13 @@ namespace Extension.InlineCompletion
 			}
 
 			return newRegion;
+		}
+
+		private string FormatSnippet(string snippetCode, string baseLine)
+		{
+			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
 		}
 	}
 }

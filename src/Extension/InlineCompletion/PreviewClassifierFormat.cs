@@ -40,8 +40,8 @@ namespace Extension.InlineCompletion
 
 			var settings = EditorSettingsProvider.GetCurrentFontSettings(dte);
 
-			ForegroundColor = settings.CommentColor;
-			
+			ForegroundOpacity = 0.5;
+			this.IsItalic = true;
 		}
 	}
 }

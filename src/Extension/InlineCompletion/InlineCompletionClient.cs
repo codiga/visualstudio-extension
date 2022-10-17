@@ -166,6 +166,7 @@ namespace Extension.InlineCompletion
 				var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
 				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
 				currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
+				_instructionsView.UpdateInstructions(currentIndex, _snippetNavigator.Count);
 			}
 			else
 			{

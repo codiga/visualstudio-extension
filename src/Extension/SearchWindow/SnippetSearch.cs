@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Extension.SearchWindow.View;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 
@@ -23,7 +24,7 @@ namespace Extension.SearchWindow
 		/// </summary>
 		public SnippetSearch() : base(null)
 		{
-			this.Caption = "SnippetSearch";
+			this.Caption = "Snippet Search";
 
 			// This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
 			// we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on

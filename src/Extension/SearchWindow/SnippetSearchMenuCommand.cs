@@ -12,7 +12,7 @@ namespace Extension.SearchWindow
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class SnippetSearchCommand
+	internal sealed class SnippetSearchMenuCommand
 	{
 		/// <summary>
 		/// Command ID.
@@ -30,12 +30,12 @@ namespace Extension.SearchWindow
 		private readonly AsyncPackage package;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SnippetSearchCommand"/> class.
+		/// Initializes a new instance of the <see cref="SnippetSearchMenuCommand"/> class.
 		/// Adds our command handlers for menu (commands must exist in the command table file)
 		/// </summary>
 		/// <param name="package">Owner package, not null.</param>
 		/// <param name="commandService">Command service to add command to, not null.</param>
-		private SnippetSearchCommand(AsyncPackage package, OleMenuCommandService commandService)
+		private SnippetSearchMenuCommand(AsyncPackage package, OleMenuCommandService commandService)
 		{
 			this.package = package ?? throw new ArgumentNullException(nameof(package));
 			commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace Extension.SearchWindow
 		/// <summary>
 		/// Gets the instance of the command.
 		/// </summary>
-		public static SnippetSearchCommand Instance
+		public static SnippetSearchMenuCommand Instance
 		{
 			get;
 			private set;
@@ -76,7 +76,7 @@ namespace Extension.SearchWindow
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
 			OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
-			Instance = new SnippetSearchCommand(package, commandService);
+			Instance = new SnippetSearchMenuCommand(package, commandService);
 		}
 
 		/// <summary>

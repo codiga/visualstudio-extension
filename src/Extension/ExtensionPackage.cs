@@ -1,23 +1,15 @@
-﻿using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
 using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
-using GraphQLClient;
-using Extension.Settings;
-using static Extension.Settings.OptionsPageProvider;
-using Community.VisualStudio.Toolkit;
+using Extension.SearchWindow;
+using System.ComponentModel.Composition;
+using Extension.Caching;
 
-namespace Extension.SearchWindow
+namespace Extension
 {
 	/// <summary>
 	/// This is the class that implements the package exposed by this assembly.
@@ -75,7 +67,7 @@ namespace Extension.SearchWindow
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			await SnippetSearchCommand.InitializeAsync(this);
+			await SnippetSearchMenuCommand.InitializeAsync(this);
 
 		}
 

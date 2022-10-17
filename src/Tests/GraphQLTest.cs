@@ -71,5 +71,19 @@ namespace Tests
 			Assert.NotNull(result);
 			Assert.IsNotEmpty(result);
 		}
+
+		[Test]
+		public async Task GetUser_should_return_user()
+		{
+			// arrange
+			var client = new CodigaClient("0000-0000-028ac693-56e1-465a-b9d7-fe7bb120ae39");
+
+			// act
+			var result = await client.GetUserAsync();
+
+			// assert
+			Assert.NotNull(result);
+			Assert.IsNotEmpty(result);
+		}
 	}
 }

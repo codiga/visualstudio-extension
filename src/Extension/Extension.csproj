@@ -74,9 +74,11 @@
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchWindow\View\GetSnippetsCommand.cs" />
+    <Compile Include="SearchWindow\View\SnippetResultViewModel.cs" />
     <Compile Include="SearchWindow\SnippetSearch.cs" />
-    <Compile Include="SearchWindow\SnippetSearchCommand.cs" />
-    <Compile Include="SearchWindow\SnippetSearchControl.xaml.cs">
+    <Compile Include="SearchWindow\SnippetSearchMenuCommand.cs" />
+    <Compile Include="SearchWindow\View\SnippetSearchControl.xaml.cs">
       <DependentUpon>SnippetSearchControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExtensionPackage.cs" />
@@ -150,7 +152,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="SearchWindow\SnippetSearchControl.xaml">
+    <Page Include="SearchWindow\View\SnippetSearchControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -13,6 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 using GraphQLClient;
+using Extension.Settings;
+using static Extension.Settings.OptionsPageProvider;
+using Community.VisualStudio.Toolkit;
 
 namespace Extension.SearchWindow
 {
@@ -37,9 +40,10 @@ namespace Extension.SearchWindow
 	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	[ProvideToolWindow(typeof(SnippetSearch))]
-	[Guid(SnippetSearchPackage.PackageGuidString)]
+	[Guid(ExtensionPackage.PackageGuidString)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-	public sealed class SnippetSearchPackage : AsyncPackage
+	[ProvideOptionPage(typeof(Settings.OptionsPageProvider.ExtensionOptionsPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
+	public sealed class ExtensionPackage : AsyncPackage
 	{
 		/// <summary>
 		/// SnippetSearchPackage GUID string.
@@ -47,9 +51,9 @@ namespace Extension.SearchWindow
 		public const string PackageGuidString = "e8d2d8f8-96dc-4c92-bb81-346b4d2318e4";
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SnippetSearchPackage"/> class.
+		/// Initializes a new instance of the <see cref="ExtensionPackage"/> class.
 		/// </summary>
-		public SnippetSearchPackage()
+		public ExtensionPackage()
 		{
 			// Inside this method you can place any initialization code that does not require
 			// any Visual Studio service because at this point the package object is created but

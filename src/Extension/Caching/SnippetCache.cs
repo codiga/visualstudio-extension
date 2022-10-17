@@ -24,7 +24,7 @@ namespace Extension.Caching
 		public const int PollIntervalInSeconds = 10;
 		public const int IdleIntervalInMinutes = 10;
 
-		private readonly CodigaClient _client;
+		private CodigaClient _client;
 		private IDictionary<string, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
 		private IDictionary<string, PollingSession> _currentPollingSessions;
 
@@ -32,10 +32,15 @@ namespace Extension.Caching
 		{
 			_cachedSnippets = new Dictionary<string, IReadOnlyCollection<CodigaSnippet>>();
 			_currentPollingSessions = new Dictionary<string, PollingSession>();
-			_client = new CodigaClient();
 		}
 
-		public void StartPolling(string language)
+		public void StartPolling(string language, CodigaClientProvider clientProvider)
+		{
+			_client = clientProvider.GetClient();
+			StartPolling(language);
+		}
+
+		private void StartPolling(string language)
 		{
 			var tokenSource = new CancellationTokenSource();
 			var session = new PollingSession
@@ -121,7 +126,12 @@ namespace Extension.Caching
 
 		public IEnumerable<CodigaSnippet> GetSnippets(string language)
 		{
-			return _cachedSnippets[language];
+			if(!_cachedSnippets.TryGetValue(language, out var snippets))
+			{
+				snippets = _client.GetRecipesForClientByShortcutAsync(language).GetAwaiter().GetResult();
+			}
+
+			return snippets;
 		}
 
 		private void Session_IdleTimerElapsed(object sender, EventArgs e)

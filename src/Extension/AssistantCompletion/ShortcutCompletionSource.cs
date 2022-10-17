@@ -34,7 +34,9 @@ namespace Extension.AssistantCompletion
 
         public CompletionStartData InitializeCompletion(CompletionTrigger trigger, SnapshotPoint triggerLocation, CancellationToken token)
         {
-            if (!char.IsPunctuation(trigger.Character))
+			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+
+			if (!char.IsPunctuation(trigger.Character) || !settings.UseCodingAssistant)
             {
                 return CompletionStartData.DoesNotParticipateInCompletion;
             }

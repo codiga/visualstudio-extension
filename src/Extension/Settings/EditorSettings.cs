@@ -1,5 +1,6 @@
 ﻿using Community.VisualStudio.Toolkit;
 using EnvDTE;
+using Extension.Settings;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -117,6 +118,16 @@ namespace Extension
 			var indentSize = textView.Options.GetOptionValue(DefaultOptions.IndentSizeOptionId);
 
 			return new IndentationSettings(indentSize, tabSize, useSpace);
+		}
+
+		public static CodigaOptions GetCurrentCodigaSettings()
+		{
+			ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			});
+
+			return CodigaOptions.Instance;
 		}
 	}
 }

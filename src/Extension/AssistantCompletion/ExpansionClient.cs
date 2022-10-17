@@ -1,5 +1,6 @@
 ﻿using Community.VisualStudio.Toolkit;
 using EnvDTE;
+using Extension.Caching;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
@@ -43,11 +44,11 @@ namespace Extension.AssistantCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet)
+		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, CodigaClientProvider clientProvider)
 		{
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();
-			_client ??= new CodigaClient();
+			_client = clientProvider.GetClient();
 			_firstUserVariable = snippet.CodeSnippet.Snippet.Declarations.FirstOrDefault()?.ID;
 
 			// start listening for incoming commands/keys

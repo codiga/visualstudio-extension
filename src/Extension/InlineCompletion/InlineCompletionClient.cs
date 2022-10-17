@@ -1,6 +1,7 @@
 ﻿using Community.VisualStudio.Toolkit;
 using EnvDTE;
 using Extension.AssistantCompletion;
+using Extension.Caching;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
@@ -38,7 +39,7 @@ namespace Extension.InlineCompletion
 		private InlineCompletionInstructionsView _instructionsView;
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 
-		private CodigaClient _apiClient;
+		private CodigaClientProvider _clientProvider;
 		private ExpansionClient _expansionClient;
 
 		private int _triggerIndentationLevel = 0;
@@ -46,13 +47,9 @@ namespace Extension.InlineCompletion
 		private int _insertionPosition = 0;
 		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
 
-		public InlineCompletionClient()
+		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, CodigaClientProvider clientProvider)
 		{
-			_apiClient ??= new CodigaClient();
-		}
-
-		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient)
-		{
+			_clientProvider = clientProvider;
 			_textView = textView;
 			_vsTextView = vsTextView;
 			_expansionClient = expansionClient;
@@ -76,6 +73,14 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
 		{
+			var codigaSettings = EditorSettingsProvider.GetCurrentCodigaSettings();
+
+			if (!codigaSettings.UseInlineCompletion)
+			{
+				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				return result;
+			}
+
 			var typedChar = char.MinValue;
 			//make sure the input is a char before getting it
 			if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
@@ -116,15 +121,16 @@ namespace Extension.InlineCompletion
 			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
 			var languages = new ReadOnlyCollection<string>(new[] { language });
 
-			_apiClient.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
+			var client = _clientProvider.GetClient();
+			client.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
 			// set up insertion position below the triggering commment
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
-				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-				_triggerIndentationLevel = EditorUtils.GetIndentLevel(triggeringLine, settings);
-				var indent = EditorUtils.GetIndent(_triggerIndentationLevel, settings);
+				var indentationSettings = EditorSettingsProvider.GetCurrentIndentationSettings();
+				_triggerIndentationLevel = EditorUtils.GetIndentLevel(triggeringLine, indentationSettings);
+				var indent = EditorUtils.GetIndent(_triggerIndentationLevel, indentationSettings);
 				edit.Replace(new Span(caretPos, 1), "\n" + indent);
 				edit.Apply();
 			}
@@ -149,7 +155,7 @@ namespace Extension.InlineCompletion
 
 		private int CommitCurrentSnippet()
 		{
-			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem);
+			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem, _clientProvider);
 			return VSConstants.S_OK;
 		}
 

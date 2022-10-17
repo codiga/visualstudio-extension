@@ -1,20 +1,27 @@
 ﻿using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
-using System;
 using System.Collections.Generic;
-using System.Reactive;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace GraphQLClient
 {
 	public class CodigaClient
 	{
 		private readonly GraphQLHttpClient _client;
+		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
+		private const string AuthHeaderScheme = "X-Api-Token";
 
 		public CodigaClient()
 		{
-			_client = new GraphQLHttpClient("https://api.codiga.io/graphql", new SystemTextJsonSerializer());
+			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+		}
+		public CodigaClient(string apiToken)
+		{
+			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+
+			if(!string.IsNullOrEmpty(apiToken))
+				_client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderScheme, apiToken);
 		}
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)

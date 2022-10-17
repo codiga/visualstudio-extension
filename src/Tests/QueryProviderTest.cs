@@ -14,6 +14,7 @@ namespace Tests
 			var shortcutQuery = QueryProvider.ShortcutQuery;
 			var recordAccessMutation = QueryProvider.RecordRecipeUseMutation;
 			var semanticQuery = QueryProvider.SemanticQuery;
+			var userQuery = QueryProvider.GetUserQuery;
 
 			// assert
 			Assert.NotNull(lastTimeStampQuery);
@@ -27,6 +28,9 @@ namespace Tests
 
 			Assert.NotNull(semanticQuery);
 			Assert.IsNotEmpty(semanticQuery);
+
+			Assert.NotNull(userQuery);
+			Assert.IsNotEmpty(userQuery);
 		}
 	}
 }

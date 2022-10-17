@@ -59,13 +59,17 @@ namespace Extension
 		/// </summary>
 		/// <param name="dte"></param>
 		/// <returns></returns>
-		public static FontSettings GetCurrentFontSettings(DTE dte)
+		public static FontSettings GetCurrentFontSettings()
 		{
 			// switch to main task to be able to access DTE
 			ThreadHelper.JoinableTaskFactory.Run(async () =>
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
+
+			var vssp = VS.GetMefService<SVsServiceProvider>();
+			var dte = (_DTE)vssp.GetService(typeof(_DTE));
+
 			// Get TextEditor properties
 			var propertiesList = dte.get_Properties("FontsAndColors", "TextEditor");
 				

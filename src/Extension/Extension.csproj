@@ -69,7 +69,7 @@
     <Compile Include="InlineCompletion\PreviewClassifierFormat.cs" />
     <Compile Include="InlineCompletion\PreviewClassifierProvider.cs" />
     <Compile Include="InlineCompletion\InlineCompletionClient.cs" />
-    <Compile Include="InlineCompletion\InlineCompletionView.cs" />
+    <Compile Include="InlineCompletion\InlineCompletionInstructionsView.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

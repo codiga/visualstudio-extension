@@ -4,11 +4,15 @@ using Extension.AssistantCompletion;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.GraphModel;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Threading;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,6 +22,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -27,16 +32,19 @@ namespace Extension.InlineCompletion
 	internal class InlineCompletionClient : IOleCommandTarget
 	{
 		private IOleCommandTarget _nextCommandHandler;
-		private InlineCompletionView _completionView;
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
+
+		private InlineCompletionInstructionsView _instructionsView;
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
+
 		private CodigaClient _apiClient;
 		private ExpansionClient _expansionClient;
-		private int triggerIndentationLevel = 0;
 
+		private int _triggerIndentationLevel = 0;
+		private int _triggerCaretPosition = 0;
+		private int _insertionPosition = 0;
 		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
-		public SnapshotSpan CurrentInstructtionSpan { get; private set; }
 
 		public InlineCompletionClient()
 		{
@@ -75,7 +83,7 @@ namespace Extension.InlineCompletion
 				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
 			}
 
-			if(CurrentSnippetSpan != null)
+			if(_instructionsView != null)
 			{
 				return HandleSessionCommand(nCmdID);
 			}
@@ -86,12 +94,12 @@ namespace Extension.InlineCompletion
 
 			var caretPos = _textView.Caret.Position.BufferPosition.Position;
 			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
-			var line = lineSnapshot.GetText();
+			var triggeringLine = lineSnapshot.GetText();
 
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
-				&& EditorUtils.IsSemanticSearchComment(line)
-				&& _completionView == null;
+				&& EditorUtils.IsSemanticSearchComment(triggeringLine)
+				&& _instructionsView == null;
 
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
 			if (!shouldTriggerCompletion)
@@ -99,43 +107,42 @@ namespace Extension.InlineCompletion
 				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 				return result;
 			}
+			_triggerCaretPosition = caretPos;
 
 			// start inline completion session
+
 			// query snippets based on keywords
-			var term = line.Replace("//", "").Trim();
+			var term = triggeringLine.Replace("//", "").Trim();
 			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
 			var languages = new ReadOnlyCollection<string>(new[] { language });
-
-			var vssp = VS.GetMefService<SVsServiceProvider>();
-			var dte = (_DTE)vssp.GetService(typeof(_DTE));
-
-
 
 			_apiClient.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
+			// set up insertion position below the triggering commment
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
 				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-				triggerIndentationLevel = EditorUtils.GetIndentLevel(line, settings);
-				var indent = EditorUtils.GetIndent(triggerIndentationLevel, settings);
+				_triggerIndentationLevel = EditorUtils.GetIndentLevel(triggeringLine, settings);
+				var indent = EditorUtils.GetIndent(_triggerIndentationLevel, settings);
 				edit.Replace(new Span(caretPos, 1), "\n" + indent);
 				edit.Apply();
 			}
 
-			caretPos = _textView.Caret.Position.BufferPosition.Position;
+			_insertionPosition = _textView.Caret.Position.BufferPosition.Position;
 
 			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
 			{
-				CurrentSnippetSpan = readEdit.CreateReadOnlyRegion(new Span(caretPos, 1));
+				CurrentSnippetSpan = readEdit.CreateReadOnlyRegion(new Span(_insertionPosition, 1));
 				readEdit.Apply();
 			}
 
 			CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, "fetching snippets...");
 
-			//_completionView = new InlineCompletionView(_textView, _settings, null, caretPos);
-			// start drawing the adornments
-			//_completionView.StartDrawingCompletionView();
+			_instructionsView = new InlineCompletionInstructionsView(_textView, _triggerCaretPosition);
+
+			// start drawing the adornments for the instructions
+			_instructionsView.StartDrawingInstructions();
 
 			return VSConstants.S_OK;
 		}
@@ -146,23 +153,33 @@ namespace Extension.InlineCompletion
 			return VSConstants.S_OK;
 		}
 
-		private async Task OnQueryFinished(Task<IReadOnlyCollection<CodigaSnippet>> result)
+		private async Task OnQueryFinished(Task<System.Collections.Generic.IReadOnlyCollection<CodigaSnippet>> result)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			var setting = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
-			_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
+			var currentIndex = 0;
 
-			var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
-			CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
+			if (snippets.Any())
+			{
+				_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
+				var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
+				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
+				currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
+			}
+			else
+			{
+				RemovePreview(CurrentSnippetSpan);
+				CurrentSnippetSpan = null;
+			}
 		}
 
 		private int HandleSessionCommand(uint nCmdID)
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
-				//_completionView.RemoveVisuals();
-				//_completionView = null;
+				_instructionsView.RemoveInstructions();
+				_instructionsView = null;
 				var start = CurrentSnippetSpan.Span.GetStartPoint(_textView.TextBuffer.CurrentSnapshot);
 				RemovePreview(CurrentSnippetSpan);
 				var startPosition = new SnapshotSpan(_textView.TextBuffer.CurrentSnapshot, new Span(start.Position, 0));
@@ -174,8 +191,8 @@ namespace Extension.InlineCompletion
 
 			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 			{
-				//_completionView.RemoveVisuals();
-				//_completionView = null;
+				_instructionsView.RemoveInstructions();
+				_instructionsView = null;
 				RemovePreview(CurrentSnippetSpan);
 				CurrentSnippetSpan = null;
 				return VSConstants.S_OK;
@@ -183,6 +200,9 @@ namespace Extension.InlineCompletion
 
 			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.RIGHT)
 			{
+				if(_snippetNavigator == null || _snippetNavigator.Count == 0)
+					return VSConstants.S_OK;
+
 				// get next snippet
 				var next = _snippetNavigator.Next();
 				var i = _snippetNavigator.IndexOf(next);
@@ -190,13 +210,16 @@ namespace Extension.InlineCompletion
 
 				var previewCode = SnippetParser.GetPreviewCode(next);
 				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
-				//_completionView.UpdateSnippetPreview(next.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+				_instructionsView.UpdateInstructions(i + 1, c);
 
 				return VSConstants.S_OK;
 			}
 
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.LEFT)
 			{
+				if (_snippetNavigator == null || _snippetNavigator.Count == 0)
+					return VSConstants.S_OK;
+
 				// get previous snippet
 				var previous = _snippetNavigator.Previous();
 				var i = _snippetNavigator.IndexOf(previous);
@@ -204,7 +227,7 @@ namespace Extension.InlineCompletion
 
 				var previewCode = SnippetParser.GetPreviewCode(previous); 
 				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
-				//_completionView.UpdateSnippetPreview(previous.CodeSnippet.Snippet.Code.CodeString, i + 1, c);
+				_instructionsView.UpdateInstructions(i + 1, c);
 
 				return VSConstants.S_OK;
 			}
@@ -214,6 +237,9 @@ namespace Extension.InlineCompletion
 
 		private void RemovePreview(IReadOnlyRegion readOnlyRegion)
 		{
+			if (readOnlyRegion == null)
+				return;
+
 			using var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit();
 			var spanToDelete = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
 			readEdit.RemoveReadOnlyRegion(readOnlyRegion);
@@ -238,6 +264,7 @@ namespace Extension.InlineCompletion
 
 			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
 			// replace snippet with new snippet
+
 			using (var edit = _textView.TextBuffer.CreateEdit())
 			{
 				edit.Replace(spanToReplace, indentedCode);
@@ -246,7 +273,7 @@ namespace Extension.InlineCompletion
 			
 			var newSpan = new Span(spanToReplace.Start, indentedCode.Length);
 			var snapSpan = new SnapshotSpan(currentSnapshot, newSpan);
-
+			
 			// create read only region for the new snippet
 			IReadOnlyRegion newRegion;
 			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
@@ -255,14 +282,14 @@ namespace Extension.InlineCompletion
 
 				readEdit.Apply();
 			}
-
+			
 			return newRegion;
 		}
 
 		private string FormatSnippet(string snippetCode)
 		{
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			return EditorUtils.IndentCodeBlock(snippetCode, triggerIndentationLevel, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, _triggerIndentationLevel, settings);
 		}
 	}
 }

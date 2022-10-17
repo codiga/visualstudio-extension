@@ -16,10 +16,7 @@ using FontStyle = System.Drawing.FontStyle;
 
 namespace Extension.InlineCompletion
 {
-	/// <summary>
-	/// TextAdornment1 places red boxes behind all the "a"s in the editor window
-	/// </summary>
-	internal sealed class InlineCompletionView
+	internal sealed class InlineCompletionInstructionsView
 	{
 		private const string Preview_Tag = "preview";
 		private const string Instructions_Tag = "instructions";
@@ -36,40 +33,34 @@ namespace Extension.InlineCompletion
 		private readonly FontSettings _settings;
 		private int _triggeringCaret;
 
-		private string? _currentCode;
-		private int _currentSnippet = 0;
-		private int _totalSnippets = 0;
+		private int _currentSnippetIndex = 0;
+		private int _totalSnippetCount = 0;
 		private double _fontSize;
 		private SolidColorBrush _textBrush;
 		private SolidColorBrush _textBackgroundBrush;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
+		/// Initializes a new instance of the <see cref="InlineCompletionInstructionsView"/> class.
 		/// </summary>
 		/// <param name="view">Text view to create the adornment for</param>
-		public InlineCompletionView(IWpfTextView view, FontSettings settings, string? initCode, int caretPos)
+		public InlineCompletionInstructionsView(IWpfTextView view, int caretPos)
 		{
 			if (view == null)
 			{
 				throw new ArgumentNullException("view");
 			}
 
-			_layer = view.GetAdornmentLayer("TextAdornment1");
-			
+			_layer = view.GetAdornmentLayer("InlineCompletionInstructions");
+
+			_settings = EditorSettingsProvider.GetCurrentFontSettings();
 			_view = view;
-			_settings = settings;
-			_currentCode = initCode;
 			_triggeringCaret = caretPos;
-			_fontSize = GetFontSize(settings.FontFamily, settings.FontSize);
+			_fontSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 			_textBrush = new SolidColorBrush(_settings.CommentColor);
 			_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
-
-			var lc = new LengthConverter();
-			var fontSize = (double)lc.ConvertFrom($"{_settings.FontSize}pt");
-			var textSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 		}
 
-		internal void StartDrawingCompletionView()
+		internal void StartDrawingInstructions()
 		{
 			_view.LayoutChanged += OnLayoutChanged;
 		}
@@ -88,59 +79,13 @@ namespace Extension.InlineCompletion
 				Height = geometry.Bounds.Height,
 				FontFamily = new FontFamily(_settings.FontFamily),
 				FontSize = _fontSize,
-				Text = $"[{_currentSnippet}/{_totalSnippets}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
+				Text = $"[{_currentSnippetIndex}/{_totalSnippetCount}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
 
 			Canvas.SetLeft(textBlock, geometry.Bounds.Width + geometry.Bounds.Height);
 			Canvas.SetTop(textBlock, geometry.Bounds.Top);
 			
 			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Instructions_Tag, textBlock, (tag, ui) => { });
-		}
-
-		/// <summary>
-		/// Draws the box that contains the code
-		/// </summary>
-		private void DrawSnippetPreview()
-		{
-			var triggeringLine = GetTriggeringLine();
-			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
-			var caretPos = _view.Caret.Position.BufferPosition;
-
-			var wholeLineSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start, triggeringLine.Length));
-			var lineText = wholeLineSpan.GetText();
-			var firstChar = wholeLineSpan.GetText().Trim().First();
-			var position = lineText.IndexOf(firstChar);
-			var onlyTextSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, triggeringLine.Length));
-			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(onlyTextSpan);
-
-			var content = _currentCode;
-			if(_currentCode == null)
-			{
-				content = "fetching snipppets...";
-			}
-			var loc = content.Split('\n').Length;
-
-			//TODO ensure space
-			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
-
-			double height = loc * geometry.Bounds.Height;
-
-			var textBlock = new TextBlock
-			{
-				Width = 1000,
-				Foreground = _textBrush,
-				Opacity = 1,
-				Background = _textBackgroundBrush,
-				FontFamily = new FontFamily(_settings.FontFamily),
-				FontSize = _fontSize,
-				Height = height,
-				Text = content
-			};
-			//var c = new EditorControl();
-			Canvas.SetLeft(textBlock, onlyTextG.Bounds.Left);
-			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
-
-			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Preview_Tag, textBlock, (tag, ui) => { });
 		}
 
 		/// <summary>
@@ -152,7 +97,7 @@ namespace Extension.InlineCompletion
 		{
 			if (_layer.IsEmpty)
 			{
-				UpdateSnippetPreview(_currentCode, _currentSnippet, _totalSnippets);
+				UpdateInstructions(_currentSnippetIndex, _totalSnippetCount);
 			}
 		}
 
@@ -162,21 +107,19 @@ namespace Extension.InlineCompletion
 		/// <param name="code"></param>
 		/// <param name="current"></param>
 		/// <param name="total"></param>
-		internal void UpdateSnippetPreview(string? code, int current, int total)
+		internal void UpdateInstructions(int current, int total)
 		{
-			_currentCode = code;
-			_currentSnippet = current;
-			_totalSnippets = total;
+			_currentSnippetIndex = current;
+			_totalSnippetCount = total;
 			_layer.RemoveAllAdornments();
 
-			DrawSnippetPreview();
 			DrawCompletionInstructions();
 		}
 
 		/// <summary>
 		/// Removes all adornments from the layer
 		/// </summary>
-		internal void RemoveVisuals()
+		internal void RemoveInstructions()
 		{
 			_view.LayoutChanged -= OnLayoutChanged;
 			_layer.RemoveAllAdornments();
@@ -203,22 +146,6 @@ namespace Extension.InlineCompletion
 			var textBlockSize = f.Height - descend;
 
 			return textBlockSize;
-		}
-
-		/// <summary>
-		/// Ensures that there is enough space below the starting line for the given lines of code.
-		/// </summary>
-		/// <param name="linesOfCode"></param>
-		/// <param name="startLine"></param>
-		/// <returns></returns>
-		private ITextSnapshot EnsureSpaceFor(int linesOfCode, ITextViewLine startLine)
-		{
-			var newLines = new string('\n', linesOfCode);
-
-			var caretPos = _view.Caret.Position.BufferPosition;
-			var edit = _view.TextBuffer.CreateEdit();
-			edit.Insert(caretPos.Position, newLines);
-			return null; ;
 		}
 
 		private ITextViewLine GetTriggeringLine()

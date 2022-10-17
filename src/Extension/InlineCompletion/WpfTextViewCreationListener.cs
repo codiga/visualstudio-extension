@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace Extension.InlineCompletion
 		/// after the selection layer in the Z-order
 		/// </summary>
 		[Export(typeof(AdornmentLayerDefinition))]
-		[Name("TextAdornment1")]
+		[Name("InlineCompletionInstructions")]
 		[Order(After = PredefinedAdornmentLayers.Text)]
 		private AdornmentLayerDefinition editorAdornmentLayer;
 

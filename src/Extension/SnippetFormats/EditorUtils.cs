@@ -77,8 +77,9 @@ namespace Extension.SnippetFormats
 			lines[0] = lines[0] + "\n";
 			for (int i = 1; i < lines.Length; i++)
 			{
-				lines[i] = lines[i].Insert(0, finalIndent);
 				lines[i] = lines[i] + "\n";
+				lines[i] = lines[i].Insert(0, finalIndent);
+				
 			}
 
 			var indentedCode = string.Concat(lines);

@@ -29,19 +29,9 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		public PreviewClassifierFormat()
 		{
-			// switch to main task to be able to access DTE
-			ThreadHelper.JoinableTaskFactory.Run(async () =>
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			});
-
-			var vssp = VS.GetMefService<SVsServiceProvider>();
-			var dte = (_DTE)vssp.GetService(typeof(_DTE));
-
-			var settings = EditorSettingsProvider.GetCurrentFontSettings(dte);
 
 			ForegroundOpacity = 0.5;
-			this.IsItalic = true;
+			IsItalic = true;
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace Extension.InlineCompletion
 		private IList<T> Items { get; }
 		private int CurrentIndex { get; set; }
 
-		public T CurrentItem => Items[CurrentIndex];
+		public T CurrentItem => Items.Any() ? Items[CurrentIndex] : default(T);
 
 		public int Count => Items.Count;
 

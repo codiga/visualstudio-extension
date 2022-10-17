@@ -21,10 +21,10 @@ namespace GraphQLClient
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 
 			if(!string.IsNullOrEmpty(apiToken))
-				_client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderScheme, apiToken);
+				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
 		}
 
-		public async Task<string?> GetUserAsync()
+		public async Task<User> GetUserAsync()
 		{
 			var request = new GraphQLHttpRequest(QueryProvider.GetUserQuery);
 			var result = await _client.SendQueryAsync<GetUserResult>(request);
@@ -102,7 +102,7 @@ namespace GraphQLClient
 
 	internal class GetUserResult
 	{
-		public string? User { get; set; }
+		public User User { get; set; }
 	}
 
 	internal class GetRecipesByShortcutResult
@@ -123,6 +123,11 @@ namespace GraphQLClient
 	internal class RecordRecipeUseMutationResult
 	{
 		public string? RecordAccess { get; set; }
+	}
+
+	public class User
+	{
+		public string UserName { get; set; }
 	}
 
 	/// <summary>

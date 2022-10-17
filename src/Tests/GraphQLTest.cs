@@ -76,14 +76,14 @@ namespace Tests
 		public async Task GetUser_should_return_user()
 		{
 			// arrange
-			var client = new CodigaClient("0000-0000-028ac693-56e1-465a-b9d7-fe7bb120ae39");
+			var token = Environment.GetEnvironmentVariable("XApiToken");
+			var client = new CodigaClient(token);
 
 			// act
 			var result = await client.GetUserAsync();
 
 			// assert
 			Assert.NotNull(result);
-			Assert.IsNotEmpty(result);
 		}
 	}
 }

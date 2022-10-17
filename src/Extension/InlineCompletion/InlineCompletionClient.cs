@@ -91,7 +91,7 @@ namespace Extension.InlineCompletion
 
 			if(_instructionsView != null)
 			{
-				return HandleSessionCommand(nCmdID);
+				return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
 
 			var caretPos = _textView.Caret.Position.BufferPosition.Position;
@@ -192,7 +192,7 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		/// <param name="nCmdID"></param>
 		/// <returns></returns>
-		private int HandleSessionCommand(uint nCmdID)
+		private int HandleSessionCommand(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
@@ -207,16 +207,7 @@ namespace Extension.InlineCompletion
 				return VSConstants.S_OK;
 			}
 
-			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
-			{
-				_instructionsView.RemoveInstructions();
-				_instructionsView = null;
-				RemovePreview(CurrentSnippetSpan);
-				CurrentSnippetSpan = null;
-				return VSConstants.S_OK;
-			}
-
-			if(nCmdID == (uint)VSConstants.VSStd2KCmdID.RIGHT)
+			else if(nCmdID == (uint)VSConstants.VSStd2KCmdID.RIGHT)
 			{
 				if(_snippetNavigator == null || _snippetNavigator.Count == 0)
 					return VSConstants.S_OK;
@@ -233,7 +224,7 @@ namespace Extension.InlineCompletion
 				return VSConstants.S_OK;
 			}
 
-			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.LEFT)
+			else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.LEFT)
 			{
 				if (_snippetNavigator == null || _snippetNavigator.Count == 0)
 					return VSConstants.S_OK;
@@ -248,6 +239,16 @@ namespace Extension.InlineCompletion
 				_instructionsView.UpdateInstructions(i + 1, c);
 
 				return VSConstants.S_OK;
+			}
+			else
+			{
+				_instructionsView.RemoveInstructions();
+				_instructionsView = null;
+				RemovePreview(CurrentSnippetSpan);
+				CurrentSnippetSpan = null;
+
+				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				return result;
 			}
 
 			return VSConstants.S_OK;

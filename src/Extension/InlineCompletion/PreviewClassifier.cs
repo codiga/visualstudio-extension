@@ -8,7 +8,7 @@ using System.ComponentModel.Composition;
 namespace Extension.InlineCompletion
 {
 	/// <summary>
-	/// Classifier that classifies all text as an instance of the "EditorClassifier1" classification type.
+	/// Classifier that classifies the preview snippet code.
 	/// </summary>
 	internal class PreviewClassifier : IClassifier
 	{
@@ -16,7 +16,6 @@ namespace Extension.InlineCompletion
 		/// Classification type.
 		/// </summary>
 		private readonly IClassificationType classificationType;
-		private readonly ILayeredClassificationType layeredClassificationType;
 		private readonly InlineCompletionClient client;
 
 		/// <summary>
@@ -26,7 +25,6 @@ namespace Extension.InlineCompletion
 		internal PreviewClassifier(IClassificationTypeRegistryService registry, InlineCompletionClient client)
 		{
 			this.classificationType = registry.GetClassificationType("PreviewClassifier");
-			//layeredClassificationType = registry.CreateClassificationType(ClassificationLayer.Semantic, "PreviewClassifier", new List<IClassificationType> { });
 			this.client = client;
 		}
 
@@ -45,17 +43,12 @@ namespace Extension.InlineCompletion
 #pragma warning restore 67
 
 		/// <summary>
-		/// Gets all the <see cref="ClassificationSpan"/> objects that intersect with the given range of text.
+		/// Returns new <see cref="ClassificationSpan"/>s based on <see cref="InlineCompletionClient.CurrentSnippetSpan"/> of the completion client.
 		/// </summary>
-		/// <remarks>
-		/// This method scans the given SnapshotSpan for potential matches for this classification.
-		/// In this instance, it classifies everything and returns each span as a new ClassificationSpan.
-		/// </remarks>
-		/// <param name="span">The span currently being classified.</param>
-		/// <returns>A list of ClassificationSpans that represent spans identified to be of this classification.</returns>
+		/// <param name="span"></param>
+		/// <returns></returns>
 		public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span)
 		{
-			// return new classification spans based on the current spans of the inline completion
 			var result = new List<ClassificationSpan>();
 
 			if(client.CurrentSnippetSpan != null && classificationType != null)
@@ -70,7 +63,7 @@ namespace Extension.InlineCompletion
 	internal static class PreviewClassificationDefinition
 	{
 		/// <summary>
-		/// Defines the "PreviewClassifier" classification type.
+		/// Defines the classification type so that it is added to the <see cref="IClassificationTypeRegistryService"/>.
 		/// </summary>
 		[Export(typeof(ClassificationTypeDefinition))]
 		[Name("PreviewClassifier")]

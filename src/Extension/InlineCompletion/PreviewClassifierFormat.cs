@@ -14,13 +14,12 @@ using System.Threading.Tasks;
 namespace Extension.InlineCompletion
 {
 	/// <summary>
-	/// Defines an editor format for the EditorClassifier1 type that has a purple background
-	/// and is underlined.
+	/// Defines an editor format for the Classifier used for previewing snippet code.
 	/// </summary>
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = "PreviewClassifier")]
 	[Name("PreviewClassifier")]
-	[UserVisible(true)] // This should be visible to the end user
+	[UserVisible(true)]
 	[Order(After = Priority.High)]
 	internal sealed class PreviewClassifierFormat : ClassificationFormatDefinition
 	{
@@ -29,7 +28,7 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		public PreviewClassifierFormat()
 		{
-
+			// set the style of the snippet code preview
 			ForegroundOpacity = 0.5;
 			IsItalic = true;
 		}

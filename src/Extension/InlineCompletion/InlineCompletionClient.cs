@@ -1,34 +1,28 @@
-﻿using Community.VisualStudio.Toolkit;
-using EnvDTE;
-using Extension.AssistantCompletion;
+﻿using Extension.AssistantCompletion;
 using Extension.Caching;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.GraphModel;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Threading;
-using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Forms;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Extension.InlineCompletion
 {
+	/// <summary>
+	/// This class is responsible for the inline completion session lifecycle.
+	/// The main purpose is to provide the user with a good preview of potential snippets returned by the semantic search.
+	/// The snippet insertion process is passed to the <see cref="ExpansionClient"/>
+	/// </summary>
 	[Export]
 	internal class InlineCompletionClient : IOleCommandTarget
 	{
@@ -47,6 +41,13 @@ namespace Extension.InlineCompletion
 		private int _insertionPosition = 0;
 		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
 
+		/// <summary>
+		/// Initialize the client and start listening for commands
+		/// </summary>
+		/// <param name="textView"></param>
+		/// <param name="vsTextView"></param>
+		/// <param name="expansionClient"></param>
+		/// <param name="clientProvider"></param>
 		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, CodigaClientProvider clientProvider)
 		{
 			_clientProvider = clientProvider;
@@ -92,10 +93,6 @@ namespace Extension.InlineCompletion
 			{
 				return HandleSessionCommand(nCmdID);
 			}
-
-			//_vsTextView.GetBuffer(out var textLines);
-			//_vsTextView.GetCaretPos(out var startLine, out var endColumn);
-			//textLines.GetLineText(startLine, 0, startLine, endColumn, out var line);
 
 			var caretPos = _textView.Caret.Position.BufferPosition.Position;
 			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
@@ -153,12 +150,21 @@ namespace Extension.InlineCompletion
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Calls the ExpansionClient to insert the selected snippet.
+		/// </summary>
+		/// <returns></returns>
 		private int CommitCurrentSnippet()
 		{
 			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem, _clientProvider);
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Callback for when the API query returns with its results.
+		/// </summary>
+		/// <param name="result"></param>
+		/// <returns></returns>
 		private async Task OnQueryFinished(Task<System.Collections.Generic.IReadOnlyCollection<CodigaSnippet>> result)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -181,6 +187,11 @@ namespace Extension.InlineCompletion
 			}
 		}
 
+		/// <summary>
+		/// Handles all the commands during an open inline session.
+		/// </summary>
+		/// <param name="nCmdID"></param>
+		/// <returns></returns>
 		private int HandleSessionCommand(uint nCmdID)
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
@@ -242,6 +253,10 @@ namespace Extension.InlineCompletion
 			return VSConstants.S_OK;
 		}
 
+		/// <summary>
+		/// Remove the code preview from the editor.
+		/// </summary>
+		/// <param name="readOnlyRegion"></param>
 		private void RemovePreview(IReadOnlyRegion readOnlyRegion)
 		{
 			if (readOnlyRegion == null)
@@ -257,6 +272,12 @@ namespace Extension.InlineCompletion
 			var snapshot = edit.Apply();
 		}
 
+		/// <summary>
+		/// Inserts the provided coded at the given span by replacing the previous read-only region.
+		/// </summary>
+		/// <param name="readOnlyRegion"></param>
+		/// <param name="snippetCode"></param>
+		/// <returns></returns>
 		private IReadOnlyRegion InsertSnippetCodePreview(IReadOnlyRegion readOnlyRegion, string snippetCode)
 		{
 			var indentedCode = FormatSnippet(snippetCode);

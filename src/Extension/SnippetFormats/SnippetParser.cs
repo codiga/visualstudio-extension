@@ -3,27 +3,27 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using System.Linq;
-using Microsoft.VisualStudio.Text.Differencing;
 using Match = System.Text.RegularExpressions.Match;
 using System.Text;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Text.Adornments;
-using MSXML;
-using Microsoft.VisualStudio.Settings.Internal;
-using System.IO;
-using System.Xml;
 using GraphQLClient;
 using Microsoft.VisualStudio.Core.Imaging;
-using Microsoft.VisualStudio.Utilities;
-using System.Web.UI.Design;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Windows.Media;
 
 namespace Extension.SnippetFormats
 {
+	/// <summary>
+	/// General util class for the different snippet formats
+	/// </summary>
 	public static class SnippetParser
 	{
+		/// <summary>
+		/// Creates completion items out of the provided Visual Studio snippets by adding an image and adding the snippet to the property bag.
+		/// </summary>
+		/// <param name="vsSnippets"></param>
+		/// <param name="source"></param>
+		/// <returns></returns>
 		public static ImmutableArray<CompletionItem> FromVisualStudioSnippets(IEnumerable<VisualStudioSnippet> vsSnippets, IAsyncCompletionSource source)
 		{
 			return vsSnippets.Select(s =>
@@ -40,11 +40,17 @@ namespace Extension.SnippetFormats
 			}).ToImmutableArray();
 		}
 
+		/// <summary>
+		/// Creates Visual Studio snippets out of the provided Codiga snippet.
+		/// Also takes care of replacing all Codiga-specific variables in the code.
+		/// </summary>
+		/// <param name="codigaSnippet"></param>
+		/// <param name="settings"></param>
+		/// <returns></returns>
 		public static VisualStudioSnippet FromCodigaSnippet(CodigaSnippet codigaSnippet, IndentationSettings settings)
 		{
 			var vsSnippet = new VisualStudioSnippet
 			{
-				// TODO metdadata
 				CodeSnippet = new CodeSnippet
 				{
 					Format = "1.0.0",

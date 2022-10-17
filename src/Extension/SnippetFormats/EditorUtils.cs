@@ -143,6 +143,14 @@ namespace Extension.SnippetFormats
 			return GetIndent(level, settings.IndentSize, settings.TabSize, settings.UseSpace);
 		}
 
+		/// <summary>
+		/// Returns the ready-to-print indent for the given settings.
+		/// </summary>
+		/// <param name="level"></param>
+		/// <param name="indentSize"></param>
+		/// <param name="tabSize"></param>
+		/// <param name="useSpace"></param>
+		/// <returns></returns>
 		public static string GetIndent(int level, int indentSize, int tabSize, bool useSpace)
 		{
 			int totalIndentSize = level * indentSize;

@@ -120,6 +120,10 @@ namespace Extension
 			return new IndentationSettings(indentSize, tabSize, useSpace);
 		}
 
+		/// <summary>
+		/// Get the current extension settings that are set under Tools->Options->Codiga
+		/// </summary>
+		/// <returns></returns>
 		public static CodigaOptions GetCurrentCodigaSettings()
 		{
 			ThreadHelper.JoinableTaskFactory.Run(async () =>

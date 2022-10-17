@@ -16,6 +16,10 @@ using FontStyle = System.Drawing.FontStyle;
 
 namespace Extension.InlineCompletion
 {
+	/// <summary>
+	/// This class is responsible for drawing the adornments for the inlince completion instructions
+	/// that provides the users with the keyboard shortcuts they need to know.
+	/// </summary>
 	internal sealed class InlineCompletionInstructionsView
 	{
 		private const string Preview_Tag = "preview";
@@ -66,7 +70,7 @@ namespace Extension.InlineCompletion
 		}
 
 		/// <summary>
-		/// Draws the instructions for the completion session
+		/// Draws the instructions for the completion session by adding a TextBlock to the adornment layer.
 		/// </summary>
 		private void DrawCompletionInstructions()
 		{

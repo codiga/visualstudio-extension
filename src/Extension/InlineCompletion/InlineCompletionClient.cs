@@ -271,7 +271,9 @@ namespace Extension.InlineCompletion
 				edit.Replace(spanToReplace, indentedCode);
 				currentSnapshot = edit.Apply();
 			}
-			
+			var caretPosition = new SnapshotPoint(_textView.TextSnapshot, _triggerCaretPosition);
+			_textView.Caret.MoveTo(caretPosition);
+
 			var newSpan = new Span(spanToReplace.Start, indentedCode.Length);
 			var snapSpan = new SnapshotSpan(currentSnapshot, newSpan);
 			

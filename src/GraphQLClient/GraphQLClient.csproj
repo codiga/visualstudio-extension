@@ -46,6 +46,7 @@
     <None Remove="Queries\GetRecipesForClientByShortcut.graphql" />
     <None Remove="Queries\GetRecipesForClientByShortcutLastTimestamp.graphql" />
     <None Remove="Queries\GetRecipesForClientSemantic.graphql" />
+    <None Remove="Queries\GetUser.graphql" />
     <None Remove="Queries\RecordRecipeUse.graphql" />
   </ItemGroup>
 
@@ -53,6 +54,7 @@
     <EmbeddedResource Include="Queries\GetRecipesForClientByShortcut.graphql" />
     <EmbeddedResource Include="Queries\GetRecipesForClientByShortcutLastTimestamp.graphql" />
     <EmbeddedResource Include="Queries\GetRecipesForClientSemantic.graphql" />
+    <EmbeddedResource Include="Queries\GetUser.graphql" />
     <EmbeddedResource Include="Queries\RecordRecipeUse.graphql" />
   </ItemGroup>
 

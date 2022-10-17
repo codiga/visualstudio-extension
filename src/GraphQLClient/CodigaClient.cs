@@ -24,6 +24,14 @@ namespace GraphQLClient
 				_client.HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(AuthHeaderScheme, apiToken);
 		}
 
+		public async Task<string?> GetUserAsync()
+		{
+			var request = new GraphQLHttpRequest(QueryProvider.GetUserQuery);
+			var result = await _client.SendQueryAsync<GetUserResult>(request);
+
+			return result.Data.User;
+		}
+
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
@@ -34,7 +42,7 @@ namespace GraphQLClient
 			variablesDict["dependencies"] = "";
 			variablesDict["parameters"] = "";
 			variablesDict["language"] = language;
-			variablesDict["onlyPublic"] = true;
+			variablesDict["onlyPublic"] = null;
 			variablesDict["onlyPrivate"] = null;
 			variablesDict["onlySubscribed"] = false;
 
@@ -91,6 +99,12 @@ namespace GraphQLClient
 			return result.Data.AssistantRecipesSemanticSearch;
 		}
 	}
+
+	internal class GetUserResult
+	{
+		public string? User { get; set; }
+	}
+
 	internal class GetRecipesByShortcutResult
 	{
 		public IReadOnlyCollection<CodigaSnippet>? GetRecipesForClientByShortcut { get; set; }

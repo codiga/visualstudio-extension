@@ -122,7 +122,7 @@ namespace Extension.InlineCompletion
 			var languages = new ReadOnlyCollection<string>(new[] { language });
 
 			var client = _clientProvider.GetClient();
-			client.GetRecipesForClientSemanticAsync(term, languages, true, 10, 0)
+			client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
 			// set up insertion position below the triggering commment

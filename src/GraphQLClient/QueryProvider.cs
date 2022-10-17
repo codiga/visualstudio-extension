@@ -13,11 +13,13 @@ namespace GraphQLClient
 		private const string ShortcutLastTimestampQueryFile = Namespace + "GetRecipesForClientByShortcutLastTimestamp.graphql";
 		private const string RecordRecipeUseMutationFile = Namespace + "RecordRecipeUse.graphql";
 		private const string SemanticQueryFile = Namespace + "GetRecipesForClientSemantic.graphql";
+		private const string GetUserQueryFile = Namespace + "GetUser.graphql";
 
 		public static string ShortcutQuery { get; }
 		public static string ShortcutLastTimestampQuery { get; }
 		public static string SemanticQuery { get; }
 		public static string RecordRecipeUseMutation { get; }
+		public static string GetUserQuery { get; }
 
 		static QueryProvider()
 		{
@@ -45,6 +47,12 @@ namespace GraphQLClient
 			{
 				using StreamReader reader = new StreamReader(stream);
 				SemanticQuery = reader.ReadToEnd();
+			}
+
+			using (Stream stream = assembly.GetManifestResourceStream(GetUserQueryFile))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				GetUserQuery = reader.ReadToEnd();
 			}
 		}
 	}

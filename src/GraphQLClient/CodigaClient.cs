@@ -16,11 +16,19 @@ namespace GraphQLClient
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 		}
+
 		public CodigaClient(string apiToken)
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 
 			if(!string.IsNullOrEmpty(apiToken))
+				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
+		}
+
+		public void SetApiToken(string apiToken)
+		{
+			_client.HttpClient.DefaultRequestHeaders.Remove(AuthHeaderScheme);
+			if (!string.IsNullOrEmpty(apiToken))
 				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
 		}
 

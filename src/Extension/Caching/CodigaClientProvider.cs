@@ -21,9 +21,16 @@ namespace Extension.Caching
 
 				var settings = CodigaOptions.Instance;
 				Client = new CodigaClient(settings.ApiToken);
+
+				CodigaOptions.Saved += CodigaOptions_Saved;
 			}
 
 			return Client;
+		}
+
+		private void CodigaOptions_Saved(CodigaOptions obj)
+		{
+			Client.SetApiToken(obj.ApiToken);
 		}
 	}
 }

@@ -93,10 +93,10 @@ namespace Tests
 				useSpace: false);
 
 			// assert
-			Assert.That(indented, Is.EqualTo("\tpublic void main()\n" +
-											 "\t{\n" +
-											 "\t\t\n" +
-											 "\t}\n"));
+			Assert.That(indented, Is.EqualTo("\tpublic void main()\r\n" +
+											 "\t{\r\n" +
+											 "\t\t\r\n" +
+											 "\t}\r\n"));
 		}
 
 		[Test]
@@ -118,10 +118,10 @@ namespace Tests
 				useSpace: true);
 
 			// assert
-			Assert.That(indented, Is.EqualTo("    public void main()\n" +
-											 "    {\n" +
-											 "        \n" +
-											 "    }\n"));
+			Assert.That(indented, Is.EqualTo("    public void main()\r\n" +
+											 "    {\r\n" +
+											 "        \r\n" +
+											 "    }\r\n"));
 					}
 
 		[Test]
@@ -143,10 +143,10 @@ namespace Tests
 				useSpace: false);
 
 			// assert
-			Assert.That(indented, Is.EqualTo("  public void main()\n" +
-											 "  {\n" +
-											 "    \n" +
-											 "  }\n"));
+			Assert.That(indented, Is.EqualTo("  public void main()\r\n" +
+											 "  {\r\n" +
+											 "    \r\n" +
+											 "  }\r\n"));
 		}
 	}
 }

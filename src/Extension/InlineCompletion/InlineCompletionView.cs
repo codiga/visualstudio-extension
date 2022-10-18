@@ -143,8 +143,8 @@ namespace Extension.InlineCompletion
 			var lineText = wholeLineSpan.GetText();
 			var firstChar = wholeLineSpan.GetText().Trim().First();
 			var position = lineText.IndexOf(firstChar);
-			var onlyTextSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, triggeringLine.Length));
-			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(onlyTextSpan);
+			var firstCharacterSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, 1));
+			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(firstCharacterSpan);
 
 			var content = _currentSnippetCode;
 			if (_currentSnippetCode == null)
@@ -157,10 +157,10 @@ namespace Extension.InlineCompletion
 			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
 
 			double height = loc * geometry.Bounds.Height;
-
+			
 			var textBlock = new TextBlock
 			{
-				Width = 1000,
+				Width = _view.ViewportWidth,
 				Foreground = _textBrush,
 				FontStyle = FontStyles.Italic,
 				Focusable = false,
@@ -170,10 +170,18 @@ namespace Extension.InlineCompletion
 				Height = height,
 				Text = content
 			};
-			Canvas.SetLeft(textBlock, onlyTextG.Bounds.Left);
-			Canvas.SetTop(textBlock, geometry.Bounds.Bottom);
 
-			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Preview_Tag, textBlock, (tag, ui) => { });
+			var border = new Border
+			{
+				BorderThickness = new Thickness(1, 0, 0, 1),
+				BorderBrush = _textBrush,
+				Child = textBlock,
+			};
+
+			Canvas.SetLeft(border, onlyTextG.Bounds.Left);
+			Canvas.SetTop(border, geometry.Bounds.Bottom);
+
+			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Preview_Tag, border, (tag, ui) => { });
 		}
 
 		/// <summary>
@@ -193,16 +201,11 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private double GetFontSize(string familyName, short size)
 		{
-			var fam = new FontFamily(familyName);
-			var t = fam.FamilyNames;
 			var f = new Font(familyName, size);
-			
 			var family = new System.Drawing.FontFamily(familyName);
 			var d = family.GetCellDescent(FontStyle.Regular);
-			var a = family.GetCellAscent(FontStyle.Regular);
 			var emHeight = family.GetEmHeight(FontStyle.Regular);
 			var descend = (f.Size * d) / emHeight;
-			var ascend = (f.Size * a) / emHeight;
 			var textBlockSize = f.Height - descend;
 
 			return textBlockSize;

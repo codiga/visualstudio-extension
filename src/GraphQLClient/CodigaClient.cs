@@ -14,13 +14,17 @@ namespace GraphQLClient
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
 
-		public CodigaClient()
+		private string Fingerprint { get; }
+
+		public CodigaClient(string fingerprint)
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+			Fingerprint = fingerprint;
 		}
 
-		public CodigaClient(string apiToken)
+		public CodigaClient(string apiToken, string fingerprint)
 		{
+			Fingerprint = fingerprint;
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 
 			if(!string.IsNullOrEmpty(apiToken))
@@ -46,7 +50,7 @@ namespace GraphQLClient
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
-			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["fingerprint"] = Fingerprint;
 			variablesDict["filename"] = "";
 			variablesDict["term"] = "";
 			variablesDict["dependencies"] = "";
@@ -66,7 +70,7 @@ namespace GraphQLClient
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
-			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["fingerprint"] = Fingerprint;
 			variablesDict["dependencies"] = "";
 			variablesDict["language"] = language;
 
@@ -79,7 +83,7 @@ namespace GraphQLClient
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
-			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["fingerprint"] = Fingerprint;
 			variablesDict["recipeId"] = recipeId;
 
 			var request = new GraphQLHttpRequest(QueryProvider.RecordRecipeUseMutation, variables);
@@ -97,7 +101,7 @@ namespace GraphQLClient
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
-			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
+			variablesDict["fingerprint"] = Fingerprint;
 			variablesDict["filename"] = "";
 			variablesDict["term"] = keywords;
 			variablesDict["dependencies"] = "";

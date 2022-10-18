@@ -19,8 +19,8 @@ namespace Extension.Caching
 					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 				});
 
-				var settings = CodigaOptions.Instance;
-				Client = new CodigaClient(settings.ApiToken);
+				var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+				Client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
 
 				CodigaOptions.Saved += CodigaOptions_Saved;
 			}

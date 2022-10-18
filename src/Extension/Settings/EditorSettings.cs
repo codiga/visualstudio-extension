@@ -131,6 +131,12 @@ namespace Extension
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
 
+			if(string.IsNullOrEmpty(CodigaOptions.Instance.Fingerprint))
+			{
+				CodigaOptions.Instance.Fingerprint = Guid.NewGuid().ToString();
+				CodigaOptions.Instance.Save();
+			}
+
 			return CodigaOptions.Instance;
 		}
 	}

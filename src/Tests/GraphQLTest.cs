@@ -13,12 +13,13 @@ namespace Tests
 	[Explicit("External API call")]
 	internal class GraphQLTest
 	{
+		private static string fingerprint = Guid.NewGuid().ToString();
 
 		[Test]
 		public async Task GetRecipesForClientByShortcutAsync_should_return_all_snippets()
 		{
 			// arrange
-			var client = new CodigaClient();
+			var client = new CodigaClient(fingerprint);
 
 			// act
 			var snippets = await client.GetRecipesForClientByShortcutAsync("Csharp");
@@ -32,7 +33,7 @@ namespace Tests
 		public async Task GetRecipesForClientByShortcutLastTimestamp_should_return_last_timestamp()
 		{
 			// arrange
-			var client = new CodigaClient();
+			var client = new CodigaClient(fingerprint);
 
 			// act
 			var ts = await client.GetRecipesForClientByShortcutLastTimestampAsync("Csharp");
@@ -45,7 +46,7 @@ namespace Tests
 		public async Task RecordRecipeUse_should_record_access()
 		{
 			// arrange
-			var client = new CodigaClient();
+			var client = new CodigaClient(fingerprint);
 
 			// act
 			var result = await client.RecordRecipeUseAsync(9260);
@@ -58,7 +59,7 @@ namespace Tests
 		public async Task GetRecipesForClientSemantic_should_return_snippets()
 		{
 			// arrange
-			var client = new CodigaClient();
+			var client = new CodigaClient(fingerprint);
 			var languages = new ReadOnlyCollection<string>(new[] { "Csharp" });
 			var watch = new Stopwatch();
 			watch.Start();
@@ -77,7 +78,7 @@ namespace Tests
 		{
 			// arrange
 			var token = Environment.GetEnvironmentVariable("XApiToken");
-			var client = new CodigaClient(token);
+			var client = new CodigaClient(token, fingerprint);
 
 			// act
 			var result = await client.GetUserAsync();

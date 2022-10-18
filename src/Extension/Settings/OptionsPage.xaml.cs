@@ -11,21 +11,25 @@ namespace Extension.Settings
 	/// </summary>
 	public partial class OptionsPage : UserControl
 	{
-		private CodigaClient CodigaClient { get; }
+		private CodigaClient CodigaClient { get; set; }
 
 		internal CodigaOptionPage extensionOptionsPage;
 
 		public OptionsPage()
 		{
 			InitializeComponent();
-			CodigaClient = new CodigaClient();
 		}
 		
 		public void Initialize()
 		{
-			cbUseCodingAssistant.IsChecked = CodigaOptions.Instance.UseCodingAssistant;
-			cbUseInlineCompletion.IsChecked = CodigaOptions.Instance.UseInlineCompletion;
-			txtToken.Text = CodigaOptions.Instance.ApiToken;
+			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+			CodigaClient = new CodigaClient(settings.Fingerprint);
+
+			cbUseCodingAssistant.IsChecked = settings.UseCodingAssistant;
+			cbUseInlineCompletion.IsChecked = settings.UseInlineCompletion;
+			lblFingerprint.Text = settings.Fingerprint;
+			txtToken.Text = settings.ApiToken;
+
 			CodigaOptions.Instance.Save();
 		}
 
@@ -60,7 +64,7 @@ namespace Extension.Settings
 			lblUserName.Text = "";
 			imgError.Visibility = Visibility.Collapsed; 
 			imgCheck.Visibility = Visibility.Collapsed;
-
+			
 			var result = ThreadHelper.JoinableTaskFactory.Run(async () =>
 			{
 				return await CodigaClient.GetUserAsync();

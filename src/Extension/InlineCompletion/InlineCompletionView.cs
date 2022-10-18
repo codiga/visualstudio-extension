@@ -44,6 +44,8 @@ namespace Extension.InlineCompletion
 		private SolidColorBrush _textBrush;
 		private SolidColorBrush _textBackgroundBrush;
 
+		public const string PreviewLayerName = "InlineCompletionLayer";
+
 		public bool ShowPreview { get; set; } = true;
 		public bool ShowInstructions { get; set; } = true;
 
@@ -58,7 +60,7 @@ namespace Extension.InlineCompletion
 				throw new ArgumentNullException("view");
 			}
 
-			_layer = view.GetAdornmentLayer("InlineCompletionInstructions");
+			_layer = view.GetAdornmentLayer(PreviewLayerName);
 
 			_settings = EditorSettingsProvider.GetCurrentFontSettings();
 			_view = view;

@@ -211,14 +211,14 @@ namespace Extension.InlineCompletion
 
 				return VSConstants.S_OK;
 			}
-			else
+			else if((pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR) || 
+					nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 			{
 				_completionView.RemoveInstructions();
 				_completionView = null;
-
-				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-				return result;
 			}
+
+			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
 	}
 }

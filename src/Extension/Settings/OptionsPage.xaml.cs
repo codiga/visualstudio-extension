@@ -69,7 +69,7 @@ namespace Extension.Settings
 			string response;
 			if (result.Errors != null && result.Errors.Any())
 			{
-				response = result.Errors.First().Message;
+				response = CodigaClient.GetReadableErrorMessage(result.Errors.First().Message);
 				imgError.Visibility = Visibility.Visible;
 			}
 			else

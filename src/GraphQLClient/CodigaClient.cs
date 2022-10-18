@@ -119,7 +119,17 @@ namespace GraphQLClient
 			_client.Dispose();
 			_client = null;
 		}
+
+		public static string GetReadableErrorMessage(string errorMessage)
+		{
+			return errorMessage switch
+			{
+				"user-not-logged" => "User is not logged in or the token is invalid.",
+				_ => errorMessage,
+			};
+		}
 	}
+
 
 	public class GetUserResult
 	{

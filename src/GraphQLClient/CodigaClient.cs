@@ -1,14 +1,16 @@
-﻿using GraphQL.Client.Http;
+﻿using GraphQL;
+using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
+using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace GraphQLClient
 {
-	public class CodigaClient
+	public class CodigaClient : IDisposable
 	{
-		private readonly GraphQLHttpClient _client;
+		private GraphQLHttpClient? _client;
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
 
@@ -16,6 +18,7 @@ namespace GraphQLClient
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 		}
+
 		public CodigaClient(string apiToken)
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
@@ -24,12 +27,19 @@ namespace GraphQLClient
 				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
 		}
 
-		public async Task<User> GetUserAsync()
+		public void SetApiToken(string apiToken)
+		{
+			_client.HttpClient.DefaultRequestHeaders.Remove(AuthHeaderScheme);
+			if (!string.IsNullOrEmpty(apiToken))
+				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
+		}
+
+		public async Task<GraphQLResponse<GetUserResult>> GetUserAsync()
 		{
 			var request = new GraphQLHttpRequest(QueryProvider.GetUserQuery);
 			var result = await _client.SendQueryAsync<GetUserResult>(request);
 
-			return result.Data.User;
+			return result;
 		}
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
@@ -80,6 +90,11 @@ namespace GraphQLClient
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip)
 		{
+			return await GetRecipesForClientSemanticAsync(keywords, languages, onlyPublic, null, false, howMany, skip);
+		}
+
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool? onlyPublic, bool? onlyPrivate, bool? onlySubscribed, int howMany, int skip)
+		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
 			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
@@ -89,8 +104,8 @@ namespace GraphQLClient
 			variablesDict["parameters"] = "";
 			variablesDict["languages"] = languages;
 			variablesDict["onlyPublic"] = onlyPublic;
-			variablesDict["onlyPrivate"] = null;
-			variablesDict["onlySubscribed"] = false;
+			variablesDict["onlyPrivate"] = onlyPrivate;
+			variablesDict["onlySubscribed"] = onlySubscribed;
 			variablesDict["howmany"] = howMany;
 			variablesDict["skip"] = skip;
 
@@ -98,9 +113,15 @@ namespace GraphQLClient
 			var result = await _client.SendQueryAsync<GetRecipesSemanticResult>(request);
 			return result.Data.AssistantRecipesSemanticSearch;
 		}
+
+		public void Dispose()
+		{
+			_client.Dispose();
+			_client = null;
+		}
 	}
 
-	internal class GetUserResult
+	public class GetUserResult
 	{
 		public User User { get; set; }
 	}

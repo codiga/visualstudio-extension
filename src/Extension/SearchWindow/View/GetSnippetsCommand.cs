@@ -1,4 +1,5 @@
-﻿using GraphQLClient;
+﻿using Extension.Caching;
+using GraphQLClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,29 @@ namespace Extension.SearchWindow.View
 {
 	internal class GetSnippetsCommand : ICommand
 	{
-		public event EventHandler CanExecuteChanged;
+		public SnippetSearchViewModel ViewModel;
 
-		public SnippetResultViewModel ViewModel;
+		public event EventHandler CanExecuteChanged
+		{
+			add { CommandManager.RequerySuggested += value; }
+
+			remove { CommandManager.RequerySuggested -= value; }
+		}
 
 		public bool CanExecute(object parameter)
 		{
 			return true;
 		}
 
-		public void Execute(object parameter)
+		public async void Execute(object parameter)
 		{
-			var snippet = new CodigaSnippet { Name = "TestSnippet" };
-			ViewModel.Snippets.Add(snippet);
+			await ViewModel.QuerySnippetsAsync();
+
+			RaiseCanExecuteChanged();
+		}
+		public void RaiseCanExecuteChanged()
+		{
+			CommandManager.InvalidateRequerySuggested();
 		}
 	}
 }

@@ -73,13 +73,13 @@ namespace Extension.SnippetFormats
 		{
 			var lines = code.Split('\n');
 			string finalIndent = GetIndent(indentLevel, indentSize, tabSize, useSpace);
-
-			lines[0] = lines[0] + "\n";
+			
+			//TODO get line ending settings
+			lines[0] = lines[0] + "\r\n";
 			for (int i = 1; i < lines.Length; i++)
 			{
-				lines[i] = lines[i] + "\n";
+				lines[i] = lines[i] + "\r\n";
 				lines[i] = lines[i].Insert(0, finalIndent);
-				
 			}
 
 			var indentedCode = string.Concat(lines);

@@ -12,13 +12,13 @@
              Name="CodeSnippetSearch">
 
 	<UserControl.DataContext>
-		<local:SnippetResultViewModel/>
+		<local:SnippetSearchViewModel/>
 	</UserControl.DataContext>	
 	
     <Grid>
 		<StackPanel Orientation="Vertical">
             <TextBlock Margin="10" HorizontalAlignment="Left">Code Snippet Search</TextBlock>
-			<TextBox Margin ="5"></TextBox>
+			<TextBox Margin="5" Text="{Binding Term}"></TextBox>
 			<Button Margin ="5" Content="Search" Command="{Binding GetSnippets}" Width="120" Height="20" Name="button1" HorizontalAlignment="Left"/>
 
 			<ScrollViewer HorizontalScrollBarVisibility="Auto" Height="300">
@@ -31,7 +31,7 @@
 						</ItemsControl.ItemsPanel>
 						<ItemsControl.ItemTemplate>
 							<DataTemplate>
-								<TextBlock Foreground="White" FontSize="20" Text="{Binding Name}"/>
+								<TextBlock Foreground="White" FontSize="20" Text="{Binding CodeSnippet.Header.Title}"/>
 							</DataTemplate>
 						</ItemsControl.ItemTemplate>
 					</ItemsControl>

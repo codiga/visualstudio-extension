@@ -1,15 +1,16 @@
 ﻿using GraphQL;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
+using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace GraphQLClient
 {
-	public class CodigaClient
+	public class CodigaClient : IDisposable
 	{
-		private readonly GraphQLHttpClient _client;
+		private GraphQLHttpClient? _client;
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
 
@@ -89,6 +90,11 @@ namespace GraphQLClient
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip)
 		{
+			return await GetRecipesForClientSemanticAsync(keywords, languages, onlyPublic, null, false, howMany, skip);
+		}
+
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool? onlyPublic, bool? onlyPrivate, bool? onlySubscribed, int howMany, int skip)
+		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
 			variablesDict["fingerprint"] = "5fff6cfc-bfd2-45db-9cd1-d9821ec9628c";
@@ -98,14 +104,20 @@ namespace GraphQLClient
 			variablesDict["parameters"] = "";
 			variablesDict["languages"] = languages;
 			variablesDict["onlyPublic"] = onlyPublic;
-			variablesDict["onlyPrivate"] = null;
-			variablesDict["onlySubscribed"] = false;
+			variablesDict["onlyPrivate"] = onlyPrivate;
+			variablesDict["onlySubscribed"] = onlySubscribed;
 			variablesDict["howmany"] = howMany;
 			variablesDict["skip"] = skip;
 
 			var request = new GraphQLHttpRequest(QueryProvider.SemanticQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesSemanticResult>(request);
 			return result.Data.AssistantRecipesSemanticSearch;
+		}
+
+		public void Dispose()
+		{
+			_client.Dispose();
+			_client = null;
 		}
 	}
 

@@ -30,7 +30,7 @@ namespace Extension.InlineCompletion
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
 
-		private InlineCompletionInstructionsView _instructionsView;
+		private InlineCompletionView _completionView;
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 
 		private CodigaClientProvider _clientProvider;
@@ -85,7 +85,7 @@ namespace Extension.InlineCompletion
 				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
 			}
 
-			if(_instructionsView != null)
+			if(_completionView != null)
 			{
 				return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
@@ -97,7 +97,7 @@ namespace Extension.InlineCompletion
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
 				&& EditorUtils.IsSemanticSearchComment(triggeringLine)
-				&& _instructionsView == null;
+				&& _completionView == null;
 
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
 			if (!shouldTriggerCompletion)
@@ -118,10 +118,10 @@ namespace Extension.InlineCompletion
 			client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
-			_instructionsView = new InlineCompletionInstructionsView(_textView, _triggerCaretPosition);
+			_completionView = new InlineCompletionView(_textView, _triggerCaretPosition);
 
 			// start drawing the adornments for the instructions
-			_instructionsView.StartDrawingInstructions();
+			_completionView.StartDrawingInstructions();
 
 			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
@@ -148,7 +148,7 @@ namespace Extension.InlineCompletion
 			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
 			var currentIndex = 0;
 
-			if (_instructionsView == null)
+			if (_completionView == null)
 				return;
 
 			if (snippets.Any())
@@ -156,12 +156,12 @@ namespace Extension.InlineCompletion
 				_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
 				var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
 				currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
-				_instructionsView.UpdateInstructions(previewCode, currentIndex, _snippetNavigator.Count);
+				_completionView.UpdateView(previewCode, currentIndex, _snippetNavigator.Count);
 			}
 			else
 			{
-				_instructionsView.ShowPreview = false;
-				_instructionsView.UpdateInstructions(null, 0, 0);
+				_completionView.ShowPreview = false;
+				_completionView.UpdateView(null, 0, 0);
 			}
 		}
 
@@ -174,8 +174,8 @@ namespace Extension.InlineCompletion
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
-				_instructionsView.RemoveInstructions();
-				_instructionsView = null;
+				_completionView.RemoveInstructions();
+				_completionView = null;
 				CommitCurrentSnippet();
 				return VSConstants.S_OK;
 			}
@@ -191,7 +191,7 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(next);
-				_instructionsView.UpdateInstructions(previewCode, i + 1, c);
+				_completionView.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
@@ -207,14 +207,14 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(previous); 
-				_instructionsView.UpdateInstructions(previewCode, i + 1, c);
+				_completionView.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
 			else
 			{
-				_instructionsView.RemoveInstructions();
-				_instructionsView = null;
+				_completionView.RemoveInstructions();
+				_completionView = null;
 
 				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 				return result;

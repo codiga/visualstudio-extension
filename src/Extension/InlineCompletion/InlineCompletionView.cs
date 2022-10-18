@@ -20,7 +20,7 @@ namespace Extension.InlineCompletion
 	/// This class is responsible for drawing the adornments for the inlince completion instructions
 	/// that provides the users with the keyboard shortcuts they need to know.
 	/// </summary>
-	internal sealed class InlineCompletionInstructionsView
+	internal sealed class InlineCompletionView
 	{
 		private const string Preview_Tag = "preview";
 		private const string Instructions_Tag = "instructions";
@@ -48,10 +48,10 @@ namespace Extension.InlineCompletion
 		public bool ShowInstructions { get; set; } = true;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="InlineCompletionInstructionsView"/> class.
+		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
 		/// </summary>
 		/// <param name="view">Text view to create the adornment for</param>
-		public InlineCompletionInstructionsView(IWpfTextView view, int caretPos)
+		public InlineCompletionView(IWpfTextView view, int caretPos)
 		{
 			if (view == null)
 			{
@@ -107,7 +107,7 @@ namespace Extension.InlineCompletion
 		{
 			if (_layer.IsEmpty)
 			{
-				UpdateInstructions(_currentSnippetCode, _currentSnippetIndex, _totalSnippetCount);
+				UpdateView(_currentSnippetCode, _currentSnippetIndex, _totalSnippetCount);
 			}
 		}
 
@@ -117,7 +117,7 @@ namespace Extension.InlineCompletion
 		/// <param name="code"></param>
 		/// <param name="current"></param>
 		/// <param name="total"></param>
-		internal void UpdateInstructions(string? code, int current, int total)
+		internal void UpdateView(string? code, int current, int total)
 		{
 			_currentSnippetCode = code;
 			_currentSnippetIndex = current;

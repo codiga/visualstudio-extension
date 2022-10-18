@@ -153,9 +153,6 @@ namespace Extension.InlineCompletion
 			}
 			var loc = content.Split('\n').Length;
 
-			//TODO ensure space
-			//var insertedLines = EnsureSpaceFor(loc, triggeringLine);
-
 			double height = loc * geometry.Bounds.Height;
 			
 			var textBlock = new TextBlock

@@ -124,7 +124,7 @@ namespace GraphQLClient
 		{
 			return errorMessage switch
 			{
-				"user-not-logged" => "User is not logged in or the token is invalid.",
+				"user-not-logged" => "User is not logged or the token is invalid.",
 				_ => errorMessage,
 			};
 		}

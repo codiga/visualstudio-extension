@@ -78,8 +78,7 @@ namespace Extension.InlineCompletion
 
 			if (!codigaSettings.UseInlineCompletion)
 			{
-				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-				return result;
+				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
 
 			var typedChar = char.MinValue;
@@ -106,9 +105,9 @@ namespace Extension.InlineCompletion
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
 			if (!shouldTriggerCompletion)
 			{
-				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-				return result;
+				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
+
 			_triggerCaretPosition = caretPos;
 
 			// start inline completion session
@@ -147,7 +146,7 @@ namespace Extension.InlineCompletion
 			// start drawing the adornments for the instructions
 			_instructionsView.StartDrawingInstructions();
 
-			return VSConstants.S_OK;
+			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
 
 		/// <summary>

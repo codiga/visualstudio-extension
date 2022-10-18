@@ -51,10 +51,10 @@ namespace Extension.InlineCompletion
 		{
 			var result = new List<ClassificationSpan>();
 
-			if(client.CurrentSnippetSpan != null && classificationType != null)
-			{
-				result.Add(new ClassificationSpan(client.CurrentSnippetSpan.Span.GetSpan(span.Snapshot), classificationType));
-			}	
+			//if(client.CurrentSnippetSpan != null && classificationType != null)
+			//{
+			//	result.Add(new ClassificationSpan(client.CurrentSnippetSpan.Span.GetSpan(span.Snapshot), classificationType));
+			//}	
 
 			return result;
 		}

@@ -1,4 +1,5 @@
-﻿using GraphQL.Client.Http;
+﻿using GraphQL;
+using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
@@ -32,12 +33,12 @@ namespace GraphQLClient
 				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
 		}
 
-		public async Task<User> GetUserAsync()
+		public async Task<GraphQLResponse<GetUserResult>> GetUserAsync()
 		{
 			var request = new GraphQLHttpRequest(QueryProvider.GetUserQuery);
 			var result = await _client.SendQueryAsync<GetUserResult>(request);
 
-			return result.Data.User;
+			return result;
 		}
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
@@ -108,7 +109,7 @@ namespace GraphQLClient
 		}
 	}
 
-	internal class GetUserResult
+	public class GetUserResult
 	{
 		public User User { get; set; }
 	}

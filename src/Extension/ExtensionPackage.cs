@@ -34,7 +34,7 @@ namespace Extension
 	[ProvideToolWindow(typeof(SnippetSearch))]
 	[Guid(ExtensionPackage.PackageGuidString)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-	[ProvideOptionPage(typeof(Settings.OptionsPageProvider.ExtensionOptionsPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
+	[ProvideOptionPage(typeof(Settings.CodigaOptionPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
 	public sealed class ExtensionPackage : AsyncPackage
 	{
 		/// <summary>

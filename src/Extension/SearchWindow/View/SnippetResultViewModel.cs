@@ -1,15 +1,10 @@
 ﻿using Community.VisualStudio.Toolkit;
 using Extension.Caching;
 using Extension.SnippetFormats;
-using GraphQLClient;
-using Microsoft.VisualStudio.Shell;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime;
 using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace Extension.SearchWindow.View
 {

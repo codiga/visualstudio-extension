@@ -134,6 +134,7 @@ namespace Tests
 				Name = "NUnit Test",
 				Description = "Creates NUnit Test",
 				Language = "Csharp",
+				Owner = new Owner { Id = 1, DisplayName = "The Owner"},
 				Keywords = new string[] {"Add", "NUnit", "Test" },
 	            Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(@"[Test]
                                         public void &[USER_INPUT:1:Test_method]()
@@ -155,6 +156,7 @@ namespace Tests
 			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("nunittest"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("NUnit Test"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Creates NUnit Test"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.EqualTo("The Owner"));
 
 			Assert.That(vsSnippet.CodeSnippet.Header.Keywords, Has.Exactly(3).Items);
 			var keyword1 = vsSnippet.CodeSnippet.Header.Keywords[0];

@@ -1,14 +1,11 @@
-﻿using Extension.SnippetFormats;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQLClient;
 using CodigaSnippet = GraphQLClient.CodigaSnippet;
-using EnvDTE;
 
 namespace Extension.Caching
 {

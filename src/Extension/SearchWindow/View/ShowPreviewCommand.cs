@@ -1,6 +1,4 @@
-﻿using Extension.Caching;
-using GraphQLClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +7,8 @@ using System.Windows.Input;
 
 namespace Extension.SearchWindow.View
 {
-	internal class GetSnippetsCommand : ICommand
+	internal class ShowPreviewCommand : ICommand
 	{
-		public SnippetSearchViewModel ViewModel;
-
 		public event EventHandler CanExecuteChanged
 		{
 			add { CommandManager.RequerySuggested += value; }
@@ -22,17 +18,14 @@ namespace Extension.SearchWindow.View
 
 		public bool CanExecute(object parameter)
 		{
-			return ViewModel.EditorOpen;
+			throw new NotImplementedException();
 		}
 
-		public async void Execute(object parameter)
+		public void Execute(object parameter)
 		{
-			RaiseCanExecuteChanged();
-
-			await ViewModel.QuerySnippetsAsync();
-
-			RaiseCanExecuteChanged();
+			throw new NotImplementedException();
 		}
+
 		public void RaiseCanExecuteChanged()
 		{
 			CommandManager.InvalidateRequerySuggested();

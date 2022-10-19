@@ -21,23 +21,50 @@ namespace Extension.SearchWindow.View
 		private bool onlyPrivate;
 		private bool onlyFavorite;
 
-		private bool editorOpen;
+		private bool editorOpen = false;
 
-		private ICommand getSnippets;
+		private GetSnippetsCommand getSnippets;
+		private InsertSnippetCommand insertSnippet;
+		private ShowPreviewCommand showPreview;
 
-		public ICommand GetSnippets { get => getSnippets; set => getSnippets = value; }
+		// Commands
+		public GetSnippetsCommand GetSnippets { get => getSnippets; set => getSnippets = value; }
+		public InsertSnippetCommand InsertSnippet { get => insertSnippet; set => insertSnippet = value; }
+		public ShowPreviewCommand ShowPreview { get => showPreview; set => showPreview = value; }
+
+		// Search parameters
 		public bool AllSnippets { get => allSnippets; set => allSnippets = value; }
 		public string Term { get => term; set => term = value; }
 		public bool OnlyFavorite { get => onlyFavorite; set => onlyFavorite = value; }
 		public bool OnlyPrivate { get => onlyPrivate; set => onlyPrivate = value; }
 		public bool OnlyPublic { get => onlyPublic; set => onlyPublic = value; }
+
+		// Results
 		public ObservableCollection<VisualStudioSnippet> Snippets { get; set; }
-		public bool EditorOpen { get => editorOpen; set => editorOpen = value; }
+
+		// View behaviour
+		public bool EditorOpen { get => editorOpen;}
+
 
 		public SnippetSearchViewModel()
 		{
 			Snippets = new ObservableCollection<VisualStudioSnippet>();
 			GetSnippets = new GetSnippetsCommand { ViewModel = this };
+			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
+			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
+		}
+
+		private async void DocumentEvents_Closed(string obj)
+		{
+			var doc = await VS.Documents.GetActiveDocumentViewAsync();
+			editorOpen = doc != null;
+			GetSnippets.RaiseCanExecuteChanged();
+		}
+
+		private async void DocumentEvents_Opened(string obj)
+		{
+			editorOpen = true;
+			GetSnippets.RaiseCanExecuteChanged();
 		}
 
 		public async Task QuerySnippetsAsync()

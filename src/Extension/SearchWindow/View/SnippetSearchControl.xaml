@@ -16,29 +16,61 @@
 	</UserControl.DataContext>	
 	
     <Grid>
-		<StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Left">Code Snippet Search</TextBlock>
-			<TextBox Margin="5" Text="{Binding Term}"></TextBox>
-			<Button Margin ="5" Content="Search" Command="{Binding GetSnippets}" Width="120" Height="20" Name="button1" HorizontalAlignment="Left"/>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-			<ScrollViewer HorizontalScrollBarVisibility="Auto" Height="300">
-				<StackPanel x:Name="Stack1">
-					<ItemsControl x:Name="tStack" Grid.Column="0" ItemsSource="{Binding Snippets}">
-						<ItemsControl.ItemsPanel>
-							<ItemsPanelTemplate>
-								<StackPanel Orientation="Vertical"/>
-							</ItemsPanelTemplate>
-						</ItemsControl.ItemsPanel>
-						<ItemsControl.ItemTemplate>
-							<DataTemplate>
-								<TextBlock Foreground="White" FontSize="20" Text="{Binding CodeSnippet.Header.Title}"/>
-							</DataTemplate>
-						</ItemsControl.ItemTemplate>
-					</ItemsControl>
-				</StackPanel>
-			</ScrollViewer>
+		<TextBlock Grid.Row="0" Margin="10" HorizontalAlignment="Left">Code Snippet Search</TextBlock>
+		<TextBox Grid.Row="1" Margin="5" Text="{Binding Term}"></TextBox>
+		<Button Grid.Row="2" Margin ="5" Content="Search" Command="{Binding GetSnippets}" Width="120" Height="20" Name="button1" HorizontalAlignment="Left"/>
 
-		</StackPanel>
+		<ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled" Width="Auto" Height="Auto" VerticalScrollBarVisibility="Auto">
+			<ItemsControl Grid.Column="0" ItemsSource="{Binding Snippets}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<!--Snippet view-->
+						<Grid>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+								<RowDefinition Height="Auto"/>
+							</Grid.RowDefinitions>
+						
+							<!--Title bar-->
+							<DockPanel Grid.Row="0" Width="Auto">
+								<TextBlock Foreground="White" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
+								<Button HorizontalAlignment="Right">Preview</Button>
+							</DockPanel>
+							
+							<!--Snippet meta data-->
+							<StackPanel  Grid.Row="1" Orientation="Horizontal">
+								<Label VerticalAlignment="Center">Owner:</Label>
+								<TextBlock VerticalAlignment="Center" Text="{Binding CodeSnippet.Header.Author}"></TextBlock>
+							</StackPanel>
+							
+							<!--Code-->
+							<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+								<TextBlock FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString}"></TextBlock>
+							</ScrollViewer>
+							
+							<!--Description-->
+							<TextBlock Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>
+							
+							<!--Footer-->
+							<TextBlock Grid.Row="4"></TextBlock>
+
+						</Grid>
+
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+
+		</ScrollViewer>
 
 	</Grid>
 </UserControl>

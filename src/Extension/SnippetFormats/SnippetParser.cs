@@ -58,7 +58,7 @@ namespace Extension.SnippetFormats
 					{
 						Id = codigaSnippet.Id,
 						Title = codigaSnippet.Name,
-						Author = "",
+						Author = codigaSnippet.Owner.DisplayName,
 						Description = codigaSnippet.Description,
 						Shortcut = codigaSnippet.Shortcut,
 						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" },

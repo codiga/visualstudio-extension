@@ -47,7 +47,7 @@ namespace GraphQLClient
 			Fingerprint = fingerprint;
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
 
-			if(!string.IsNullOrEmpty(apiToken))
+			if (!string.IsNullOrEmpty(apiToken))
 				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
 		}
 
@@ -108,7 +108,7 @@ namespace GraphQLClient
 
 			var request = new GraphQLHttpRequest(QueryProvider.RecordRecipeUseMutation, variables);
 			var result = await _client.SendMutationAsync<RecordRecipeUseMutationResult>(request);
-			
+
 			return result.Data.RecordAccess;
 		}
 
@@ -182,7 +182,7 @@ namespace GraphQLClient
 
 	public class User
 	{
-		public string UserName { get; set; }
+		public string? UserName { get; set; }
 	}
 
 	/// <summary>
@@ -229,5 +229,16 @@ namespace GraphQLClient
 		/// shortcut
 		/// </summary>
 		public string? Shortcut { get; set; }
+
+		public bool? IsPublic { get; set; }
+
+		public Owner? Owner { get; set; }
+	}
+
+	public class Owner
+	{
+		public long? Id { get; set; }
+
+		public string? DisplayName { get; set; }
 	}
 }

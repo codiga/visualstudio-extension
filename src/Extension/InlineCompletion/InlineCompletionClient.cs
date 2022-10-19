@@ -30,16 +30,13 @@ namespace Extension.InlineCompletion
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
 
-		private InlineCompletionInstructionsView _instructionsView;
+		private InlineCompletionView _completionView;
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 
 		private CodigaClientProvider _clientProvider;
 		private ExpansionClient _expansionClient;
 
-		private int _triggerIndentationLevel = 0;
 		private int _triggerCaretPosition = 0;
-		private int _insertionPosition = 0;
-		public IReadOnlyRegion CurrentSnippetSpan { get; private set; }
 
 		/// <summary>
 		/// Initialize the client and start listening for commands
@@ -88,7 +85,7 @@ namespace Extension.InlineCompletion
 				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
 			}
 
-			if(_instructionsView != null)
+			if(_completionView != null)
 			{
 				return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
@@ -100,7 +97,7 @@ namespace Extension.InlineCompletion
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
 				&& EditorUtils.IsSemanticSearchComment(triggeringLine)
-				&& _instructionsView == null;
+				&& _completionView == null;
 
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
 			if (!shouldTriggerCompletion)
@@ -121,30 +118,10 @@ namespace Extension.InlineCompletion
 			client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
 				.ContinueWith(OnQueryFinished);
 
-			// set up insertion position below the triggering commment
-			using (var edit = _textView.TextBuffer.CreateEdit())
-			{
-				var indentationSettings = EditorSettingsProvider.GetCurrentIndentationSettings();
-				_triggerIndentationLevel = EditorUtils.GetIndentLevel(triggeringLine, indentationSettings);
-				var indent = EditorUtils.GetIndent(_triggerIndentationLevel, indentationSettings);
-				edit.Replace(new Span(caretPos, 1), "\n" + indent);
-				edit.Apply();
-			}
-
-			_insertionPosition = _textView.Caret.Position.BufferPosition.Position;
-
-			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
-			{
-				CurrentSnippetSpan = readEdit.CreateReadOnlyRegion(new Span(_insertionPosition, 1));
-				readEdit.Apply();
-			}
-
-			CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, "fetching snippets...");
-
-			_instructionsView = new InlineCompletionInstructionsView(_textView, _triggerCaretPosition);
+			_completionView = new InlineCompletionView(_textView, _triggerCaretPosition);
 
 			// start drawing the adornments for the instructions
-			_instructionsView.StartDrawingInstructions();
+			_completionView.StartDrawingInstructions();
 
 			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
@@ -171,18 +148,20 @@ namespace Extension.InlineCompletion
 			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
 			var currentIndex = 0;
 
+			if (_completionView == null)
+				return;
+
 			if (snippets.Any())
 			{
 				_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
 				var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
-				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
 				currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
-				_instructionsView.UpdateInstructions(currentIndex, _snippetNavigator.Count);
+				_completionView.UpdateView(previewCode, currentIndex, _snippetNavigator.Count);
 			}
 			else
 			{
-				RemovePreview(CurrentSnippetSpan);
-				CurrentSnippetSpan = null;
+				_completionView.ShowPreview = false;
+				_completionView.UpdateView(null, 0, 0);
 			}
 		}
 
@@ -195,13 +174,8 @@ namespace Extension.InlineCompletion
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
-				_instructionsView.RemoveInstructions();
-				_instructionsView = null;
-				var start = CurrentSnippetSpan.Span.GetStartPoint(_textView.TextBuffer.CurrentSnapshot);
-				RemovePreview(CurrentSnippetSpan);
-				var startPosition = new SnapshotSpan(_textView.TextBuffer.CurrentSnapshot, new Span(start.Position, 0));
-				_textView.Selection.Select(startPosition, false);
-				CurrentSnippetSpan = null;
+				_completionView.RemoveInstructions();
+				_completionView = null;
 				CommitCurrentSnippet();
 				return VSConstants.S_OK;
 			}
@@ -217,8 +191,7 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(next);
-				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
-				_instructionsView.UpdateInstructions(i + 1, c);
+				_completionView.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
@@ -234,92 +207,18 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(previous); 
-				CurrentSnippetSpan = InsertSnippetCodePreview(CurrentSnippetSpan, previewCode);
-				_instructionsView.UpdateInstructions(i + 1, c);
+				_completionView.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
-			else
+			else if((pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR) || 
+					nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 			{
-				_instructionsView.RemoveInstructions();
-				_instructionsView = null;
-				RemovePreview(CurrentSnippetSpan);
-				CurrentSnippetSpan = null;
-
-				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-				return result;
+				_completionView.RemoveInstructions();
+				_completionView = null;
 			}
 
-			return VSConstants.S_OK;
-		}
-
-		/// <summary>
-		/// Remove the code preview from the editor.
-		/// </summary>
-		/// <param name="readOnlyRegion"></param>
-		private void RemovePreview(IReadOnlyRegion readOnlyRegion)
-		{
-			if (readOnlyRegion == null)
-				return;
-
-			using var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit();
-			var spanToDelete = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
-			readEdit.RemoveReadOnlyRegion(readOnlyRegion);
-			readEdit.Apply();
-
-			using var edit = _textView.TextBuffer.CreateEdit();
-			var newLineSnippet = edit.Delete(spanToDelete);
-			var snapshot = edit.Apply();
-		}
-
-		/// <summary>
-		/// Inserts the provided coded at the given span by replacing the previous read-only region.
-		/// </summary>
-		/// <param name="readOnlyRegion"></param>
-		/// <param name="snippetCode"></param>
-		/// <returns></returns>
-		private IReadOnlyRegion InsertSnippetCodePreview(IReadOnlyRegion readOnlyRegion, string snippetCode)
-		{
-			var indentedCode = FormatSnippet(snippetCode);
-
-			// remove current read only region
-			ITextSnapshot currentSnapshot;
-			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
-			{
-				readEdit.RemoveReadOnlyRegion(readOnlyRegion);
-				currentSnapshot = readEdit.Apply();
-			}
-
-			var spanToReplace = readOnlyRegion.Span.GetSpan(_textView.TextBuffer.CurrentSnapshot);
-			// replace snippet with new snippet
-
-			using (var edit = _textView.TextBuffer.CreateEdit())
-			{
-				edit.Replace(spanToReplace, indentedCode);
-				currentSnapshot = edit.Apply();
-			}
-			var caretPosition = new SnapshotPoint(_textView.TextSnapshot, _triggerCaretPosition);
-			_textView.Caret.MoveTo(caretPosition);
-
-			var newSpan = new Span(spanToReplace.Start, indentedCode.Length);
-			var snapSpan = new SnapshotSpan(currentSnapshot, newSpan);
-			
-			// create read only region for the new snippet
-			IReadOnlyRegion newRegion;
-			using (var readEdit = _textView.TextBuffer.CreateReadOnlyRegionEdit())
-			{
-				newRegion = readEdit.CreateReadOnlyRegion(newSpan);
-
-				readEdit.Apply();
-			}
-			
-			return newRegion;
-		}
-
-		private string FormatSnippet(string snippetCode)
-		{
-			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			return EditorUtils.IndentCodeBlock(snippetCode, _triggerIndentationLevel, settings);
+			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
 	}
 }

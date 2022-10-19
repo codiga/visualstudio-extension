@@ -28,7 +28,7 @@ namespace Extension.InlineCompletion
 		/// after the selection layer in the Z-order
 		/// </summary>
 		[Export(typeof(AdornmentLayerDefinition))]
-		[Name("InlineCompletionInstructions")]
+		[Name(InlineCompletionView.PreviewLayerName)]
 		[Order(After = PredefinedAdornmentLayers.Text)]
 		private AdornmentLayerDefinition editorAdornmentLayer;
 

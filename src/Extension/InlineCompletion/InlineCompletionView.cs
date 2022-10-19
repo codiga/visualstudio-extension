@@ -20,7 +20,7 @@ namespace Extension.InlineCompletion
 	/// This class is responsible for drawing the adornments for the inlince completion instructions
 	/// that provides the users with the keyboard shortcuts they need to know.
 	/// </summary>
-	internal sealed class InlineCompletionInstructionsView
+	internal sealed class InlineCompletionView
 	{
 		private const string Preview_Tag = "preview";
 		private const string Instructions_Tag = "instructions";
@@ -37,35 +37,43 @@ namespace Extension.InlineCompletion
 		private readonly FontSettings _settings;
 		private int _triggeringCaret;
 
+		private string? _currentSnippetCode;
 		private int _currentSnippetIndex = 0;
 		private int _totalSnippetCount = 0;
 		private double _fontSize;
 		private SolidColorBrush _textBrush;
 		private SolidColorBrush _textBackgroundBrush;
 
+		public const string PreviewLayerName = "InlineCompletionLayer";
+
+		public bool ShowPreview { get; set; } = true;
+		public bool ShowInstructions { get; set; } = true;
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="InlineCompletionInstructionsView"/> class.
+		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
 		/// </summary>
 		/// <param name="view">Text view to create the adornment for</param>
-		public InlineCompletionInstructionsView(IWpfTextView view, int caretPos)
+		public InlineCompletionView(IWpfTextView view, int caretPos)
 		{
 			if (view == null)
 			{
 				throw new ArgumentNullException("view");
 			}
 
-			_layer = view.GetAdornmentLayer("InlineCompletionInstructions");
+			_layer = view.GetAdornmentLayer(PreviewLayerName);
 
 			_settings = EditorSettingsProvider.GetCurrentFontSettings();
 			_view = view;
 			_triggeringCaret = caretPos;
 			_fontSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 			_textBrush = new SolidColorBrush(_settings.CommentColor);
+			_textBrush.Opacity = 0.7;
 			_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
 		}
 
 		internal void StartDrawingInstructions()
 		{
+			_currentSnippetCode = null;
 			_view.LayoutChanged += OnLayoutChanged;
 		}
 
@@ -101,7 +109,7 @@ namespace Extension.InlineCompletion
 		{
 			if (_layer.IsEmpty)
 			{
-				UpdateInstructions(_currentSnippetIndex, _totalSnippetCount);
+				UpdateView(_currentSnippetCode, _currentSnippetIndex, _totalSnippetCount);
 			}
 		}
 
@@ -111,13 +119,68 @@ namespace Extension.InlineCompletion
 		/// <param name="code"></param>
 		/// <param name="current"></param>
 		/// <param name="total"></param>
-		internal void UpdateInstructions(int current, int total)
+		internal void UpdateView(string? code, int current, int total)
 		{
+			_currentSnippetCode = code;
 			_currentSnippetIndex = current;
 			_totalSnippetCount = total;
 			_layer.RemoveAllAdornments();
 
-			DrawCompletionInstructions();
+			if(ShowInstructions)
+				DrawCompletionInstructions();
+			if(ShowPreview)
+				DrawSnippetPreview();
+		}
+
+		/// <summary>
+		/// Draws the box that contains the code
+		/// </summary>
+		private void DrawSnippetPreview()
+		{
+			var triggeringLine = GetTriggeringLine();
+			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
+			var caretPos = _view.Caret.Position.BufferPosition;
+
+			var wholeLineSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start, triggeringLine.Length));
+			var lineText = wholeLineSpan.GetText();
+			var firstChar = wholeLineSpan.GetText().Trim().First();
+			var position = lineText.IndexOf(firstChar);
+			var firstCharacterSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, 1));
+			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(firstCharacterSpan);
+
+			var content = _currentSnippetCode;
+			if (_currentSnippetCode == null)
+			{
+				content = "fetching snipppets...";
+			}
+			var loc = content.Split('\n').Length;
+
+			double height = loc * geometry.Bounds.Height;
+			
+			var textBlock = new TextBlock
+			{
+				Width = _view.ViewportWidth,
+				Foreground = _textBrush,
+				FontStyle = FontStyles.Italic,
+				Focusable = false,
+				Background = _textBackgroundBrush,
+				FontFamily = new FontFamily(_settings.FontFamily),
+				FontSize = _fontSize,
+				Height = height,
+				Text = content
+			};
+
+			var border = new Border
+			{
+				BorderThickness = new Thickness(1, 0, 0, 1),
+				BorderBrush = _textBrush,
+				Child = textBlock,
+			};
+
+			Canvas.SetLeft(border, onlyTextG.Bounds.Left);
+			Canvas.SetTop(border, geometry.Bounds.Bottom);
+
+			_layer.AddAdornment(AdornmentPositioningBehavior.TextRelative, triggeringLine.Extent, Preview_Tag, border, (tag, ui) => { });
 		}
 
 		/// <summary>
@@ -137,16 +200,11 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private double GetFontSize(string familyName, short size)
 		{
-			var fam = new FontFamily(familyName);
-			var t = fam.FamilyNames;
 			var f = new Font(familyName, size);
-			
 			var family = new System.Drawing.FontFamily(familyName);
 			var d = family.GetCellDescent(FontStyle.Regular);
-			var a = family.GetCellAscent(FontStyle.Regular);
 			var emHeight = family.GetEmHeight(FontStyle.Regular);
 			var descend = (f.Size * d) / emHeight;
-			var ascend = (f.Size * a) / emHeight;
 			var textBlockSize = f.Height - descend;
 
 			return textBlockSize;

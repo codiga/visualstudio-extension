@@ -66,11 +66,12 @@
     <Compile Include="Caching\CodigaClientProvider.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
-    <Compile Include="InlineCompletion\PreviewClassifier.cs" />
-    <Compile Include="InlineCompletion\PreviewClassifierFormat.cs" />
-    <Compile Include="InlineCompletion\PreviewClassifierProvider.cs" />
+    <Compile Include="InlineCompletion\Preview\PreviewClassifier.cs" />
+    <Compile Include="InlineCompletion\Preview\PreviewClassifierFormat.cs" />
+    <Compile Include="InlineCompletion\Preview\PreviewClassifierProvider.cs" />
     <Compile Include="InlineCompletion\InlineCompletionClient.cs" />
-    <Compile Include="InlineCompletion\InlineCompletionInstructionsView.cs" />
+    <Compile Include="InlineCompletion\InlineCompletionView.cs" />
+    <Compile Include="InlineCompletion\Preview\PreviewTextEditor.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

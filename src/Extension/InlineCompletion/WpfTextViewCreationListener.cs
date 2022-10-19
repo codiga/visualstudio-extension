@@ -41,8 +41,6 @@ namespace Extension.InlineCompletion
 		[Import]
 		internal InlineCompletionClient InlineCompletionClient;
 
-		[Import]
-		internal CodigaClientProvider ClientProvider;
 
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
@@ -53,7 +51,7 @@ namespace Extension.InlineCompletion
 		{
 			var vsTextView = AdapterService.GetViewAdapter(textView);
 
-			InlineCompletionClient.Initialize(textView, vsTextView, ExpansionClient, ClientProvider);
+			InlineCompletionClient.Initialize(textView, vsTextView, ExpansionClient);
 		}
 	}
 }

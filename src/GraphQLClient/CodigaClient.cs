@@ -140,7 +140,7 @@ namespace GraphQLClient
 
 		public void Dispose()
 		{
-			_client.Dispose();
+			_client?.Dispose();
 			_client = null;
 		}
 

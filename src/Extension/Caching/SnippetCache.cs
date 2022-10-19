@@ -11,7 +11,7 @@ namespace Extension.Caching
 {
 	interface ISnippetCache
 	{
-		public bool StartPolling(string language, ICodigaClientProvider clientProvider);
+		public bool StartPolling(string language);
 		public void StopPolling();
 		public void StopPolling(string language);
 		public void ReportActivity(string language);
@@ -26,23 +26,25 @@ namespace Extension.Caching
 		public const int PollIntervalInSeconds = 10;
 		public const int IdleIntervalInMinutes = 10;
 
-		private ICodigaClient _client;
+		private ICodigaClientProvider _clientProvider;
 		private IDictionary<string, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
 		private IDictionary<string, PollingSession> _currentPollingSessions;
 
 		public SnippetCache()
 		{
+			_clientProvider = new DefaultCodigaClientProvider();
 			_cachedSnippets = new Dictionary<string, IReadOnlyCollection<CodigaSnippet>>();
 			_currentPollingSessions = new Dictionary<string, PollingSession>();
 		}
 
-		public bool StartPolling(string language, ICodigaClientProvider clientProvider)
+		public SnippetCache(ICodigaClientProvider provider)
 		{
-			_client = clientProvider.GetClient();
-			return StartPolling(language);
+			_clientProvider = provider;
+			_cachedSnippets = new Dictionary<string, IReadOnlyCollection<CodigaSnippet>>();
+			_currentPollingSessions = new Dictionary<string, PollingSession>();
 		}
 
-		internal bool StartPolling(string language)
+		public bool StartPolling(string language)
 		{
 			if (_currentPollingSessions.TryGetValue(language, out var session))
 			{
@@ -118,12 +120,14 @@ namespace Extension.Caching
 				if (!_currentPollingSessions.TryGetValue(language, out var session))
 					return;
 
-				var ts = await _client.GetRecipesForClientByShortcutLastTimestampAsync(language);
+				var client = _clientProvider.GetClient();
+
+				var ts = await client.GetRecipesForClientByShortcutLastTimestampAsync(language);
 				var lastTs = session.LastTimeStamp;
 				if (lastTs == null || ts > lastTs)
 				{
 					// TODO only add diff
-					var snippets = await _client.GetRecipesForClientByShortcutAsync(language);
+					var snippets = await client.GetRecipesForClientByShortcutAsync(language);
 					_cachedSnippets[language] = snippets;
 					session.LastTimeStamp = ts;
 				}

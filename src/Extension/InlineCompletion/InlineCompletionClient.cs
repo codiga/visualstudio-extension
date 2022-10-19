@@ -29,11 +29,11 @@ namespace Extension.InlineCompletion
 		private IOleCommandTarget _nextCommandHandler;
 		private IWpfTextView _textView;
 		private IVsTextView _vsTextView;
+		private ICodigaClientProvider _clientProvider;
 
 		private InlineCompletionView _completionView;
 		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
 
-		private CodigaClientProvider _clientProvider;
 		private ExpansionClient _expansionClient;
 
 		private int _triggerCaretPosition = 0;
@@ -45,9 +45,9 @@ namespace Extension.InlineCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="expansionClient"></param>
 		/// <param name="clientProvider"></param>
-		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient, CodigaClientProvider clientProvider)
+		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient)
 		{
-			_clientProvider = clientProvider;
+			_clientProvider = new DefaultCodigaClientProvider();
 			_textView = textView;
 			_vsTextView = vsTextView;
 			_expansionClient = expansionClient;
@@ -115,8 +115,12 @@ namespace Extension.InlineCompletion
 			var languages = new ReadOnlyCollection<string>(new[] { language });
 
 			var client = _clientProvider.GetClient();
-			client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
-				.ContinueWith(OnQueryFinished);
+
+			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+			{
+				await client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
+				.ContinueWith(OnQueryFinished, TaskScheduler.Default);
+			});
 
 			_completionView = new InlineCompletionView(_textView, _triggerCaretPosition);
 
@@ -132,7 +136,7 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private int CommitCurrentSnippet()
 		{
-			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem, _clientProvider);
+			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem);
 			return VSConstants.S_OK;
 		}
 

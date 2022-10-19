@@ -27,16 +27,11 @@ namespace Extension.AssistantCompletion
 	/// A session ends as soon as the user commits the snippet insertion.
 	/// </summary>
 	[Export]
-	internal class ExpansionClient : IOleCommandTarget, IVsExpansionClient
+	internal class ExpansionClient : IOleCommandTarget, IVsExpansionClient, IDisposable
 	{
 		private IVsExpansionSession _currentExpansionSession;
 		private IOleCommandTarget _nextCommandHandler;
 		private IVsTextView _currentTextView;
-
-		private string? _firstUserVariable;
-		private TextSpan _endSpan;
-
-		private ICodigaClient _client;
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -44,12 +39,9 @@ namespace Extension.AssistantCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, ICodigaClientProvider clientProvider)
+		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet)
 		{
 			_currentTextView = vsTextView;
-			_endSpan = new TextSpan();
-			_client = clientProvider.GetClient();
-			_firstUserVariable = snippet.CodeSnippet.Snippet.Declarations.FirstOrDefault()?.ID;
 
 			// start listening for incoming commands/keys
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
@@ -231,7 +223,12 @@ namespace Extension.AssistantCompletion
 		/// <param name="id"></param>
 		private void ReportUsage(long id)
 		{
-			_client.RecordRecipeUseAsync(id);
+			var clientProvider = new DefaultCodigaClientProvider();
+			var client = clientProvider.GetClient();
+			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+			{
+				await client.RecordRecipeUseAsync(id);
+			});
 		}
 
 		/// <summary>
@@ -245,6 +242,13 @@ namespace Extension.AssistantCompletion
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
 			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
+		}
+
+		public void Dispose()
+		{
+			_currentTextView.RemoveCommandFilter(this);
+			_currentExpansionSession?.EndCurrentExpansion(0);
+			_currentExpansionSession = null;
 		}
 	}
 }

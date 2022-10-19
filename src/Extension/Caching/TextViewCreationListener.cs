@@ -24,9 +24,6 @@ namespace Extension.Caching
 		[Import]
 		internal SnippetCache Cache;
 
-		[Import]
-		internal CodigaClientProvider ClientProvider;
-
 		public void VsTextViewCreated(IVsTextView textViewAdapter)
 		{
 			ITextView textView = AdapterService.GetWpfTextView(textViewAdapter);
@@ -37,7 +34,7 @@ namespace Extension.Caching
 			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
 			var ext = Path.GetExtension(path);
 			var codigaLanguage = CodigaLanguages.Parse(ext);
-			Cache.StartPolling(codigaLanguage, ClientProvider);
+			Cache.StartPolling(codigaLanguage);
 		}
 
 		private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)

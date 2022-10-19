@@ -11,24 +11,11 @@ namespace Tests
 	[TestFixture]
 	public class SnippetCacheTest
 	{
-		private ISnippetCache systemUnderTest;
+		private ISnippetCache _systemUnderTest;
 
 		[SetUp]
 		public void SetUp()
 		{
-			systemUnderTest = new SnippetCache();
-		}
-
-		[TearDown]
-		public void TearDown()
-		{
-			systemUnderTest.StopPolling();
-		}
-
-		[Test]
-		public void StartPolling_should_not_start_multiple_sessions_for_same_language()
-		{
-			// arrange
 			var snippets = new ReadOnlyCollection<CodigaSnippet>(new[] { new CodigaSnippet() });
 
 			var clientMock = new Mock<ICodigaClient>();
@@ -40,12 +27,25 @@ namespace Tests
 			var providerMock = new Mock<ICodigaClientProvider>();
 			providerMock.Setup(p => p.GetClient()).Returns(clientMock.Object);
 
+			_systemUnderTest = new SnippetCache(providerMock.Object);
+		}
+
+		[TearDown]
+		public void TearDown()
+		{
+			_systemUnderTest.StopPolling();
+		}
+
+		[Test]
+		public void StartPolling_should_not_start_multiple_sessions_for_same_language()
+		{
+			// arrange
 			//first polling session
-			var started = systemUnderTest.StartPolling("Csharp", providerMock.Object);
+			var started = _systemUnderTest.StartPolling("Csharp");
 			Assert.That(started, Is.True);
 
 			// act
-			started = systemUnderTest.StartPolling("Csharp", providerMock.Object);
+			started = _systemUnderTest.StartPolling("Csharp");
 
 			// arrange
 			Assert.That(started, Is.False);
@@ -55,7 +55,7 @@ namespace Tests
 		public void SnippetCache_should_setup_internal_structures()
 		{
 			// act
-			var snippets = systemUnderTest.GetSnippets("Csharp");
+			var snippets = _systemUnderTest.GetSnippets("Csharp");
 
 			//assert
 			Assert.That(snippets, Is.Empty);
@@ -67,7 +67,7 @@ namespace Tests
 		{
 			// arrange
 			var token = new CancellationTokenSource();
-			var cache = (SnippetCache)systemUnderTest;
+			var cache = (SnippetCache)_systemUnderTest;
 
 			// act
 			cache.PollSnippetsAsync(token.Token, "Csharp");

@@ -180,7 +180,65 @@ namespace Tests
 			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
         }
 
-        [Test]
+		[Test]
+		public void FromCodigaSnippet_should_handle_unknown_owner()
+		{
+			// arrange
+			var snippet = new CodigaSnippet
+			{
+				Id = 99,
+				Shortcut = "nunittest",
+				Name = "NUnit Test",
+				Description = "Creates NUnit Test",
+				Language = "Csharp",
+				Owner = null,
+				Keywords = new string[] { "Add", "NUnit", "Test" },
+				Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(@"[Test]
+                                        public void &[USER_INPUT:1:Test_method]()
+                                        {
+                                            // arrange
+  
+                                            // act
+                                            &[USER_INPUT:2:act]
+    
+                                            // assert
+                                        }"))
+			};
+
+			// act
+			var vsSnippet = SnippetParser.FromCodigaSnippet(snippet, new IndentationSettings(4, 4, false));
+
+			// assert
+			Assert.That(vsSnippet.CodeSnippet.Header.Id, Is.EqualTo(99));
+			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("nunittest"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("NUnit Test"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Creates NUnit Test"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.EqualTo(""));
+
+			Assert.That(vsSnippet.CodeSnippet.Header.Keywords, Has.Exactly(3).Items);
+			var keyword1 = vsSnippet.CodeSnippet.Header.Keywords[0];
+			var keyword2 = vsSnippet.CodeSnippet.Header.Keywords[1];
+			var keyword3 = vsSnippet.CodeSnippet.Header.Keywords[2];
+
+			Assert.That(keyword1.Text, Is.EqualTo("Add"));
+			Assert.That(keyword2.Text, Is.EqualTo("NUnit"));
+			Assert.That(keyword3.Text, Is.EqualTo("Test"));
+
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
+			var param1 = vsSnippet.CodeSnippet.Snippet.Declarations.First();
+			var param2 = vsSnippet.CodeSnippet.Snippet.Declarations.Last();
+			Assert.That(param1.ID, Is.EqualTo("param1"));
+			Assert.That(param1.Default, Is.EqualTo("Test_method"));
+			Assert.That(param2.ID, Is.EqualTo("param2"));
+			Assert.That(param2.Default, Is.EqualTo("act"));
+
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Csharp"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
+		}
+
+
+		[Test]
         public void VisualStudioSnippet_should_serialize_correctly_to_xml()
         {
 			// arrange

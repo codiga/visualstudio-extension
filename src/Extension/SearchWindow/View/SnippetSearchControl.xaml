@@ -9,7 +9,7 @@
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
-             Name="CodeSnippetSearch">
+             x:Name="CodeSnippetSearch">
 
 	<UserControl.DataContext>
 		<local:SnippetSearchViewModel/>
@@ -44,7 +44,7 @@
 							<!--Title bar-->
 							<DockPanel Grid.Row="0" Width="Auto">
 								<TextBlock Foreground="White" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
-								<Button HorizontalAlignment="Right">Preview</Button>
+								<Button HorizontalAlignment="Right" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">Insert</Button>
 							</DockPanel>
 							
 							<!--Snippet meta data-->

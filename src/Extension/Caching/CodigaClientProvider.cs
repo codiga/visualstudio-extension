@@ -5,37 +5,57 @@ using System.ComponentModel.Composition;
 
 namespace Extension.Caching
 {
+
+	/// <summary>
+	/// Provides a implementation independent way to get a CodigaClient. Useful for testing/mocking.
+	/// </summary>
 	public interface ICodigaClientProvider
 	{
 		public ICodigaClient GetClient();
 	}
 
-	[Export]
-	public class CodigaClientProvider : ICodigaClientProvider
+	/// <summary>
+	/// Provides access to the default global singleton instance of the CodigaClient.
+	/// </summary>
+	public class DefaultCodigaClientProvider : ICodigaClientProvider
 	{
-		private CodigaClient Client { get; set; }
-
 		public ICodigaClient GetClient()
 		{
-			if(Client == null)
+			return GlobalCodigaClient.Instance;
+		}
+	}
+
+	/// <summary>
+	/// Provides singleton access to the Codiga GraphQL client.
+	/// </summary>
+	public class GlobalCodigaClient
+	{
+		private static CodigaClient _client { get; set; }
+
+		public static ICodigaClient Instance
+		{
+			get
 			{
-				ThreadHelper.JoinableTaskFactory.Run(async () =>
+				if (_client == null)
 				{
-					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				});
+					ThreadHelper.JoinableTaskFactory.Run(async () =>
+					{
+						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+					});
 
-				var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
-				Client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
+					var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+					_client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
 
-				CodigaOptions.Saved += CodigaOptions_Saved;
+					CodigaOptions.Saved += CodigaOptions_Saved;
+				}
+
+				return _client;
 			}
-
-			return Client;
 		}
 
-		private void CodigaOptions_Saved(CodigaOptions obj)
+		private static void CodigaOptions_Saved(CodigaOptions obj)
 		{
-			Client.SetApiToken(obj.ApiToken);
+			Instance.SetApiToken(obj.ApiToken);
 		}
 	}
 }

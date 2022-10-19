@@ -8,13 +8,33 @@ using System.Threading.Tasks;
 
 namespace GraphQLClient
 {
-	public class CodigaClient : IDisposable
+	public interface ICodigaClient : IDisposable
+	{
+		public string Fingerprint { get; }
+
+		public void SetApiToken(string apiToken);
+
+		public Task<GraphQLResponse<GetUserResult>> GetUserAsync();
+
+		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language);
+
+		public Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language);
+
+		public Task<string> RecordRecipeUseAsync(long recipeId);
+
+		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip);
+
+		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool? onlyPublic, bool? onlyPrivate, bool? onlySubscribed, int howMany, int skip);
+	}
+
+
+	public class CodigaClient : ICodigaClient, IDisposable
 	{
 		private GraphQLHttpClient? _client;
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
 
-		private string Fingerprint { get; }
+		public string Fingerprint { get; }
 
 		public CodigaClient(string fingerprint)
 		{

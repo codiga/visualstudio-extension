@@ -14,6 +14,11 @@ namespace Extension.Caching
 {
 	interface ISnippetCache
 	{
+		public bool StartPolling(string language, ICodigaClientProvider clientProvider);
+		public void StopPolling();
+		public void StopPolling(string language);
+		public void ReportActivity(string language);
+
 		public IEnumerable<CodigaSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies);
 		public IEnumerable<CodigaSnippet> GetSnippets(string language);
 	}
@@ -24,7 +29,7 @@ namespace Extension.Caching
 		public const int PollIntervalInSeconds = 10;
 		public const int IdleIntervalInMinutes = 10;
 
-		private CodigaClient _client;
+		private ICodigaClient _client;
 		private IDictionary<string, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
 		private IDictionary<string, PollingSession> _currentPollingSessions;
 
@@ -34,28 +39,34 @@ namespace Extension.Caching
 			_currentPollingSessions = new Dictionary<string, PollingSession>();
 		}
 
-		public void StartPolling(string language, CodigaClientProvider clientProvider)
+		public bool StartPolling(string language, ICodigaClientProvider clientProvider)
 		{
 			_client = clientProvider.GetClient();
-			StartPolling(language);
+			return StartPolling(language);
 		}
 
-		private void StartPolling(string language)
+		internal bool StartPolling(string language)
 		{
+			if (_currentPollingSessions.TryGetValue(language, out var session))
+			{
+				return false;
+			}
+
 			var tokenSource = new CancellationTokenSource();
-			var session = new PollingSession
+			session = new PollingSession
 			{
 				Language = language,
 				Source = tokenSource,
 				LastTimeStamp = null
 			};
 
-			session.IdleTimerElapsed += Session_IdleTimerElapsed; ;
+			session.IdleTimerElapsed += Session_IdleTimerElapsed;
 
 			_currentPollingSessions.Add(language, session);
 			PollSnippetsAsync(tokenSource.Token, language);
-		}
 
+			return true;
+		}
 
 		public void StopPolling()
 		{
@@ -88,7 +99,22 @@ namespace Extension.Caching
 			}
 		}
 
-		public async Task PollSnippetsAsync(CancellationToken cancellationToken, string language)
+		public IEnumerable<CodigaSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies)
+		{
+			throw new NotImplementedException();
+		}
+
+		public IEnumerable<CodigaSnippet> GetSnippets(string language)
+		{
+			if (!_cachedSnippets.TryGetValue(language, out var snippets))
+			{
+				snippets = new List<CodigaSnippet>();
+			}
+
+			return snippets;
+		}
+
+		internal async Task PollSnippetsAsync(CancellationToken cancellationToken, string language)
 		{
 			while (true)
 			{
@@ -117,21 +143,6 @@ namespace Extension.Caching
 					return;
 				}
 			}
-		}
-
-		public IEnumerable<CodigaSnippet> GetSnippets(string language, ReadOnlyCollection<string> dependencies)
-		{
-			throw new NotImplementedException();
-		}
-
-		public IEnumerable<CodigaSnippet> GetSnippets(string language)
-		{
-			if(!_cachedSnippets.TryGetValue(language, out var snippets))
-			{
-				snippets = _client.GetRecipesForClientByShortcutAsync(language).GetAwaiter().GetResult();
-			}
-
-			return snippets;
 		}
 
 		private void Session_IdleTimerElapsed(object sender, EventArgs e)

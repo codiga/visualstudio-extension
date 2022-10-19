@@ -5,12 +5,17 @@ using System.ComponentModel.Composition;
 
 namespace Extension.Caching
 {
+	public interface ICodigaClientProvider
+	{
+		public ICodigaClient GetClient();
+	}
+
 	[Export]
-	public class CodigaClientProvider
+	public class CodigaClientProvider : ICodigaClientProvider
 	{
 		private CodigaClient Client { get; set; }
 
-		public CodigaClient GetClient()
+		public ICodigaClient GetClient()
 		{
 			if(Client == null)
 			{

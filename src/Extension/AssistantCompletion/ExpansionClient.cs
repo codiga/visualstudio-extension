@@ -36,7 +36,7 @@ namespace Extension.AssistantCompletion
 		private string? _firstUserVariable;
 		private TextSpan _endSpan;
 
-		private CodigaClient _client;
+		private ICodigaClient _client;
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -44,7 +44,7 @@ namespace Extension.AssistantCompletion
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, CodigaClientProvider clientProvider)
+		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, ICodigaClientProvider clientProvider)
 		{
 			_currentTextView = vsTextView;
 			_endSpan = new TextSpan();

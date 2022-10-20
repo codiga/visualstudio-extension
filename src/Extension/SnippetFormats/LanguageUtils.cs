@@ -52,6 +52,7 @@ namespace Extension.SnippetFormats
 		{
 			return extension switch
 			{
+				//TODO complete list
 				".cs" => LanguageEnumeration.Csharp,
 				".css" => LanguageEnumeration.Css,
 				".html" => LanguageEnumeration.Html,
@@ -62,6 +63,9 @@ namespace Extension.SnippetFormats
 				".c" => LanguageEnumeration.C,
 				".cpp" => LanguageEnumeration.Cpp,
 				".java" => LanguageEnumeration.Java,
+				".rb" => LanguageEnumeration.Ruby,
+				".rs" => LanguageEnumeration.Rust,
+				".go" => LanguageEnumeration.Go,
 				_ => LanguageEnumeration.Unknown
 			};
 		}

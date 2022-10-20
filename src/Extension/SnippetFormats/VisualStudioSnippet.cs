@@ -159,6 +159,9 @@ namespace Extension.SnippetFormats
 		[XmlText]
 		public XmlNode[] CDataCode { get; set; }
 
+		/// <summary>
+		/// Wrapper property for CDataCode to be able to work with regular strings.
+		/// </summary>
 		[XmlIgnore]
 		public string CodeString
 		{
@@ -173,13 +176,20 @@ namespace Extension.SnippetFormats
 			}
 		}
 
+		/// <summary>
+		/// The raw initial code string.
+		/// </summary>
+		[XmlIgnore]
+		public string RawCode { get; }
+
 		public Code()
 		{
-			
+
 		}
 
 		public Code(string language, string codeString)
 		{
+			RawCode = codeString;
 			CDataCode = new XmlNode[] { new XmlDocument().CreateCDataSection(codeString) };
 			Language = language;
 		}

@@ -109,15 +109,11 @@ namespace Extension.SearchWindow.View
 
 		public async Task InsertSnippetAsync(object param)
 		{
-			var client = new ExpansionClient();
-			
-			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
-			var adapterFactory = await VS.GetMefServiceAsync<IVsEditorAdaptersFactoryService>();
 			var snippet = (VisualStudioSnippet)param;
-			var caretPosition = currentDocView.TextView.Caret.Position;
-			var legacyCaretPosition = caretPosition.GetLegacyCaretPosition();
-			var vsTextView = adapterFactory.GetViewAdapter(currentDocView.TextView);
-			client.StartExpansion(vsTextView, snippet, legacyCaretPosition);
+
+			var client = new ExpansionClient();
+			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+			client.StartExpansion(currentDocView.TextView, snippet);
 		}
 
 		#endregion

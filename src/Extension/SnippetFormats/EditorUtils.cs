@@ -50,6 +50,37 @@ namespace Extension.SnippetFormats
 			return keywords.Length >= 2;
 		}
 
+
+		/// <summary>
+		/// returns a new indented code block using the indentation of the current line and the settings.
+		/// </summary>
+		/// <param name="code"></param>
+		/// <param name="caret"></param>
+		/// <param name="settings"></param>
+		/// <returns></returns>
+		public static string IndentCodeBlock(string code, ITextCaret caret, IndentationSettings settings)
+		{
+			var isVirtual = caret.InVirtualSpace;
+			var snapshot = caret.Position.BufferPosition.Snapshot;
+			int indentLevel;
+			var indentFirstLine = false;
+
+			if (isVirtual)
+			{
+				indentFirstLine = true;
+				var spaces = caret.Position.VirtualSpaces;
+				indentLevel = GetVirtualIndentLevel(spaces, settings);
+			}
+			else
+			{
+				var currentLine = snapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);
+				indentLevel = GetIndentLevel(currentLine.GetText(), settings);
+			}
+
+			var indentedCode = IndentCodeBlock(code, indentLevel, settings, indentFirstLine);
+			return indentedCode;
+		}
+
 		/// <summary>
 		/// Returns a new indented code block based on the given IndentationSettings.
 		/// The first line of the code block won't be indented as the editor should take care of that.
@@ -57,9 +88,9 @@ namespace Extension.SnippetFormats
 		/// <param name="code"></param>
 		/// <param name="settings"></param>
 		/// <returns></returns>
-		public static string IndentCodeBlock(string code, int indentLevel, IndentationSettings settings)
+		public static string IndentCodeBlock(string code, int indentLevel, IndentationSettings settings, bool indentFirstLine)
 		{
-			return IndentCodeBlock(code, indentLevel, settings.IndentSize, settings.TabSize, settings.UseSpace);
+			return IndentCodeBlock(code, indentLevel, settings.IndentSize, settings.TabSize, settings.UseSpace, indentFirstLine);
 		}
 
 		/// <summary>
@@ -71,21 +102,30 @@ namespace Extension.SnippetFormats
 		/// <param name="tabSize"></param>
 		/// <param name="useSpace"></param>
 		/// <returns></returns>
-		public static string IndentCodeBlock(string code, int indentLevel, int indentSize, int tabSize, bool useSpace)
+		public static string IndentCodeBlock(string code, int indentLevel, int indentSize, int tabSize, bool useSpace, bool indentFirstLine)
 		{
 			var lines = code.Split('\n');
 			string finalIndent = GetIndent(indentLevel, indentSize, tabSize, useSpace);
 			
 			//TODO get line ending settings
-			lines[0] = lines[0] + "\r\n";
-			for (int i = 1; i < lines.Length; i++)
+			
+			var i = indentFirstLine ? 0 : 1;
+			for (; i < lines.Length; i++)
 			{
 				lines[i] = lines[i] + "\r\n";
 				lines[i] = lines[i].Insert(0, finalIndent);
 			}
+			if(!indentFirstLine)
+				lines[0] = lines[0] + "\r\n";
 
 			var indentedCode = string.Concat(lines);
 			return indentedCode;
+		}
+
+		public static int GetVirtualIndentLevel(int virtualSpaces, IndentationSettings settings)
+		{
+			var virtualLine = new string(' ', virtualSpaces);
+			return GetIndentLevel(virtualLine, settings);
 		}
 
 		/// <summary>
@@ -215,7 +255,8 @@ namespace Extension.SnippetFormats
 
 			var caretLine = caretPosition.BufferPosition.GetContainingLine();
 
-			var caretIndex = caretLine.Length - (caretLine.End.Position - caretPosition.BufferPosition.Position);
+			// creating a new line with [Enter] will result in a virtual caret position. Only after entring text indent will be added.
+			var caretIndex = (caretLine.Length + caretPosition.VirtualSpaces) - (caretLine.End.Position - caretPosition.BufferPosition.Position);
 
 			textSpan.iStartLine = caretLine.LineNumber;
 			textSpan.iEndLine = caretLine.LineNumber;

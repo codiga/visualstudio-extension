@@ -90,7 +90,34 @@ namespace Tests
 				indentLevel: 1, 
 				indentSize: 4, 
 				tabSize: 4, 
-				useSpace: false);
+				useSpace: false,
+				indentFirstLine: false);
+
+			// assert
+			Assert.That(indented, Is.EqualTo("\tpublic void main()\r\n" +
+											 "\t{\r\n" +
+											 "\t\t\r\n" +
+											 "\t}\r\n"));
+		}
+
+		[Test]
+		public void IndentCodeBlock_should_indent_first_line()
+		{
+			// arrange
+			var codeBlock =
+				"public void main()\n" +
+				"{\n" +
+				"\t\n" +
+				"}";
+
+			// act
+			var indented = EditorUtils.IndentCodeBlock(
+				code: codeBlock,
+				indentLevel: 1,
+				indentSize: 4,
+				tabSize: 4,
+				useSpace: false,
+				indentFirstLine: true);
 
 			// assert
 			Assert.That(indented, Is.EqualTo("\tpublic void main()\r\n" +
@@ -115,7 +142,8 @@ namespace Tests
 				indentLevel: 1,
 				indentSize: 4,
 				tabSize: 4,
-				useSpace: true);
+				useSpace: true,
+				indentFirstLine: false);
 
 			// assert
 			Assert.That(indented, Is.EqualTo("    public void main()\r\n" +
@@ -140,7 +168,8 @@ namespace Tests
 				indentLevel: 1,
 				indentSize: 2,
 				tabSize: 4,
-				useSpace: false);
+				useSpace: false,
+				indentFirstLine: false);
 
 			// assert
 			Assert.That(indented, Is.EqualTo("  public void main()\r\n" +

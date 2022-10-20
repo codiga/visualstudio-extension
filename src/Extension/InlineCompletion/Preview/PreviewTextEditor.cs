@@ -90,7 +90,7 @@ namespace Extension.InlineCompletion.Preview
 		private static string FormatSnippet(string snippetCode, int indentLevel)
 		{
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings, false);
 		}
 	}
 }

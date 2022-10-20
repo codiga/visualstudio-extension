@@ -4,9 +4,11 @@ using Extension.Caching;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Settings.Internal;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using MSXML;
@@ -34,6 +36,28 @@ namespace Extension.AssistantCompletion
 		private IOleCommandTarget _nextCommandHandler;
 		private IVsTextView _currentTextView;
 
+
+		/// <summary>
+		/// Starts a new snippet insertion based on the caret of the given TextView.
+		/// </summary>
+		/// <param name="textView"></param>
+		/// <param name="snippet"></param>
+		/// <returns></returns>
+		public int StartExpansion(IWpfTextView textView, VisualStudioSnippet snippet)
+		{
+			var caret = textView.Caret;
+
+			// indent code based on caret
+			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+			var indentedCode = EditorUtils.IndentCodeBlock(snippet.CodeSnippet.Snippet.Code.RawCode, caret, settings);
+			snippet.CodeSnippet.Snippet.Code.CodeString = indentedCode;
+
+			// start session at carret position
+			var legacyCaretPosition = caret.Position.GetLegacyCaretPosition();
+			StartExpansionInternal(textView.ToIVsTextView(), snippet, legacyCaretPosition);
+
+			return VSConstants.S_OK;
+		}
 
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
@@ -89,7 +113,8 @@ namespace Extension.AssistantCompletion
 			vsTextView.GetBuffer(out var textLines);
 			textLines.GetLineText(position.iStartLine, 0, position.iEndLine, position.iEndIndex, out var currentLine);
 
-			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.CodeString, currentLine);
+			// indent the snippet based on the current position
+			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.RawCode, currentLine);
 			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
 
 			// create IXMLDOMNode from snippet
@@ -116,6 +141,42 @@ namespace Extension.AssistantCompletion
 				out _currentExpansionSession);
 
 			ReportUsage(snippet.CodeSnippet.Header.Id);
+
+			return VSConstants.S_OK;
+		}
+
+		private int StartExpansionInternal(IVsTextView vsTextView, VisualStudioSnippet formattedSnippet, TextSpan position)
+		{
+			_currentTextView = vsTextView;
+
+			// start listening for incoming commands/keys
+			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
+
+			// create IXMLDOMNode from snippet
+			IXMLDOMNode snippetXml;
+			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
+			using (var sw = new StringWriter())
+			{
+				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
+				serializer.Serialize(xw, formattedSnippet);
+				var xmlDoc = new DOMDocument();
+				xmlDoc.loadXML(sw.ToString());
+				snippetXml = xmlDoc.documentElement.childNodes.nextNode();
+			}
+
+			vsTextView.GetBuffer(out var textLines);
+			textLines.GetLanguageServiceID(out var languageServiceId);
+			var expansion = (IVsExpansion)textLines;
+
+			expansion.InsertSpecificExpansion(
+				pSnippet: snippetXml,
+				tsInsertPos: position,
+				pExpansionClient: this,
+				guidLang: languageServiceId,
+				pszRelativePath: string.Empty,
+				out _currentExpansionSession);
+
+			ReportUsage(formattedSnippet.CodeSnippet.Header.Id);
 
 			return VSConstants.S_OK;
 		}
@@ -257,9 +318,12 @@ namespace Extension.AssistantCompletion
 		/// <returns></returns>
 		private string FormatSnippet(string snippetCode, string baseLine)
 		{
+			if (baseLine == null)
+				return snippetCode;
+
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
-			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings);
+			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings, false);
 		}
 
 		public void Dispose()

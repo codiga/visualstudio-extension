@@ -182,7 +182,7 @@ namespace Extension.SnippetFormats
 		internal static string GetPreviewCode(VisualStudioSnippet vsSnippet)
 		{
 			var literals = vsSnippet.CodeSnippet.Snippet.Declarations;
-			var sb = new StringBuilder(vsSnippet.CodeSnippet.Snippet.Code.CodeString);
+			var sb = new StringBuilder(vsSnippet.CodeSnippet.Snippet.Code.RawCode);
 
 			foreach (var literal in literals)
 			{

@@ -36,6 +36,7 @@ namespace Extension.InlineCompletion
 		private readonly IWpfTextView _view;
 		private readonly FontSettings _settings;
 		private int _triggeringCaret;
+		private ITrackingSpan _triggeringLine;
 
 		private string? _currentSnippetCode;
 		private int _currentSnippetIndex = 0;
@@ -53,7 +54,7 @@ namespace Extension.InlineCompletion
 		/// Initializes a new instance of the <see cref="InlineCompletionView"/> class.
 		/// </summary>
 		/// <param name="view">Text view to create the adornment for</param>
-		public InlineCompletionView(IWpfTextView view, int caretPos)
+		public InlineCompletionView(IWpfTextView view, ITrackingSpan triggeringLine)
 		{
 			if (view == null)
 			{
@@ -64,7 +65,7 @@ namespace Extension.InlineCompletion
 
 			_settings = EditorSettingsProvider.GetCurrentFontSettings();
 			_view = view;
-			_triggeringCaret = caretPos;
+			_triggeringLine = triggeringLine;
 			_fontSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
 			_textBrush = new SolidColorBrush(_settings.CommentColor);
 			_textBrush.Opacity = 0.7;
@@ -212,7 +213,13 @@ namespace Extension.InlineCompletion
 
 		private ITextViewLine GetTriggeringLine()
 		{
-			return _view.TextViewLines.Single(l => _triggeringCaret >= l.Start && _triggeringCaret <= l.End);
+			var lineSpan = _triggeringLine.GetSpan(_view.TextSnapshot);
+			var textViewLines = _view.TextViewLines.GetTextViewLinesIntersectingSpan(lineSpan);
+
+			if (!textViewLines.Any())
+				throw new ArgumentOutOfRangeException(nameof(_triggeringLine), "Cannot map tracking span to a valid view line");
+
+			return textViewLines.First();
 		}
 	}
 }

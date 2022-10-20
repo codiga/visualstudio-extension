@@ -1,10 +1,13 @@
 ﻿using Community.VisualStudio.Toolkit;
+using Extension.AssistantCompletion;
 using Extension.Caching;
 using Extension.SnippetFormats;
+using Microsoft.VisualStudio.Editor;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Extension.SnippetFormats;
 
 namespace Extension.SearchWindow.View
 {
@@ -50,6 +53,7 @@ namespace Extension.SearchWindow.View
 
 			GetSnippets = new AsyncButtonCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
 			InsertSnippet = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
+			ShowPreview = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -61,6 +65,7 @@ namespace Extension.SearchWindow.View
 			_editorOpen = windows.Any();
 			GetSnippets.RaiseCanExecuteChanged();
 			InsertSnippet.RaiseCanExecuteChanged();
+			ShowPreview.RaiseCanExecuteChanged();
 		}
 
 		private async void DocumentEvents_Opened(string obj)
@@ -68,6 +73,7 @@ namespace Extension.SearchWindow.View
 			_editorOpen = true;
 			GetSnippets.RaiseCanExecuteChanged();
 			InsertSnippet.RaiseCanExecuteChanged();
+			ShowPreview.RaiseCanExecuteChanged();
 		}
 
 		#region GetSnippets command
@@ -101,18 +107,26 @@ namespace Extension.SearchWindow.View
 
 		#region InsertSnippet command
 
-		public bool IsValidCaretPosition(object param)
-		{
-			return true;
-		}
-
 		public async Task InsertSnippetAsync(object param)
 		{
-			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
-
+			var client = new ExpansionClient();
 			
+			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+			var adapterFactory = await VS.GetMefServiceAsync<IVsEditorAdaptersFactoryService>();
+			var snippet = (VisualStudioSnippet)param;
+			var caretPosition = currentDocView.TextView.Caret.Position;
+			var legacyCaretPosition = caretPosition.GetLegacyCaretPosition();
+			var vsTextView = adapterFactory.GetViewAdapter(currentDocView.TextView);
+			client.StartExpansion(vsTextView, snippet, legacyCaretPosition);
 		}
 
+		#endregion
+
+		#region ShowPreview command
+		public async Task ShowPreviewAsync(object param)
+		{
+
+		}
 		#endregion
 
 	}

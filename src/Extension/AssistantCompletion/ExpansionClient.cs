@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Media.TextFormatting;
 using System.Windows.Shapes;
 using System.Xml;
 
@@ -33,28 +34,24 @@ namespace Extension.AssistantCompletion
 		private IOleCommandTarget _nextCommandHandler;
 		private IVsTextView _currentTextView;
 
+
 		/// <summary>
 		/// Starts a new snippet insertion session at the current caret position.
+		/// All text prior to the cartet in this line will be replaced.
 		/// </summary>
 		/// <param name="vsTextView"></param>
 		/// <param name="completionItem"></param>
 		/// <returns></returns>
 		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet)
 		{
-			_currentTextView = vsTextView;
-
-			// start listening for incoming commands/keys
-			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
-
 			vsTextView.GetBuffer(out var textLines);
-			var expansion = (IVsExpansion)textLines;
 			vsTextView.GetCaretPos(out var startLine, out var endColumn);
-			
-			// replace the typed search text
+
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var currentLine);
 
 			int startIndex;
-			if (currentLine.Any(c => c != ' ' && c != '\t'))
+			// replace the typed search text
+			if (!string.IsNullOrEmpty(currentLine) && currentLine.Any(c => c != ' ' && c != '\t'))
 			{
 				startIndex = currentLine.IndexOf(currentLine.Trim().First());
 			}
@@ -70,10 +67,30 @@ namespace Extension.AssistantCompletion
 				iEndIndex = endColumn,
 			};
 
+			StartExpansion(vsTextView, snippet, position);
+
+			return VSConstants.S_OK;
+		}
+
+		/// <summary>
+		/// Starts a new snippet insertion session at the specified text span. The specified span will be replaced by the snippet.
+		/// </summary>
+		/// <param name="vsTextView"></param>
+		/// <param name="snippet"></param>
+		/// <param name="position"></param>
+		/// <returns></returns>
+		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, TextSpan position)
+		{
+			_currentTextView = vsTextView;
+
+			// start listening for incoming commands/keys
+			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
+
+			vsTextView.GetBuffer(out var textLines);
+			textLines.GetLineText(position.iStartLine, 0, position.iEndLine, position.iEndIndex, out var currentLine);
+
 			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.CodeString, currentLine);
 			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
-
-			textLines.GetLanguageServiceID(out var languageServiceId);
 
 			// create IXMLDOMNode from snippet
 			IXMLDOMNode snippetXml;
@@ -87,6 +104,9 @@ namespace Extension.AssistantCompletion
 				snippetXml = xmlDoc.documentElement.childNodes.nextNode();
 			}
 
+			textLines.GetLanguageServiceID(out var languageServiceId);
+			var expansion = (IVsExpansion)textLines;
+
 			expansion.InsertSpecificExpansion(
 				pSnippet: snippetXml,
 				tsInsertPos: position,
@@ -94,7 +114,7 @@ namespace Extension.AssistantCompletion
 				guidLang: languageServiceId,
 				pszRelativePath: string.Empty,
 				out _currentExpansionSession);
-			
+
 			ReportUsage(snippet.CodeSnippet.Header.Id);
 
 			return VSConstants.S_OK;
@@ -172,14 +192,12 @@ namespace Extension.AssistantCompletion
 
 		public int FormatSpan(IVsTextLines pBuffer, TextSpan[] ts)
 		{
-			// NOTE: How to get the LanguageService here to call Source.Reformat?
 			return VSConstants.S_OK;
 		}
 
 		public int EndExpansion()
 		{
-			// stop listening to input when the expansion is done
-			_currentTextView.RemoveCommandFilter(this);
+			_currentTextView?.RemoveCommandFilter(this);
 			return VSConstants.S_OK;
 		}
 
@@ -246,7 +264,7 @@ namespace Extension.AssistantCompletion
 
 		public void Dispose()
 		{
-			_currentTextView.RemoveCommandFilter(this);
+			_currentTextView?.RemoveCommandFilter(this);
 			_currentExpansionSession?.EndCurrentExpansion(0);
 			_currentExpansionSession = null;
 		}

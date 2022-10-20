@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.Text.Editor;
+﻿using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -171,6 +173,56 @@ namespace Extension.SnippetFormats
 			}
 
 			return finalIndent;
+		}
+
+		/// <summary>
+		/// Transforms the span into a new <see cref="TextSpan"/>.
+		/// </summary>
+		/// <param name="span"></param>
+		/// <returns></returns>
+		public static TextSpan GetLegacySpan(this SnapshotSpan span)
+		{
+			// sample model in current positions.
+			// SnapshotSpan goes from 3 to 14.
+			// expected legacy span would be: start: line 0, pos 3 end: line 2 pos 1
+			/*
+			 0: 0,1,2,{3,4,5,6[7]
+			 1: 8,9,10,11,[12]
+			 2: 13,14},[15]
+			 */
+
+			var textSpan = new TextSpan();
+			
+			var startLine = span.Snapshot.GetLineFromPosition(span.Span.Start);
+			var endLine = span.Snapshot.GetLineFromPosition(span.Span.End);
+
+			textSpan.iStartLine = startLine.LineNumber;
+			textSpan.iEndLine = endLine.LineNumber;
+			textSpan.iStartIndex = span.Start.Position - startLine.Start.Position;
+			textSpan.iEndIndex = span.End.Position - endLine.Start.Position;
+
+			return textSpan;
+		}
+
+		/// <summary>
+		/// Returns a new TextSpan representing the caret position.
+		/// </summary>
+		/// <param name="caretPosition"></param>
+		/// <returns></returns>
+		public static TextSpan GetLegacyCaretPosition(this CaretPosition caretPosition)
+		{
+			var textSpan = new TextSpan();
+
+			var caretLine = caretPosition.BufferPosition.GetContainingLine();
+
+			var caretIndex = caretLine.Length - (caretLine.End.Position - caretPosition.BufferPosition.Position);
+
+			textSpan.iStartLine = caretLine.LineNumber;
+			textSpan.iEndLine = caretLine.LineNumber;
+			textSpan.iStartIndex = caretIndex;
+			textSpan.iEndIndex = caretIndex;
+
+			return textSpan;
 		}
 	}
 }

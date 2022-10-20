@@ -91,12 +91,12 @@ namespace Extension.InlineCompletion
 			}
 
 			var caretPos = _textView.Caret.Position.BufferPosition.Position;
-			var lineSnapshot = _textView.TextBuffer.CurrentSnapshot.Lines.Single(l => caretPos >= l.Start && caretPos <= l.End);
-			var triggeringLine = lineSnapshot.GetText();
-
+			var triggeringLine = _textView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
+			var triggeringLineText = triggeringLine.GetText();
+			var lineTrackingSpan = _textView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
-				&& EditorUtils.IsSemanticSearchComment(triggeringLine)
+				&& EditorUtils.IsSemanticSearchComment(triggeringLineText)
 				&& _completionView == null;
 
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
@@ -110,7 +110,7 @@ namespace Extension.InlineCompletion
 			// start inline completion session
 
 			// query snippets based on keywords
-			var term = triggeringLine.Replace("//", "").Trim();
+			var term = triggeringLineText.Replace("//", "").Trim();
 			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
 			var languages = new ReadOnlyCollection<string>(new[] { language });
 
@@ -122,7 +122,7 @@ namespace Extension.InlineCompletion
 				.ContinueWith(OnQueryFinished, TaskScheduler.Default);
 			});
 
-			_completionView = new InlineCompletionView(_textView, _triggerCaretPosition);
+			_completionView = new InlineCompletionView(_textView, lineTrackingSpan);
 
 			// start drawing the adornments for the instructions
 			_completionView.StartDrawingInstructions();

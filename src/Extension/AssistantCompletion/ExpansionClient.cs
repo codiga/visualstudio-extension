@@ -73,6 +73,10 @@ namespace Extension.AssistantCompletion
 
 			textLines.GetLineText(startLine, 0, startLine, endColumn, out var currentLine);
 
+			// indent the snippet based on the current position
+			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.RawCode, currentLine);
+			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
+
 			int startIndex;
 			// replace the typed search text
 			if (!string.IsNullOrEmpty(currentLine) && currentLine.Any(c => c != ' ' && c != '\t'))
@@ -91,56 +95,7 @@ namespace Extension.AssistantCompletion
 				iEndIndex = endColumn,
 			};
 
-			StartExpansion(vsTextView, snippet, position);
-
-			return VSConstants.S_OK;
-		}
-
-		/// <summary>
-		/// Starts a new snippet insertion session at the specified text span. The specified span will be replaced by the snippet.
-		/// </summary>
-		/// <param name="vsTextView"></param>
-		/// <param name="snippet"></param>
-		/// <param name="position"></param>
-		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet, TextSpan position)
-		{
-			_currentTextView = vsTextView;
-
-			// start listening for incoming commands/keys
-			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
-
-			vsTextView.GetBuffer(out var textLines);
-			textLines.GetLineText(position.iStartLine, 0, position.iEndLine, position.iEndIndex, out var currentLine);
-
-			// indent the snippet based on the current position
-			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.RawCode, currentLine);
-			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
-
-			// create IXMLDOMNode from snippet
-			IXMLDOMNode snippetXml;
-			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
-			using (var sw = new StringWriter())
-			{
-				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
-				serializer.Serialize(xw, snippet);
-				var xmlDoc = new DOMDocument();
-				xmlDoc.loadXML(sw.ToString());
-				snippetXml = xmlDoc.documentElement.childNodes.nextNode();
-			}
-
-			textLines.GetLanguageServiceID(out var languageServiceId);
-			var expansion = (IVsExpansion)textLines;
-
-			expansion.InsertSpecificExpansion(
-				pSnippet: snippetXml,
-				tsInsertPos: position,
-				pExpansionClient: this,
-				guidLang: languageServiceId,
-				pszRelativePath: string.Empty,
-				out _currentExpansionSession);
-
-			ReportUsage(snippet.CodeSnippet.Header.Id);
+			StartExpansionInternal(vsTextView, snippet, position);
 
 			return VSConstants.S_OK;
 		}

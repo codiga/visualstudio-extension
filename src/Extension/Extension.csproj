@@ -96,6 +96,7 @@
       <DependentUpon>OptionsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="SnippetFormats\EditorUtils.cs" />
+    <Compile Include="SnippetFormats\LanguageUtils.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

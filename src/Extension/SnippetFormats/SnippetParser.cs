@@ -205,52 +205,5 @@ namespace Extension.SnippetFormats
 
 	}
 
-	public static class CodigaLanguages
-	{
-		public enum LanguageEnumeration
-		{
-			Unknown,
-			Coldfusion,
-			Docker,
-			Objectivec,
-			Terraform,
-			Json,
-			Yaml,
-			Typescript,
-			Swift,
-			Solidity,
-			Sql,
-			Shell,
-			Scala,
-			Rust,
-			Ruby,
-			Php,
-			Python,
-			Perl,
-			Kotlin,
-			Javascript,
-			Java,
-			Html,
-			Haskell,
-			Go,
-			Dart,
-			Csharp,
-			Css,
-			Cpp,
-			C,
-			Apex
-		}
-
-		public static string Parse(string extension)
-		{
-			return extension switch
-			{
-				".cs" => "Csharp",
-				".css" => "Css",
-				".html" => "Html",
-				".json" => "Json",
-				_ => "unknown"
-			};
-		}
-	}
+	
 }

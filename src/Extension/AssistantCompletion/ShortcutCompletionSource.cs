@@ -36,7 +36,7 @@ namespace Extension.AssistantCompletion
         {
 			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
 
-			if (!char.IsPunctuation(trigger.Character) || !settings.UseCodingAssistant)
+			if (trigger.Character != '.' || !settings.UseCodingAssistant)
             {
                 return CompletionStartData.DoesNotParticipateInCompletion;
             }
@@ -110,7 +110,7 @@ namespace Extension.AssistantCompletion
 			var path = doc.Document.FilePath;
             var ext = Path.GetExtension(path);
             var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var chachedSnippets = Cache.GetSnippets(CodigaLanguages.Parse(ext)).Select(s => SnippetParser.FromCodigaSnippet(s, settings));
+			var chachedSnippets = Cache.GetSnippets(LanguageUtils.Parse(ext).GetName()).Select(s => SnippetParser.FromCodigaSnippet(s, settings));
             var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
 
             return new CompletionContext(completionItems);

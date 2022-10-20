@@ -16,7 +16,28 @@ namespace Tests
 		public bool IsComment_should_consider_csharp_comment(string line)
 		{
 			// act & assert
-			return EditorUtils.IsComment(line);
+			return EditorUtils.IsComment(line, LanguageUtils.LanguageEnumeration.Csharp);
+		}
+
+		[Test]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Csharp, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.C, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Cpp, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Typescript, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Javascript, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Go, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Java, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Rust, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Dart, ExpectedResult = true)]
+		[TestCase("// this is a comment", LanguageUtils.LanguageEnumeration.Kotlin, ExpectedResult = true)]
+		[TestCase("# this is also a comment",LanguageUtils.LanguageEnumeration.Python, ExpectedResult = true)]
+		[TestCase("# this is also a comment",LanguageUtils.LanguageEnumeration.Shell, ExpectedResult = true)]
+		[TestCase("# this is also a comment",LanguageUtils.LanguageEnumeration.Perl, ExpectedResult = true)]
+		[TestCase("# this is also a comment",LanguageUtils.LanguageEnumeration.Yaml, ExpectedResult = true)]
+		public bool IsComment_should_consider_language(string line, LanguageUtils.LanguageEnumeration language)
+		{
+			// act & assert
+			return EditorUtils.IsComment(line, language);
 		}
 
 		[Test]
@@ -42,7 +63,7 @@ namespace Tests
 		public bool IsSemanticSearchComment_should_consider_keyword_count(string line)
 		{
 			// act & assert
-			return EditorUtils.IsSemanticSearchComment(line);
+			return EditorUtils.IsSemanticSearchComment(line, LanguageUtils.LanguageEnumeration.Csharp);
 		}
 
 		[Test]

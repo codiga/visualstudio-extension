@@ -5,7 +5,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using static Extension.SnippetFormats.CodigaLanguages;
 
 namespace Tests
 {

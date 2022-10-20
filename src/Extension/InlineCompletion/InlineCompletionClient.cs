@@ -24,7 +24,7 @@ namespace Extension.InlineCompletion
 	/// The snippet insertion process is passed to the <see cref="ExpansionClient"/>
 	/// </summary>
 	[Export]
-	internal class InlineCompletionClient : IOleCommandTarget
+	internal class InlineCompletionClient : IOleCommandTarget, IDisposable
 	{
 		private IOleCommandTarget _nextCommandHandler;
 		private IWpfTextView _textView;
@@ -94,9 +94,11 @@ namespace Extension.InlineCompletion
 			var triggeringLine = _textView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
 			var triggeringLineText = triggeringLine.GetText();
 			var lineTrackingSpan = _textView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
+			var language = LanguageUtils.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
+
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
-				&& EditorUtils.IsSemanticSearchComment(triggeringLineText)
+				&& EditorUtils.IsSemanticSearchComment(triggeringLineText, language)
 				&& _completionView == null;
 
 			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
@@ -110,9 +112,10 @@ namespace Extension.InlineCompletion
 			// start inline completion session
 
 			// query snippets based on keywords
-			var term = triggeringLineText.Replace("//", "").Trim();
-			var language = CodigaLanguages.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
-			var languages = new ReadOnlyCollection<string>(new[] { language });
+			var sign = LanguageUtils.GetCommentSign(language);
+			var term = triggeringLineText.Replace(sign, "").Trim();
+			
+			var languages = new ReadOnlyCollection<string>(new[] { language.GetName() });
 
 			var client = _clientProvider.GetClient();
 
@@ -223,6 +226,11 @@ namespace Extension.InlineCompletion
 			}
 
 			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+		}
+
+		public void Dispose()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

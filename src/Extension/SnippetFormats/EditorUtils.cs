@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Extension.SnippetFormats.LanguageUtils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Extension.SnippetFormats
@@ -27,11 +28,11 @@ namespace Extension.SnippetFormats
 		/// </summary>
 		/// <param name="line"></param>
 		/// <returns></returns>
-		public static bool IsComment(string line)
+		public static bool IsComment(string line, LanguageEnumeration language)
 		{
-			// TODO add support for all languages
 			line = line.Trim();
-			return line.StartsWith("//");
+			var sign = GetCommentSign(language);
+			return line.StartsWith(sign);
 		}
 
 		/// <summary>
@@ -39,12 +40,13 @@ namespace Extension.SnippetFormats
 		/// </summary>
 		/// <param name="line"></param>
 		/// <returns></returns>
-		public static bool IsSemanticSearchComment(string line)
+		public static bool IsSemanticSearchComment(string line, LanguageEnumeration language)
 		{
-			if (!IsComment(line))
+			if (!IsComment(line, language))
 				return false;
-			
-			var withoutCommentChar = line.Replace("//", "").Trim();
+
+			var sign = GetCommentSign(language);
+			var withoutCommentChar = line.Replace(sign, "").Trim();
 			var keywords = withoutCommentChar.Split(' ');
 
 			return keywords.Length >= 2;

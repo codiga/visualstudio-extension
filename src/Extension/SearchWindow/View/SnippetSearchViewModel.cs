@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Extension.SnippetFormats;
 using Extension.InlineCompletion.Preview;
+using Microsoft.VisualStudio.Shell;
 
 namespace Extension.SearchWindow.View
 {
@@ -62,6 +63,18 @@ namespace Extension.SearchWindow.View
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
+
+			var windows = ThreadHelper.JoinableTaskFactory.Run( async () =>
+			{
+				return await VS.Windows.GetAllDocumentWindowsAsync();
+			});
+			 
+			_editorOpen = windows.Any();
+
+			GetSnippets.RaiseCanExecuteChanged();
+			InsertSnippet.RaiseCanExecuteChanged();
+			ShowPreview.RaiseCanExecuteChanged();
+			HidePreview.RaiseCanExecuteChanged();
 		}
 
 		private async void DocumentEvents_Closed(string obj)
@@ -71,6 +84,7 @@ namespace Extension.SearchWindow.View
 			GetSnippets.RaiseCanExecuteChanged();
 			InsertSnippet.RaiseCanExecuteChanged();
 			ShowPreview.RaiseCanExecuteChanged();
+			HidePreview.RaiseCanExecuteChanged();
 		}
 
 		private async void DocumentEvents_Opened(string obj)
@@ -79,6 +93,7 @@ namespace Extension.SearchWindow.View
 			GetSnippets.RaiseCanExecuteChanged();
 			InsertSnippet.RaiseCanExecuteChanged();
 			ShowPreview.RaiseCanExecuteChanged();
+			HidePreview.RaiseCanExecuteChanged();
 		}
 
 		#region GetSnippets command
@@ -94,7 +109,7 @@ namespace Extension.SearchWindow.View
 
 			var client = _clientProvider.GetClient();
 			var ext = Path.GetExtension(currentDocView.Document.FilePath);
-			var languages = new ReadOnlyCollection<string>(new[] { CodigaLanguages.Parse(ext) });
+			var languages = new ReadOnlyCollection<string>(new[] { LanguageUtils.Parse(ext).GetName() });
 
 			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, null, OnlyFavorite, 10, 0);
 

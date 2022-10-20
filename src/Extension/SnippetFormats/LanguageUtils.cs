@@ -66,6 +66,21 @@ namespace Extension.SnippetFormats
 				".rb" => LanguageEnumeration.Ruby,
 				".rs" => LanguageEnumeration.Rust,
 				".go" => LanguageEnumeration.Go,
+				".php" => LanguageEnumeration.Php,
+				".yml" => LanguageEnumeration.Yaml,
+				".cfm" => LanguageEnumeration.Coldfusion,
+				".dockerfile" => LanguageEnumeration.Docker,
+				".m" => LanguageEnumeration.Objectivec,
+				".tf" => LanguageEnumeration.Terraform,
+				".swift" => LanguageEnumeration.Swift,
+				".sol" => LanguageEnumeration.Solidity,
+				".sql" => LanguageEnumeration.Sql,
+				".sh" => LanguageEnumeration.Shell,
+				".scala" => LanguageEnumeration.Scala,
+				".pl" => LanguageEnumeration.Perl,
+				".hs" => LanguageEnumeration.Haskell,
+				".dart" => LanguageEnumeration.Dart,
+
 				_ => LanguageEnumeration.Unknown
 			};
 		}

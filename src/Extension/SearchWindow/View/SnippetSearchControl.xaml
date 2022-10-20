@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-			 xmlns:local="clr-namespace:Extension.SearchWindow.View"
-             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+			 xmlns:local="clr-namespace:Extension.SearchWindow.View" 
+			 xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+			 Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
@@ -44,7 +45,22 @@
 							<!--Title bar-->
 							<DockPanel Grid.Row="0" Width="Auto">
 								<TextBlock Foreground="White" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
-								<Button HorizontalAlignment="Right" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">Insert</Button>
+								<Button HorizontalAlignment="Right" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
+									<i:Interaction.Triggers>
+										<i:EventTrigger EventName="MouseEnter">
+											<i:EventTrigger.Actions>
+												<i:InvokeCommandAction Command="{Binding Path=DataContext.ShowPreview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+											</i:EventTrigger.Actions>
+										</i:EventTrigger>
+
+										<i:EventTrigger EventName="MouseLeave">
+											<i:EventTrigger.Actions>
+												<i:InvokeCommandAction Command="{Binding Path=DataContext.HidePreview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+											</i:EventTrigger.Actions>
+										</i:EventTrigger>
+									</i:Interaction.Triggers>
+									Insert
+								</Button>
 							</DockPanel>
 							
 							<!--Snippet meta data-->

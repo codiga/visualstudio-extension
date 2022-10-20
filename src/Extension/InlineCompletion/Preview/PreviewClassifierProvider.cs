@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 
-namespace Extension.InlineCompletion
+namespace Extension.InlineCompletion.Preview
 {
 	/// <summary>
 	/// Classifier provider. It adds the classifier to the set of classifiers.
@@ -22,9 +22,6 @@ namespace Extension.InlineCompletion
 		[Import]
 		private IClassificationTypeRegistryService classificationRegistry;
 
-		[Import]
-		internal InlineCompletionClient InlineCompletionClient;
-
 #pragma warning restore 649
 
 		/// <summary>
@@ -34,7 +31,7 @@ namespace Extension.InlineCompletion
 		/// <returns>A classifier for the text buffer, or null if the provider cannot do so in its current state.</returns>
 		public IClassifier GetClassifier(ITextBuffer buffer)
 		{
-			return buffer.Properties.GetOrCreateSingletonProperty(creator: () => new PreviewClassifier(classificationRegistry, InlineCompletionClient));
+			return buffer.Properties.GetOrCreateSingletonProperty(creator: () => new PreviewClassifier(classificationRegistry));
 		}
 	}
 }

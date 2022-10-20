@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Extension.SnippetFormats;
+using Extension.InlineCompletion.Preview;
 
 namespace Extension.SearchWindow.View
 {
@@ -26,11 +27,13 @@ namespace Extension.SearchWindow.View
 		private AsyncButtonCommand _getSnippets;
 		private AsyncButtonCommand _insertSnippet;
 		private AsyncButtonCommand _showPreview;
+		private AsyncButtonCommand _hidePreview;
 
 		// Commands
 		public AsyncButtonCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
 		public AsyncButtonCommand InsertSnippet { get => _insertSnippet; set => _insertSnippet = value; }
 		public AsyncButtonCommand ShowPreview { get => _showPreview; set => _showPreview = value; }
+		public AsyncButtonCommand HidePreview { get => _hidePreview; set => _hidePreview = value; }
 
 		// Search parameters
 		public bool AllSnippets { get => _allSnippets; set => _allSnippets = value; }
@@ -44,6 +47,7 @@ namespace Extension.SearchWindow.View
 
 		// View behaviour
 		public bool EditorOpen { get => _editorOpen;}
+		
 
 		public SnippetSearchViewModel()
 		{
@@ -53,7 +57,8 @@ namespace Extension.SearchWindow.View
 
 			GetSnippets = new AsyncButtonCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
 			InsertSnippet = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
-			ShowPreview = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
+			ShowPreview = new AsyncButtonCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
+			HidePreview = new AsyncButtonCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -109,6 +114,7 @@ namespace Extension.SearchWindow.View
 
 		public async Task InsertSnippetAsync(object param)
 		{
+			await HidePreviewAsync(param);
 			var snippet = (VisualStudioSnippet)param;
 
 			var client = new ExpansionClient();
@@ -118,10 +124,21 @@ namespace Extension.SearchWindow.View
 
 		#endregion
 
-		#region ShowPreview command
+		#region Preview commands
 		public async Task ShowPreviewAsync(object param)
 		{
+			var snippet = (VisualStudioSnippet)param;
+			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
 
+			var previewEditor = new CodePreviewSession();
+			previewEditor.StartPreviewing(currentDocView.TextView, snippet);
+		}
+
+		public async Task HidePreviewAsync(object param)
+		{
+			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+			var previewEditor = new CodePreviewSession();
+			previewEditor.StopPreviewing(currentDocView.TextView);
 		}
 		#endregion
 

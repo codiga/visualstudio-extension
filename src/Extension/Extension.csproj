@@ -71,7 +71,7 @@
     <Compile Include="InlineCompletion\Preview\PreviewClassifierProvider.cs" />
     <Compile Include="InlineCompletion\InlineCompletionClient.cs" />
     <Compile Include="InlineCompletion\InlineCompletionView.cs" />
-    <Compile Include="InlineCompletion\Preview\PreviewTextEditor.cs" />
+    <Compile Include="InlineCompletion\Preview\CodePreviewSession.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,6 +149,9 @@
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2116">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
+      <Version>1.1.39</Version>
     </PackageReference>
     <PackageReference Include="StrawberryShake.Core">
       <Version>12.14.0</Version>

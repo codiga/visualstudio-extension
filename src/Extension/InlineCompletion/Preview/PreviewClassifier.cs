@@ -1,11 +1,12 @@
-﻿using Microsoft.VisualStudio.Text;
+﻿using Extension.InlineCompletion.Preview;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
-namespace Extension.InlineCompletion
+namespace Extension.InlineCompletion.Preview
 {
 	/// <summary>
 	/// Classifier that classifies the preview snippet code.
@@ -15,20 +16,16 @@ namespace Extension.InlineCompletion
 		/// <summary>
 		/// Classification type.
 		/// </summary>
-		private readonly IClassificationType classificationType;
-		private readonly InlineCompletionClient client;
+		private readonly IClassificationType _classificationType;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PreviewClassifier"/> class.
 		/// </summary>
 		/// <param name="registry">Classification registry.</param>
-		internal PreviewClassifier(IClassificationTypeRegistryService registry, InlineCompletionClient client)
+		internal PreviewClassifier(IClassificationTypeRegistryService registry)
 		{
-			this.classificationType = registry.GetClassificationType("PreviewClassifier");
-			this.client = client;
+			_classificationType = registry.GetClassificationType("PreviewClassifier");
 		}
-
-#pragma warning disable 67
 
 		/// <summary>
 		/// An event that occurs when the classification of a span of text has changed.
@@ -40,10 +37,9 @@ namespace Extension.InlineCompletion
 		/// </remarks>
 		public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
-#pragma warning restore 67
 
 		/// <summary>
-		/// Returns new <see cref="ClassificationSpan"/>s based on <see cref="InlineCompletionClient.CurrentSnippetSpan"/> of the completion client.
+		/// Returns new <see cref="ClassificationSpan"/>s based on <see cref="CodePreviewSession.CurrentPreview"/> of the completion client.
 		/// </summary>
 		/// <param name="span"></param>
 		/// <returns></returns>
@@ -51,10 +47,10 @@ namespace Extension.InlineCompletion
 		{
 			var result = new List<ClassificationSpan>();
 
-			//if(client.CurrentSnippetSpan != null && classificationType != null)
-			//{
-			//	result.Add(new ClassificationSpan(client.CurrentSnippetSpan.Span.GetSpan(span.Snapshot), classificationType));
-			//}	
+			if(CodePreviewSession.CurrentPreview != null && _classificationType != null)
+			{
+				result.Add(new ClassificationSpan(CodePreviewSession.CurrentPreview.Span.GetSpan(span.Snapshot), _classificationType));
+			}	
 
 			return result;
 		}
@@ -67,6 +63,6 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		[Export(typeof(ClassificationTypeDefinition))]
 		[Name("PreviewClassifier")]
-		private static ClassificationTypeDefinition typeDefinition;
+		private static ClassificationTypeDefinition s_typeDefinition;
 	}
 }

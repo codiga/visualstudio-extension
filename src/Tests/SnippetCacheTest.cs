@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using GraphQLClient;
 using System.Collections.ObjectModel;
+using Extension.SnippetFormats;
 
 namespace Tests
 {
@@ -41,11 +42,21 @@ namespace Tests
 		{
 			// arrange
 			//first polling session
-			var started = _systemUnderTest.StartPolling("Csharp");
+			var started = _systemUnderTest.StartPolling(LanguageUtils.LanguageEnumeration.Csharp);
 			Assert.That(started, Is.True);
 
 			// act
-			started = _systemUnderTest.StartPolling("Csharp");
+			started = _systemUnderTest.StartPolling(LanguageUtils.LanguageEnumeration.Csharp);
+
+			// arrange
+			Assert.That(started, Is.False);
+		}
+
+		[Test]
+		public void StartPolling_should_not_start_sessions_for_unknown_language()
+		{
+			// act
+			var started = _systemUnderTest.StartPolling(LanguageUtils.LanguageEnumeration.Unknown);
 
 			// arrange
 			Assert.That(started, Is.False);
@@ -55,7 +66,7 @@ namespace Tests
 		public void SnippetCache_should_setup_internal_structures()
 		{
 			// act
-			var snippets = _systemUnderTest.GetSnippets("Csharp");
+			var snippets = _systemUnderTest.GetSnippets(LanguageUtils.LanguageEnumeration.Csharp);
 
 			//assert
 			Assert.That(snippets, Is.Empty);
@@ -70,12 +81,12 @@ namespace Tests
 			var cache = (SnippetCache)_systemUnderTest;
 
 			// act
-			cache.PollSnippetsAsync(token.Token, "Csharp");
+			cache.PollSnippetsAsync(token.Token, LanguageUtils.LanguageEnumeration.Csharp);
 
 			// assert
 			await Task.Delay(15000);
 
-			var snippets = cache.GetSnippets("Csharp");
+			var snippets = cache.GetSnippets(LanguageUtils.LanguageEnumeration.Csharp);
 		}
 	}
 }

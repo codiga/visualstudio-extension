@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 
@@ -38,9 +39,13 @@ namespace Extension.InlineCompletion
 		[Import]
 		internal ExpansionClient ExpansionClient;
 
-		[Import]
-		internal InlineCompletionClient InlineCompletionClient;
+		internal Dictionary<IWpfTextView, InlineCompletionClient> InlineCompletionClients { get;}
 
+
+		public WpfTextViewCreationListener()
+		{
+			InlineCompletionClients = new Dictionary<IWpfTextView, InlineCompletionClient>();
+		}
 
 		/// <summary>
 		/// Called when a text view having matching roles is created over a text data model having a matching content type.
@@ -49,9 +54,20 @@ namespace Extension.InlineCompletion
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView)
 		{
-			var vsTextView = AdapterService.GetViewAdapter(textView);
+			textView.Closed += TextView_Closed;
+			var client = new InlineCompletionClient();
+			InlineCompletionClients.Add(textView, client);
+			client.Initialize(textView, ExpansionClient);
+		}
 
-			InlineCompletionClient.Initialize(textView, vsTextView, ExpansionClient);
+		private void TextView_Closed(object sender, System.EventArgs e)
+		{
+			var view = (IWpfTextView)sender;
+			if(InlineCompletionClients.TryGetValue(view, out var client))
+			{
+				client.Dispose();
+				InlineCompletionClients.Remove(view);
+			}
 		}
 	}
 }

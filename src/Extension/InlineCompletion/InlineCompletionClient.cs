@@ -23,11 +23,10 @@ namespace Extension.InlineCompletion
 	/// The main purpose is to provide the user with a good preview of potential snippets returned by the semantic search.
 	/// The snippet insertion process is passed to the <see cref="ExpansionClient"/>
 	/// </summary>
-	[Export]
 	internal class InlineCompletionClient : IOleCommandTarget, IDisposable
 	{
 		private IOleCommandTarget _nextCommandHandler;
-		private IWpfTextView _textView;
+		private IWpfTextView _wpfTextView;
 		private ICodigaClientProvider _clientProvider;
 
 		private InlineCompletionView _completionView;
@@ -35,19 +34,18 @@ namespace Extension.InlineCompletion
 
 		private ExpansionClient _expansionClient;
 
-		private int _triggerCaretPosition = 0;
-
 		/// <summary>
 		/// Initialize the client and start listening for commands
 		/// </summary>
-		/// <param name="textView"></param>
+		/// <param name="wpfTextView"></param>
 		/// <param name="vsTextView"></param>
 		/// <param name="expansionClient"></param>
 		/// <param name="clientProvider"></param>
-		public void Initialize(IWpfTextView textView, IVsTextView vsTextView, ExpansionClient expansionClient)
+		public void Initialize(IWpfTextView wpfTextView, ExpansionClient expansionClient)
 		{
 			_clientProvider = new DefaultCodigaClientProvider();
-			_textView = textView;
+			_wpfTextView = wpfTextView;
+			var vsTextView = wpfTextView.ToIVsTextView();
 			_expansionClient = expansionClient;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 		}
@@ -56,7 +54,7 @@ namespace Extension.InlineCompletion
 		{
 			return _nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
 		}
-
+		
 		/// <summary>
 		/// This handles incoming commands during the inline completion session.
 		/// Commands are NextSnippet(tbd), PreviousSnippet(tbd), Commit [Tab], Cancel [ESC]
@@ -88,11 +86,11 @@ namespace Extension.InlineCompletion
 				return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
 
-			var caretPos = _textView.Caret.Position.BufferPosition.Position;
-			var triggeringLine = _textView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
+			var caretPos = _wpfTextView.Caret.Position.BufferPosition.Position;
+			var triggeringLine = _wpfTextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
 			var triggeringLineText = triggeringLine.GetText();
-			var lineTrackingSpan = _textView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
-			var language = LanguageUtils.Parse(Path.GetExtension(_textView.ToDocumentView().FilePath));
+			var lineTrackingSpan = _wpfTextView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
+			var language = LanguageUtils.Parse(Path.GetExtension(_wpfTextView.ToDocumentView().FilePath));
 
 
 			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
@@ -104,8 +102,6 @@ namespace Extension.InlineCompletion
 			{
 				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
-
-			_triggerCaretPosition = caretPos;
 
 			// start inline completion session
 
@@ -123,7 +119,7 @@ namespace Extension.InlineCompletion
 				.ContinueWith(OnQueryFinished, TaskScheduler.Default);
 			});
 
-			_completionView = new InlineCompletionView(_textView, lineTrackingSpan);
+			_completionView = new InlineCompletionView(_wpfTextView, lineTrackingSpan);
 
 			// start drawing the adornments for the instructions
 			_completionView.StartDrawingInstructions();
@@ -137,7 +133,7 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private int CommitCurrentSnippet()
 		{
-			_expansionClient.StartExpansion(_textView, _snippetNavigator.CurrentItem, true);
+			_expansionClient.StartExpansion(_wpfTextView, _snippetNavigator.CurrentItem, true);
 			return VSConstants.S_OK;
 		}
 
@@ -221,6 +217,7 @@ namespace Extension.InlineCompletion
 			{
 				_completionView.RemoveInstructions();
 				_completionView = null;
+				_snippetNavigator = null;
 			}
 
 			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
@@ -228,7 +225,8 @@ namespace Extension.InlineCompletion
 
 		public void Dispose()
 		{
-			throw new NotImplementedException();
+			var vsTextView = _wpfTextView.ToIVsTextView();
+			vsTextView.RemoveCommandFilter(this);
 		}
 	}
 }

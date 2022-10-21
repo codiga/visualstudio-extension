@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Package;
+﻿using Extension.SnippetFormats;
+using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
@@ -35,7 +36,6 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		private readonly IWpfTextView _view;
 		private readonly FontSettings _settings;
-		private int _triggeringCaret;
 		private ITrackingSpan _triggeringLine;
 
 		private string? _currentSnippetCode;
@@ -189,6 +189,9 @@ namespace Extension.InlineCompletion
 		/// </summary>
 		internal void RemoveInstructions()
 		{
+			_currentSnippetCode = null;
+			_currentSnippetIndex = 0;
+			_totalSnippetCount = 0;
 			_view.LayoutChanged -= OnLayoutChanged;
 			_layer.RemoveAllAdornments();
 		}

@@ -24,7 +24,7 @@ namespace GraphQLClient
 
 		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip);
 
-		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool? onlyPublic, bool? onlyPrivate, bool? onlySubscribed, int howMany, int skip);
+		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate, bool onlySubscribed, int howMany, int skip);
 	}
 
 
@@ -114,10 +114,10 @@ namespace GraphQLClient
 
 		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip)
 		{
-			return await GetRecipesForClientSemanticAsync(keywords, languages, onlyPublic, null, false, howMany, skip);
+			return await GetRecipesForClientSemanticAsync(keywords, languages, onlyPublic, false, false, howMany, skip);
 		}
 
-		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool? onlyPublic, bool? onlyPrivate, bool? onlySubscribed, int howMany, int skip)
+		public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate, bool onlySubscribed, int howMany, int skip)
 		{
 			dynamic variables = new System.Dynamic.ExpandoObject();
 			var variablesDict = (IDictionary<string, object?>)variables;
@@ -127,9 +127,12 @@ namespace GraphQLClient
 			variablesDict["dependencies"] = "";
 			variablesDict["parameters"] = "";
 			variablesDict["languages"] = languages;
-			variablesDict["onlyPublic"] = onlyPublic;
-			variablesDict["onlyPrivate"] = onlyPrivate;
-			variablesDict["onlySubscribed"] = onlySubscribed;
+			if(onlyPublic)
+				variablesDict["onlyPublic"] = onlyPublic;
+			if(onlyPrivate)
+				variablesDict["onlyPrivate"] = onlyPrivate;
+			if(onlySubscribed)
+				variablesDict["onlySubscribed"] = onlySubscribed;
 			variablesDict["howmany"] = howMany;
 			variablesDict["skip"] = skip;
 

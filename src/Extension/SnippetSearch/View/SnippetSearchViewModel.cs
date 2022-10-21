@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Extension.SnippetSearch.Preview;
+using System.Runtime.InteropServices;
+using System.Windows.Input;
 
 namespace Extension.SearchWindow.View
 {
@@ -27,26 +29,45 @@ namespace Extension.SearchWindow.View
 		private AsyncButtonCommand _insertSnippet;
 		private AsyncButtonCommand _showPreview;
 		private AsyncButtonCommand _hidePreview;
+		private AsyncButtonCommand _keyDown;
 
 		// Commands
 		public AsyncButtonCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
 		public AsyncButtonCommand InsertSnippet { get => _insertSnippet; set => _insertSnippet = value; }
 		public AsyncButtonCommand ShowPreview { get => _showPreview; set => _showPreview = value; }
 		public AsyncButtonCommand HidePreview { get => _hidePreview; set => _hidePreview = value; }
+		public AsyncButtonCommand KeyDown { get => _keyDown; set => _keyDown = value; }
 
 		// Search parameters
-		public bool AllSnippets { get => _allSnippets; set => _allSnippets = value; }
 		public string Term { get => _term; set => _term = value; }
 		public bool OnlyFavorite { get => _onlyFavorite; set => _onlyFavorite = value; }
 		public bool OnlyPrivate { get => _onlyPrivate; set => _onlyPrivate = value; }
 		public bool OnlyPublic { get => _onlyPublic; set => _onlyPublic = value; }
+
+		public bool AllSnippets
+		{
+			get
+			{
+				return _allSnippets;
+			}
+			set
+			{
+				if (value)
+				{
+					OnlyPrivate = false;
+					OnlyPublic = false;
+				}
+				
+				_allSnippets = value;
+			}
+		}
 
 		// Results
 		public ObservableCollection<VisualStudioSnippet> Snippets { get; set; }
 
 		// View behaviour
 		public bool EditorOpen { get => _editorOpen;}
-		
+
 
 		public SnippetSearchViewModel()
 		{
@@ -58,6 +79,7 @@ namespace Extension.SearchWindow.View
 			InsertSnippet = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
 			ShowPreview = new AsyncButtonCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
 			HidePreview = new AsyncButtonCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
+			KeyDown = new AsyncButtonCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -73,6 +95,8 @@ namespace Extension.SearchWindow.View
 			InsertSnippet.RaiseCanExecuteChanged();
 			ShowPreview.RaiseCanExecuteChanged();
 			HidePreview.RaiseCanExecuteChanged();
+
+			AllSnippets = true;
 		}
 
 		private async void DocumentEvents_Closed(string obj)
@@ -103,18 +127,18 @@ namespace Extension.SearchWindow.View
 
 		public async Task QuerySnippetsAsync(object param)
 		{
+			Snippets.Clear();
+
 			var currentDocView =  await VS.Documents.GetActiveDocumentViewAsync();
 
 			var client = _clientProvider.GetClient();
 			var ext = Path.GetExtension(currentDocView.Document.FilePath);
 			var languages = new ReadOnlyCollection<string>(new[] { LanguageUtils.Parse(ext).GetName() });
 
-			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, null, OnlyFavorite, 10, 0);
+			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
 
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var vsSnippets = result.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
-
-			Snippets.Clear();
 
 			foreach (var snippet in vsSnippets)
 			{
@@ -155,5 +179,19 @@ namespace Extension.SearchWindow.View
 		}
 		#endregion
 
+		public async Task OnKeyUp(object param)
+		{
+			if (Term == null)
+				return;
+
+			var args = (KeyEventArgs)param;
+
+			var keyWordCount = Term.Trim().Split(' ').Count();
+
+			if(keyWordCount >= 2 && args.Key == Key.Space)
+			{
+				await QuerySnippetsAsync(null);
+			}
+		}
 	}
 }

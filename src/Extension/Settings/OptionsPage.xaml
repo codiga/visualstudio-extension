@@ -19,7 +19,6 @@
 			<RowDefinition Height="35" />
 			<RowDefinition Height="35" />
 			<RowDefinition Height="35" />
-			<RowDefinition Height="35" />
 			<RowDefinition Height="20" />
 			
 		</Grid.RowDefinitions>
@@ -31,18 +30,13 @@
 		<Label Grid.Column="0" Grid.Row="1" VerticalAlignment="Center">Use inline completion</Label>
 		<CheckBox x:Name="cbUseInlineCompletion" Margin="5" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center"
 				  Checked="UseInlineCompletion_Checked" Unchecked="UseInlineCompletion_Unchecked"></CheckBox>
-
-		<Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Center">Fingerprint</Label>
-		<TextBox x:Name="lblFingerprint" VerticalContentAlignment="Center" Background="LightGray" IsReadOnly="True"
-				 IsReadOnlyCaretVisible="False" Margin="5" Height="20" Grid.Column="1" Grid.Row="2" 
-				 HorizontalAlignment="Stretch" VerticalAlignment="Center"></TextBox>
-		
-		<Label Grid.Column="0" Grid.Row="3" VerticalAlignment="Center">API Token</Label>
-		<TextBox x:Name="txtToken" VerticalContentAlignment="Center" Margin="5" Height="20" Grid.Column="1" Grid.Row="3" HorizontalAlignment="Stretch"></TextBox>
-		<Button x:Name="btnVerify" Margin="5" Height="20" Grid.Column="2" Grid.Row="3"
+	
+		<Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Center">API Token</Label>
+		<TextBox x:Name="txtToken" VerticalContentAlignment="Center" Margin="5" Height="20" Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch"></TextBox>
+		<Button x:Name="btnVerify" Margin="5" Height="20" Grid.Column="2" Grid.Row="2"
 				Click="VerifyToken_Clicked">Save token</Button>
 
-		<StackPanel Margin="5 0 0 0" Grid.Column="1" Grid.Row="4" Orientation="Horizontal" VerticalAlignment="Center">
+		<StackPanel Margin="5 0 0 0" Grid.Column="1" Grid.Row="3" Orientation="Horizontal" VerticalAlignment="Center">
 			<imaging:CrispImage x:Name="imgCheck" Visibility="Collapsed" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.OnlineStatusAvailable}" />
 			<imaging:CrispImage x:Name="imgError" Visibility="Collapsed" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.OnlineStatusPresenting}" />
 			<TextBlock x:Name="lblUserName" HorizontalAlignment="Left" VerticalAlignment="Center"></TextBlock>

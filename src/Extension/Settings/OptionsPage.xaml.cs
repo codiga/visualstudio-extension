@@ -1,4 +1,5 @@
-﻿using GraphQLClient;
+﻿using Extension.Caching;
+using GraphQLClient;
 using Microsoft.VisualStudio.Shell;
 using System.Linq;
 using System.Windows;
@@ -11,7 +12,7 @@ namespace Extension.Settings
 	/// </summary>
 	public partial class OptionsPage : UserControl
 	{
-		private CodigaClient CodigaClient { get; set; }
+		private ICodigaClient CodigaClient { get; set; }
 
 		internal CodigaOptionPage extensionOptionsPage;
 
@@ -23,11 +24,11 @@ namespace Extension.Settings
 		public void Initialize()
 		{
 			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
-			CodigaClient = new CodigaClient(settings.Fingerprint);
+			var provider = new DefaultCodigaClientProvider();
+			CodigaClient = provider.GetClient();
 
 			cbUseCodingAssistant.IsChecked = settings.UseCodingAssistant;
 			cbUseInlineCompletion.IsChecked = settings.UseInlineCompletion;
-			lblFingerprint.Text = settings.Fingerprint;
 			txtToken.Text = settings.ApiToken;
 
 			CodigaOptions.Instance.Save();
@@ -73,7 +74,7 @@ namespace Extension.Settings
 			string response;
 			if (result.Errors != null && result.Errors.Any())
 			{
-				response = CodigaClient.GetReadableErrorMessage(result.Errors.First().Message);
+				response = GraphQLClient.CodigaClient.GetReadableErrorMessage(result.Errors.First().Message);
 				imgError.Visibility = Visibility.Visible;
 			}
 			else

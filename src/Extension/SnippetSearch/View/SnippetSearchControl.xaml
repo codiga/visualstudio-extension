@@ -200,7 +200,7 @@
 						
 							<!--Title bar-->
 							<DockPanel Grid.Row="0" Width="Auto">
-								<TextBlock Foreground="White" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
+								<TextBlock Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
 								<Button HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">

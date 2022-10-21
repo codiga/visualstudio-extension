@@ -134,7 +134,7 @@ namespace Extension.SearchWindow.View
 
 			var client = new ExpansionClient();
 			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
-			client.StartExpansion(currentDocView.TextView, snippet);
+			client.StartExpansion(currentDocView.TextView, snippet, false);
 		}
 
 		#endregion

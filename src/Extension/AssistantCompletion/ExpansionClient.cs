@@ -5,6 +5,7 @@ using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.GraphModel.CodeSchema;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Settings.Internal;
 using Microsoft.VisualStudio.Shell;
@@ -43,7 +44,7 @@ namespace Extension.AssistantCompletion
 		/// <param name="textView"></param>
 		/// <param name="snippet"></param>
 		/// <returns></returns>
-		public int StartExpansion(IWpfTextView textView, VisualStudioSnippet snippet)
+		public int StartExpansion(IWpfTextView textView, VisualStudioSnippet snippet, bool replaceLine)
 		{
 			var caret = textView.Caret;
 
@@ -52,50 +53,20 @@ namespace Extension.AssistantCompletion
 			var indentedCode = EditorUtils.IndentCodeBlock(snippet.CodeSnippet.Snippet.Code.RawCode, caret, settings);
 			snippet.CodeSnippet.Snippet.Code.CodeString = indentedCode;
 
-			// start session at carret position
-			var legacyCaretPosition = caret.Position.GetLegacyCaretPosition();
-			StartExpansionInternal(textView.ToIVsTextView(), snippet, legacyCaretPosition);
-
-			return VSConstants.S_OK;
-		}
-
-		/// <summary>
-		/// Starts a new snippet insertion session at the current caret position.
-		/// All text prior to the cartet in this line will be replaced.
-		/// </summary>
-		/// <param name="vsTextView"></param>
-		/// <param name="completionItem"></param>
-		/// <returns></returns>
-		public int StartExpansion(IVsTextView vsTextView, VisualStudioSnippet snippet)
-		{
-			vsTextView.GetBuffer(out var textLines);
-			vsTextView.GetCaretPos(out var startLine, out var endColumn);
-
-			textLines.GetLineText(startLine, 0, startLine, endColumn, out var currentLine);
-
-			// indent the snippet based on the current position
-			var formattedSnippet = FormatSnippet(snippet.CodeSnippet.Snippet.Code.RawCode, currentLine);
-			snippet.CodeSnippet.Snippet.Code.CodeString = formattedSnippet;
-
-			int startIndex;
-			// replace the typed search text
-			if (!string.IsNullOrEmpty(currentLine) && currentLine.Any(c => c != ' ' && c != '\t'))
+			// determine span for insertion, insert at caret or replace whole line
+			// as the expansion client is a legacy API we have to transform the spans to TextSpan.
+			TextSpan insertionPosition;
+			if (replaceLine)
 			{
-				startIndex = currentLine.IndexOf(currentLine.Trim().First());
+				var currentLine = textView.TextSnapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);			
+				insertionPosition = currentLine.Extent.GetLegacySpan();
 			}
 			else
 			{
-				startIndex = endColumn;
+				insertionPosition = caret.Position.GetLegacyCaretPosition();
 			}
-			var position = new TextSpan
-			{
-				iStartLine = startLine,
-				iStartIndex = startIndex,
-				iEndLine = startLine,
-				iEndIndex = endColumn,
-			};
 
-			StartExpansionInternal(vsTextView, snippet, position);
+			StartExpansionInternal(textView.ToIVsTextView(), snippet, insertionPosition);
 
 			return VSConstants.S_OK;
 		}

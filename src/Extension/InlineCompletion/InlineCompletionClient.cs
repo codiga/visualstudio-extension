@@ -28,7 +28,6 @@ namespace Extension.InlineCompletion
 	{
 		private IOleCommandTarget _nextCommandHandler;
 		private IWpfTextView _textView;
-		private IVsTextView _vsTextView;
 		private ICodigaClientProvider _clientProvider;
 
 		private InlineCompletionView _completionView;
@@ -49,7 +48,6 @@ namespace Extension.InlineCompletion
 		{
 			_clientProvider = new DefaultCodigaClientProvider();
 			_textView = textView;
-			_vsTextView = vsTextView;
 			_expansionClient = expansionClient;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 		}
@@ -139,7 +137,7 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private int CommitCurrentSnippet()
 		{
-			_expansionClient.StartExpansion(_vsTextView, _snippetNavigator.CurrentItem);
+			_expansionClient.StartExpansion(_textView, _snippetNavigator.CurrentItem, true);
 			return VSConstants.S_OK;
 		}
 

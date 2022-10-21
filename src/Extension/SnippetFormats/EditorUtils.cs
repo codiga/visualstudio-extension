@@ -65,11 +65,9 @@ namespace Extension.SnippetFormats
 			var isVirtual = caret.InVirtualSpace;
 			var snapshot = caret.Position.BufferPosition.Snapshot;
 			int indentLevel;
-			var indentFirstLine = false;
 
 			if (isVirtual)
 			{
-				indentFirstLine = true;
 				var spaces = caret.Position.VirtualSpaces;
 				indentLevel = GetVirtualIndentLevel(spaces, settings);
 			}
@@ -79,7 +77,7 @@ namespace Extension.SnippetFormats
 				indentLevel = GetIndentLevel(currentLine.GetText(), settings);
 			}
 
-			var indentedCode = IndentCodeBlock(code, indentLevel, settings, indentFirstLine);
+			var indentedCode = IndentCodeBlock(code, indentLevel, settings, true);
 			return indentedCode;
 		}
 

@@ -1,12 +1,11 @@
-﻿using Extension.InlineCompletion.Preview;
-using Microsoft.VisualStudio.Text;
+﻿using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
-namespace Extension.InlineCompletion.Preview
+namespace Extension.SnippetSearch.Preview
 {
 	/// <summary>
 	/// Classifier that classifies the preview snippet code.

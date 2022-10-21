@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Extension.SearchWindow
+namespace Extension.SnippetSearch
 {
 	/// <summary>
 	/// This class implements the tool window exposed by this package and hosts a user control.
@@ -17,12 +17,12 @@ namespace Extension.SearchWindow
 	/// </para>
 	/// </remarks>
 	[Guid("34835821-723b-41b3-81aa-463bea94ea52")]
-	public class SnippetSearch : ToolWindowPane
+	public class SearchWindow : ToolWindowPane
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SnippetSearch"/> class.
+		/// Initializes a new instance of the <see cref="SearchWindow"/> class.
 		/// </summary>
-		public SnippetSearch() : base(null)
+		public SearchWindow() : base(null)
 		{
 			this.Caption = "Snippet Search";
 

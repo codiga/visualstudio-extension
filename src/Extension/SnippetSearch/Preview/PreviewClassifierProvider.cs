@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 
-namespace Extension.InlineCompletion.Preview
+namespace Extension.SnippetSearch.Preview
 {
 	/// <summary>
 	/// Classifier provider. It adds the classifier to the set of classifiers.

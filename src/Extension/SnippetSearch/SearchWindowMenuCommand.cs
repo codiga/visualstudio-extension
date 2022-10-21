@@ -7,12 +7,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
-namespace Extension.SearchWindow
+namespace Extension.SnippetSearch
 {
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class SnippetSearchMenuCommand
+	internal sealed class SearchWindowMenuCommand
 	{
 		/// <summary>
 		/// Command ID.
@@ -30,12 +30,12 @@ namespace Extension.SearchWindow
 		private readonly AsyncPackage package;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SnippetSearchMenuCommand"/> class.
+		/// Initializes a new instance of the <see cref="SearchWindowMenuCommand"/> class.
 		/// Adds our command handlers for menu (commands must exist in the command table file)
 		/// </summary>
 		/// <param name="package">Owner package, not null.</param>
 		/// <param name="commandService">Command service to add command to, not null.</param>
-		private SnippetSearchMenuCommand(AsyncPackage package, OleMenuCommandService commandService)
+		private SearchWindowMenuCommand(AsyncPackage package, OleMenuCommandService commandService)
 		{
 			this.package = package ?? throw new ArgumentNullException(nameof(package));
 			commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace Extension.SearchWindow
 		/// <summary>
 		/// Gets the instance of the command.
 		/// </summary>
-		public static SnippetSearchMenuCommand Instance
+		public static SearchWindowMenuCommand Instance
 		{
 			get;
 			private set;
@@ -76,7 +76,7 @@ namespace Extension.SearchWindow
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
 			OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
-			Instance = new SnippetSearchMenuCommand(package, commandService);
+			Instance = new SearchWindowMenuCommand(package, commandService);
 		}
 
 		/// <summary>
@@ -88,7 +88,7 @@ namespace Extension.SearchWindow
 		{
 			this.package.JoinableTaskFactory.RunAsync(async delegate
 			{
-				ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(SnippetSearch), 0, true, this.package.DisposalToken);
+				ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(SearchWindow), 0, true, this.package.DisposalToken);
 				if ((null == window) || (null == window.Frame))
 				{
 					throw new NotSupportedException("Cannot create tool window");

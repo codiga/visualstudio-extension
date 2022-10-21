@@ -8,6 +8,7 @@ using Task = System.Threading.Tasks.Task;
 using Extension.SearchWindow;
 using System.ComponentModel.Composition;
 using Extension.Caching;
+using Extension.SnippetSearch;
 
 namespace Extension
 {
@@ -31,7 +32,7 @@ namespace Extension
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
 	[ProvideMenuResource("Menus.ctmenu", 1)]
-	[ProvideToolWindow(typeof(SnippetSearch))]
+	[ProvideToolWindow(typeof(SnippetSearch.SearchWindow))]
 	[Guid(ExtensionPackage.PackageGuidString)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	[ProvideOptionPage(typeof(Settings.CodigaOptionPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
@@ -67,14 +68,14 @@ namespace Extension
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			await SnippetSearchMenuCommand.InitializeAsync(this);
+			await SearchWindowMenuCommand.InitializeAsync(this);
 
 		}
 
 		public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
-			if (toolWindowType == typeof(SnippetSearch).GUID)
+			if (toolWindowType == typeof(SnippetSearch.SearchWindow).GUID)
 			{
 				return this;
 			}
@@ -84,7 +85,7 @@ namespace Extension
 
 		protected override string GetToolWindowTitle(Type toolWindowType, int id)
 		{
-			if (toolWindowType == typeof(SnippetSearch))
+			if (toolWindowType == typeof(SnippetSearch.SearchWindow))
 			{
 				return "SnippetSearch loading";
 			}

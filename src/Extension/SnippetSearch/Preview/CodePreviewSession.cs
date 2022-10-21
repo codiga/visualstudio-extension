@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using System.Windows.Forms;
 
-namespace Extension.InlineCompletion.Preview
+namespace Extension.SnippetSearch.Preview
 {
 	public interface ICodePreviewSession
 	{

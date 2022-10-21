@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Extension.InlineCompletion.Preview
+namespace Extension.SnippetSearch.Preview
 {
 	/// <summary>
 	/// Defines an editor format for the Classifier used for previewing snippet code.

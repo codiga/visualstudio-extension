@@ -2,14 +2,12 @@
 using Extension.AssistantCompletion;
 using Extension.Caching;
 using Extension.SnippetFormats;
-using Microsoft.VisualStudio.Editor;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Extension.SnippetFormats;
-using Extension.InlineCompletion.Preview;
 using Microsoft.VisualStudio.Shell;
+using Extension.SnippetSearch.Preview;
 
 namespace Extension.SearchWindow.View
 {

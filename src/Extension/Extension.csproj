@@ -66,24 +66,24 @@
     <Compile Include="Caching\CodigaClientProvider.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
-    <Compile Include="InlineCompletion\Preview\PreviewClassifier.cs" />
-    <Compile Include="InlineCompletion\Preview\PreviewClassifierFormat.cs" />
-    <Compile Include="InlineCompletion\Preview\PreviewClassifierProvider.cs" />
+    <Compile Include="SnippetSearch\Preview\PreviewClassifier.cs" />
+    <Compile Include="SnippetSearch\Preview\PreviewClassifierFormat.cs" />
+    <Compile Include="SnippetSearch\Preview\PreviewClassifierProvider.cs" />
     <Compile Include="InlineCompletion\InlineCompletionClient.cs" />
     <Compile Include="InlineCompletion\InlineCompletionView.cs" />
-    <Compile Include="InlineCompletion\Preview\CodePreviewSession.cs" />
+    <Compile Include="SnippetSearch\Preview\CodePreviewSession.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchWindow\View\AsyncButtonCommand.cs" />
-    <Compile Include="SearchWindow\View\SnippetSearchViewModel.cs" />
-    <Compile Include="SearchWindow\SnippetSearch.cs" />
-    <Compile Include="SearchWindow\SnippetSearchMenuCommand.cs" />
-    <Compile Include="SearchWindow\View\SnippetSearchControl.xaml.cs">
+    <Compile Include="SnippetSearch\View\AsyncButtonCommand.cs" />
+    <Compile Include="SnippetSearch\View\SnippetSearchViewModel.cs" />
+    <Compile Include="SnippetSearch\SearchWindow.cs" />
+    <Compile Include="SnippetSearch\SearchWindowMenuCommand.cs" />
+    <Compile Include="SnippetSearch\View\SnippetSearchControl.xaml.cs">
       <DependentUpon>SnippetSearchControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExtensionPackage.cs" />
-    <Compile Include="SearchWindow\SnippetSearchPackage1.cs">
+    <Compile Include="SnippetSearch\SnippetSearchPackage1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SnippetSearchPackage.vsct</DependentUpon>
@@ -162,7 +162,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="SearchWindow\View\SnippetSearchControl.xaml">
+    <Page Include="SnippetSearch\View\SnippetSearchControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -172,16 +172,16 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SearchWindow\Resources\SnippetSearchCommand.png" />
-    <Content Include="SearchWindow\Resources\SnippetSearchPackage.ico" />
-    <VSCTCompile Include="SearchWindow\SnippetSearchPackage.vsct">
+    <Content Include="SnippetSearch\Resources\SnippetSearchCommand.png" />
+    <Content Include="SnippetSearch\Resources\SnippetSearchPackage.ico" />
+    <VSCTCompile Include="SnippetSearch\SnippetSearchPackage.vsct">
       <Generator>VsctGenerator</Generator>
       <ResourceName>Menus.ctmenu</ResourceName>
       <LastGenOutput>SnippetSearchPackage1.cs</LastGenOutput>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SearchWindow\VSPackage.resx">
+    <EmbeddedResource Include="SnippetSearch\VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
     </EmbeddedResource>

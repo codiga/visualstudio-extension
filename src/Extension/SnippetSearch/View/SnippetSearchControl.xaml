@@ -185,11 +185,11 @@
 		
 		<!--Snippet scroll area-->
 		<ScrollViewer Grid.Row="3" HorizontalScrollBarVisibility="Disabled" Width="Auto" Height="Auto" VerticalScrollBarVisibility="Auto">
-			<ItemsControl Grid.Column="0" ItemsSource="{Binding Snippets}" Margin="10">
+			<ItemsControl Grid.Column="0" ItemsSource="{Binding Snippets}">
 				<ItemsControl.ItemTemplate>
 					<DataTemplate>
 						<!--Snippet view-->
-						<Grid>
+						<Grid Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowFrameKey}}" Margin="5">
 							<Grid.RowDefinitions>
 								<RowDefinition Height="Auto"/>
 								<RowDefinition Height="Auto"/>
@@ -200,8 +200,8 @@
 						
 							<!--Title bar-->
 							<DockPanel Grid.Row="0" Width="Auto">
-								<TextBlock Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
-								<Button HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
+								<TextBlock Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}"/>
+								<Button Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">
 											<i:EventTrigger.Actions>
@@ -219,18 +219,18 @@
 							</DockPanel>
 							
 							<!--Snippet meta data-->
-							<StackPanel  Grid.Row="1" Orientation="Horizontal">
+							<StackPanel Margin="5"  Grid.Row="1" Orientation="Horizontal">
 								<Label VerticalAlignment="Center">Owner:</Label>
 								<TextBlock VerticalAlignment="Center" Text="{Binding CodeSnippet.Header.Author}"></TextBlock>
 							</StackPanel>
 							
 							<!--Code-->
-							<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
-								<TextBlock FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString}"></TextBlock>
+							<ScrollViewer Margin="30 0 0 0" Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+								<TextBlock Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.EnvironmentBackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString}"></TextBlock>
 							</ScrollViewer>
 							
 							<!--Description-->
-							<TextBlock Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>
+							<TextBlock Padding="10" Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>
 							
 							<!--Footer-->
 							<TextBlock Grid.Row="4"></TextBlock>

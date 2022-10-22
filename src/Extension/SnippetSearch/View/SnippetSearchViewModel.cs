@@ -10,10 +10,12 @@ using Microsoft.VisualStudio.Shell;
 using Extension.SnippetSearch.Preview;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Extension.SearchWindow.View
 {
-	internal class SnippetSearchViewModel
+	internal class SnippetSearchViewModel : INotifyPropertyChanged
 	{
 		private ICodigaClientProvider _clientProvider;
 
@@ -24,12 +26,15 @@ namespace Extension.SearchWindow.View
 		private bool _onlyFavorite;
 
 		private bool _editorOpen = false;
+		private string _watermark;
 
 		private AsyncButtonCommand _getSnippets;
 		private AsyncButtonCommand _insertSnippet;
 		private AsyncButtonCommand _showPreview;
 		private AsyncButtonCommand _hidePreview;
 		private AsyncButtonCommand _keyDown;
+
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		// Commands
 		public AsyncButtonCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
@@ -66,8 +71,36 @@ namespace Extension.SearchWindow.View
 		public ObservableCollection<VisualStudioSnippet> Snippets { get; set; }
 
 		// View behaviour
-		public bool EditorOpen { get => _editorOpen;}
+		public bool EditorOpen { 
+			get 
+			{
+				return _editorOpen;
+			}
+			set
+			{
+				if (_editorOpen != value) 
+				{ 
+					_editorOpen = value;
+					OnPropertyChanged();
+					OnEditorOpenChanged();
+				}
+			}
+		}
 
+		public string Watermark
+		{
+			get
+			{
+				return _watermark;
+			}
+			set
+			{	if (_watermark != value)
+				{
+					_watermark = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 
 		public SnippetSearchViewModel()
 		{
@@ -89,33 +122,24 @@ namespace Extension.SearchWindow.View
 				return await VS.Windows.GetAllDocumentWindowsAsync();
 			});
 			 
-			_editorOpen = windows.Any();
-
-			GetSnippets.RaiseCanExecuteChanged();
-			InsertSnippet.RaiseCanExecuteChanged();
-			ShowPreview.RaiseCanExecuteChanged();
-			HidePreview.RaiseCanExecuteChanged();
+			EditorOpen = windows.Any();
+			OnEditorOpenChanged();
 
 			AllSnippets = true;
 		}
 
+
 		private async void DocumentEvents_Closed(string obj)
 		{
 			var windows = await VS.Windows.GetAllDocumentWindowsAsync();
-			_editorOpen = windows.Any();
-			GetSnippets.RaiseCanExecuteChanged();
-			InsertSnippet.RaiseCanExecuteChanged();
-			ShowPreview.RaiseCanExecuteChanged();
-			HidePreview.RaiseCanExecuteChanged();
+			EditorOpen = windows.Any();
+			OnEditorOpenChanged();
 		}
 
 		private async void DocumentEvents_Opened(string obj)
 		{
-			_editorOpen = true;
-			GetSnippets.RaiseCanExecuteChanged();
-			InsertSnippet.RaiseCanExecuteChanged();
-			ShowPreview.RaiseCanExecuteChanged();
-			HidePreview.RaiseCanExecuteChanged();
+			EditorOpen = true;
+			OnEditorOpenChanged();
 		}
 
 		#region GetSnippets command
@@ -127,8 +151,6 @@ namespace Extension.SearchWindow.View
 
 		public async Task QuerySnippetsAsync(object param)
 		{
-			Snippets.Clear();
-
 			var currentDocView =  await VS.Documents.GetActiveDocumentViewAsync();
 
 			var client = _clientProvider.GetClient();
@@ -136,6 +158,8 @@ namespace Extension.SearchWindow.View
 			var languages = new ReadOnlyCollection<string>(new[] { LanguageUtils.Parse(ext).GetName() });
 
 			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
+
+			Snippets.Clear();
 
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var vsSnippets = result.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
@@ -179,6 +203,7 @@ namespace Extension.SearchWindow.View
 		}
 		#endregion
 
+		#region Live search commands
 		public async Task OnKeyUp(object param)
 		{
 			if (Term == null)
@@ -192,6 +217,27 @@ namespace Extension.SearchWindow.View
 			{
 				await QuerySnippetsAsync(null);
 			}
+		}
+		#endregion
+
+
+		protected void OnPropertyChanged([CallerMemberName] string name = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+		}
+
+		private void OnEditorOpenChanged()
+		{
+			GetSnippets.RaiseCanExecuteChanged();
+			InsertSnippet.RaiseCanExecuteChanged();
+			ShowPreview.RaiseCanExecuteChanged();
+			HidePreview.RaiseCanExecuteChanged();
+			KeyDown.RaiseCanExecuteChanged();
+
+			if (EditorOpen)
+				Watermark = "Search for Snippets";
+			else
+				Watermark = "Open a file to search for snippets";
 		}
 	}
 }

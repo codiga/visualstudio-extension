@@ -237,6 +237,51 @@ namespace Tests
 			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
 		}
 
+		[Test]
+		public void FromCodigaSnippet_should_work_with_python_snippet()
+		{
+
+			// arrange
+			var snippet = new CodigaSnippet
+			{
+				Id = 99,
+				Shortcut = "csv.file.read",
+				Name = "read csv file",
+				Description = "Read a CSV file in Python",
+				Language = "Python",
+				Keywords = new string[] { "read", "csv", "file" },
+				Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(@"
+					import csv
+
+					with open(&[USER_INPUT:1:file_name], mode ='r', encoding='utf-8') as file:
+						# reading the CSV file
+						csvFile = csv.DictReader(file)
+						# displaying the contents of the CSV file
+						for line in csvFile:
+						&[USER_INPUT:0]"))
+			};
+
+			// act
+			var vsSnippet = SnippetParser.FromCodigaSnippet(snippet, new IndentationSettings(4, 4, false));
+
+			// assert
+			Assert.That(vsSnippet.CodeSnippet.Header.Id, Is.EqualTo(99));
+			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("csv.file.read"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("read csv file"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Read a CSV file in Python"));
+			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.EqualTo(""));
+
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(1).Items);
+			var param1 = vsSnippet.CodeSnippet.Snippet.Declarations.First();
+
+			Assert.That(param1.ID, Is.EqualTo("param1"));
+			Assert.That(param1.Default, Is.EqualTo("file_name"));
+
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Python"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$end$"));
+		}
+
 
 		[Test]
         public void VisualStudioSnippet_should_serialize_correctly_to_xml()

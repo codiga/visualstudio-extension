@@ -199,9 +199,15 @@
 							</Grid.RowDefinitions>
 						
 							<!--Title bar-->
-							<DockPanel Grid.Row="0" Width="Auto">
-								<TextBlock Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
-								<Button Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
+
+							<Grid Grid.Row="0" Width="Auto">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+								</Grid.ColumnDefinitions>
+
+								<TextBlock Grid.Column="0" Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
+								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">
 											<i:EventTrigger.Actions>
@@ -216,7 +222,8 @@
 										</i:EventTrigger>
 									</i:Interaction.Triggers>
 								</Button>
-							</DockPanel>
+								
+							</Grid>
 							
 							<!--Snippet meta data-->
 							<StackPanel Margin="5"  Grid.Row="1" Orientation="Horizontal">
@@ -225,9 +232,7 @@
 							</StackPanel>
 							
 							<!--Code-->
-							<ScrollViewer Margin="30 0 0 0" Grid.Row="2" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
-								<TextBlock Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.EnvironmentBackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString}"></TextBlock>
-							</ScrollViewer>
+							<TextBox  Margin="30 0 0 0" Height="Auto" Grid.Row="2" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="true" Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.EnvironmentBackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString, Mode=OneWay}"></TextBox>
 							
 							<!--Description-->
 							<TextBlock Padding="10" Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>

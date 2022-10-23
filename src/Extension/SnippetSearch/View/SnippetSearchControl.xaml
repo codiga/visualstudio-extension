@@ -232,7 +232,7 @@
 							</StackPanel>
 							
 							<!--Code-->
-							<TextBox  Margin="30 0 0 0" Height="Auto" Grid.Row="2" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="true" Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.EnvironmentBackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString, Mode=OneWay}"></TextBox>
+							<TextBox  Margin="30 0 0 0" Height="Auto" Grid.Row="2" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="true" Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.BackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString, Mode=OneWay}"></TextBox>
 							
 							<!--Description-->
 							<TextBlock Padding="10" Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>

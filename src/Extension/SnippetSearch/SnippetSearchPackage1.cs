@@ -17,9 +17,6 @@ namespace Extension.SnippetSearch
 
         public const string guidSnippetSearchPackageCmdSetString = "e05530d0-618b-4eea-bbf7-49728865ebbd";
         public static Guid guidSnippetSearchPackageCmdSet = new Guid(guidSnippetSearchPackageCmdSetString);
-
-        public const string guidImagesString = "8bb3f701-48db-4b56-81e9-137f2d5092f5";
-        public static Guid guidImages = new Guid(guidImagesString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -27,11 +24,5 @@ namespace Extension.SnippetSearch
     internal sealed partial class PackageIds
     {
         public const int SnippetSearchCommandId = 0x0100;
-        public const int bmpPic1 = 0x0001;
-        public const int bmpPic2 = 0x0002;
-        public const int bmpPicSearch = 0x0003;
-        public const int bmpPicX = 0x0004;
-        public const int bmpPicArrows = 0x0005;
-        public const int bmpPicStrikethrough = 0x0006;
     }
 }

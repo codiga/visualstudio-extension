@@ -172,8 +172,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SnippetSearch\Resources\SnippetSearchCommand.png" />
-    <Content Include="SnippetSearch\Resources\SnippetSearchPackage.ico" />
     <VSCTCompile Include="SnippetSearch\SnippetSearchPackage.vsct">
       <Generator>VsctGenerator</Generator>
       <ResourceName>Menus.ctmenu</ResourceName>
@@ -184,6 +182,7 @@
     <EmbeddedResource Include="SnippetSearch\VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

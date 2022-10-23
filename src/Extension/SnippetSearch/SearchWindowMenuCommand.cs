@@ -12,7 +12,7 @@ namespace Extension.SnippetSearch
 	/// <summary>
 	/// Command handler
 	/// </summary>
-	internal sealed class SearchWindowMenuCommand
+	internal sealed class SnippetSearchMenuCommand
 	{
 		/// <summary>
 		/// Command ID.
@@ -30,25 +30,26 @@ namespace Extension.SnippetSearch
 		private readonly AsyncPackage package;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="SearchWindowMenuCommand"/> class.
+		/// Initializes a new instance of the <see cref="SnippetSearchMenuCommand"/> class.
 		/// Adds our command handlers for menu (commands must exist in the command table file)
 		/// </summary>
 		/// <param name="package">Owner package, not null.</param>
 		/// <param name="commandService">Command service to add command to, not null.</param>
-		private SearchWindowMenuCommand(AsyncPackage package, OleMenuCommandService commandService)
+		private SnippetSearchMenuCommand(AsyncPackage package, OleMenuCommandService commandService)
 		{
 			this.package = package ?? throw new ArgumentNullException(nameof(package));
 			commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
 			var menuCommandID = new CommandID(CommandSet, CommandId);
-			var menuItem = new MenuCommand(this.Execute, menuCommandID);
+			var menuItem = new MenuCommand(Execute, menuCommandID);
+			
 			commandService.AddCommand(menuItem);
 		}
 
 		/// <summary>
 		/// Gets the instance of the command.
 		/// </summary>
-		public static SearchWindowMenuCommand Instance
+		public static SnippetSearchMenuCommand Instance
 		{
 			get;
 			private set;
@@ -76,7 +77,7 @@ namespace Extension.SnippetSearch
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
 			OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
-			Instance = new SearchWindowMenuCommand(package, commandService);
+			Instance = new SnippetSearchMenuCommand(package, commandService);
 		}
 
 		/// <summary>

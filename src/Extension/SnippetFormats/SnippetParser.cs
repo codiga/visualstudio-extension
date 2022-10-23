@@ -62,7 +62,9 @@ namespace Extension.SnippetFormats
 						Description = codigaSnippet.Description,
 						Shortcut = codigaSnippet.Shortcut,
 						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" },
-						Keywords = new List<Keyword>(codigaSnippet.Keywords.Select(k => new Keyword { Text = k}))
+						Keywords = new List<Keyword>(codigaSnippet.Keywords.Select(k => new Keyword { Text = k})),
+						IsPublic = codigaSnippet.IsPublic ?? false,
+						IsPrivate = !codigaSnippet.IsPublic ?? true,
 					},
 					Snippet = new Snippet
 					{

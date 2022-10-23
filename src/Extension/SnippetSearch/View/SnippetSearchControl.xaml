@@ -17,7 +17,7 @@
 	<UserControl.Resources>
 
 		<ResourceDictionary>
-
+			<BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 			<!--Overwrite default button styling-->
 			<!--see https://stackoverflow.com/questions/28346852/background-does-not-change-of-button-c-sharp-wpf -->
 			<ControlTemplate x:Key="PreviewButton" TargetType="ButtonBase">
@@ -206,7 +206,11 @@
 									<ColumnDefinition Width="Auto"/>
 								</Grid.ColumnDefinitions>
 
-								<TextBlock Grid.Column="0" Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="20" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Grid.Column="0" Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="18" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
+									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPrivate, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="Private Snippet" x:Name="imgPrivate" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Lock}"/>
+									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPublic, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="Public Snippet" x:Name="imgPublic" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Unlock}"/>
+								</StackPanel>
 								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">

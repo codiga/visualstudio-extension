@@ -206,11 +206,12 @@
 									<ColumnDefinition Width="Auto"/>
 								</Grid.ColumnDefinitions>
 
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Grid.Column="0" Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="18" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
-									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPrivate, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="Private Snippet" x:Name="imgPrivate" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Lock}"/>
-									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPublic, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="Public Snippet" x:Name="imgPublic" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Unlock}"/>
-								</StackPanel>
+								<DockPanel Grid.Column="0">
+									<TextBlock Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="18" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
+									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPrivate, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Private Snippet" x:Name="imgPrivate" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Lock}"/>
+									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPublic, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Public Snippet" x:Name="imgPublic" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Unlock}"/>
+								</DockPanel>
+								
 								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">

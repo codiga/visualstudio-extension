@@ -65,6 +65,7 @@ namespace Extension.SnippetFormats
 						Keywords = new List<Keyword>(codigaSnippet.Keywords.Select(k => new Keyword { Text = k})),
 						IsPublic = codigaSnippet.IsPublic ?? false,
 						IsPrivate = !codigaSnippet.IsPublic ?? true,
+						IsSubscribed = codigaSnippet.IsSubscribed ?? false,
 					},
 					Snippet = new Snippet
 					{

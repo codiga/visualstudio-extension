@@ -49,6 +49,9 @@ namespace Extension.SnippetFormats
 		[XmlIgnore]
 		public bool IsPrivate { get; set; }
 
+		[XmlIgnore]
+		public bool IsSubscribed { get; set; }
+
 		/// <summary>
 		/// Required element. The friendly name of the code snippet. 
 		/// There must be exactly one Title element in a Header element.

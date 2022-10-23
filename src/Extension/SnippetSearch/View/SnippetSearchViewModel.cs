@@ -45,9 +45,33 @@ namespace Extension.SearchWindow.View
 
 		// Search parameters
 		public string Term { get => _term; set => _term = value; }
-		public bool OnlyFavorite { get => _onlyFavorite; set => _onlyFavorite = value; }
-		public bool OnlyPrivate { get => _onlyPrivate; set => _onlyPrivate = value; }
-		public bool OnlyPublic { get => _onlyPublic; set => _onlyPublic = value; }
+		public bool OnlyFavorite
+		{
+			get => _onlyFavorite; 
+			
+			set
+			{
+				_onlyFavorite = value;
+			}
+		}
+		public bool OnlyPrivate
+		{
+			get => _onlyPrivate; 
+			
+			set
+			{
+				_onlyPrivate = value;
+			}
+		}
+		public bool OnlyPublic
+		{
+			get => _onlyPublic; 
+			
+			set
+			{
+				_onlyPublic = value;
+			}
+		}
 
 		public bool AllSnippets
 		{

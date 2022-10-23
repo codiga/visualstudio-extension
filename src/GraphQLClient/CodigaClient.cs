@@ -234,6 +234,7 @@ namespace GraphQLClient
 		public string? Shortcut { get; set; }
 
 		public bool? IsPublic { get; set; }
+		public bool? IsSubscribed { get; set; }
 
 		public Owner? Owner { get; set; }
 	}

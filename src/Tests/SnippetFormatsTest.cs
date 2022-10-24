@@ -20,9 +20,9 @@ namespace Tests
 		[Test]
 		[TestCase("&[USER_INPUT:0]", ExpectedResult = "$end$")]
 		[TestCase("&[USER_INPUT:0] test &[USER_INPUT:1] test &[USER_INPUT:2]", ExpectedResult = "$end$ test $end$ test $end$")]
-		[TestCase("&[USER_INPUT:0:default]", ExpectedResult = "&[USER_INPUT:0:default]")]
+		[TestCase("&[USER_INPUT:0:default]", ExpectedResult = "&[USER_INPUT:0:default]$end$")]
 		[TestCase("&[USER_INPUT:0: ]", ExpectedResult = "$end$", Ignore = "Not sure how to handle yet")]
-		[TestCase("&[USER_INPsUT:0:__ ::]", ExpectedResult = "&[USER_INPsUT:0:__ ::]")]
+		[TestCase("&[USER_INPsUT:0:__ ::]", ExpectedResult = "&[USER_INPsUT:0:__ ::]$end$")]
 		public string ReplaceUserCaretPositions_should_create_end_variable(string input)
 		{
 			// arrange
@@ -213,7 +213,7 @@ namespace Tests
 			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("nunittest"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("NUnit Test"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Creates NUnit Test"));
-			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.EqualTo(""));
+			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.Null);
 
 			Assert.That(vsSnippet.CodeSnippet.Header.Keywords, Has.Exactly(3).Items);
 			var keyword1 = vsSnippet.CodeSnippet.Header.Keywords[0];
@@ -269,7 +269,7 @@ namespace Tests
 			Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("csv.file.read"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("read csv file"));
 			Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Read a CSV file in Python"));
-			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.EqualTo(""));
+			Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.Null);
 
 			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(1).Items);
 			var param1 = vsSnippet.CodeSnippet.Snippet.Declarations.First();

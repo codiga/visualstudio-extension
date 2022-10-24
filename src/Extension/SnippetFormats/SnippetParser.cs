@@ -58,7 +58,6 @@ namespace Extension.SnippetFormats
 					{
 						Id = codigaSnippet.Id,
 						Title = codigaSnippet.Name,
-						Author = codigaSnippet.Owner?.DisplayName ?? "",
 						Description = codigaSnippet.Description,
 						Shortcut = codigaSnippet.Shortcut,
 						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" },
@@ -74,6 +73,11 @@ namespace Extension.SnippetFormats
 				}
 			};
 
+			if(codigaSnippet.Owner != null)
+			{
+				vsSnippet.CodeSnippet.Header.Author = codigaSnippet.Owner.DisplayName;
+			}
+
 			var encoded = codigaSnippet.Code;
 			var base64bytes = Convert.FromBase64String(encoded);
 			var plainCode = Encoding.UTF8.GetString(base64bytes);
@@ -88,8 +92,6 @@ namespace Extension.SnippetFormats
 
 			return vsSnippet;
 		}
-
-
 
 		/// <summary>
 		/// Replaces Codiga user variables [USER_INPUT:order:default] with VS literals

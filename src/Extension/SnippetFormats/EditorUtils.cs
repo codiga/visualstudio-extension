@@ -150,7 +150,7 @@ namespace Extension.SnippetFormats
 		public static int GetIndentLevel(string line, int indentSize, int tabSize, bool useSpace)
 		{
 			//get non text chararcters
-			string indentChars = string.Empty;
+			var indentChars = string.Empty;
 
 			if(line.Any(c => c != ' ' && c != '\t'))
 			{
@@ -165,18 +165,11 @@ namespace Extension.SnippetFormats
 			var charCounts = indentChars.GroupBy(c => c)
 				.Select(c => new { Char = c.Key, Count = c.Count() });
 			
-			int tabCount = charCounts.SingleOrDefault(c => c.Char == '\t')?.Count ?? 0;
-			int spaceCount = charCounts.SingleOrDefault(c => c.Char == ' ')?.Count ?? 0;
+			var tabCount = charCounts.SingleOrDefault(c => c.Char == '\t')?.Count ?? 0;
+			var spaceCount = charCounts.SingleOrDefault(c => c.Char == ' ')?.Count ?? 0;
 
-			int indentLevel = 0;
-			if (useSpace)
-			{
-				indentLevel = spaceCount / indentSize;
-			}
-			else
-			{
-				indentLevel = (tabCount * tabSize + spaceCount) / indentSize;
-			}
+			var indentLevel = (tabCount * tabSize + spaceCount) / indentSize;
+
 			return indentLevel;
 		}
 

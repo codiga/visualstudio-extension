@@ -143,11 +143,15 @@ namespace Extension.SnippetFormats
 			// so $end$ does not work with multiple caret positions
 			// whitespace default does not work for VS.
 
-			//TODO better support variables without default: generate default default? $end$ destorys the order
-
 			var plainCode = stringBuilder.ToString();
 			var userCaretRegex = new Regex(@"&\[USER_INPUT\:\d+\]");
 			var caretMatches = userCaretRegex.Matches(plainCode);
+
+			// if the snippet does not define the cursor position after the session we set it to the end
+			if(caretMatches.Count == 0)
+			{
+				stringBuilder.Append("$end$");
+			}
 
 			foreach (Match match in caretMatches)
 			{

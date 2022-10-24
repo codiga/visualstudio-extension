@@ -8,10 +8,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Extension.SnippetSearch.Preview;
-using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Extension.Settings;
+using System.Diagnostics;
+using System.Windows.Navigation;
 
 namespace Extension.SearchWindow.View
 {
@@ -24,24 +26,27 @@ namespace Extension.SearchWindow.View
 		private bool _onlyPublic;
 		private bool _onlyPrivate;
 		private bool _onlyFavorite;
+		private string _userName;
 
 		private bool _editorOpen = false;
 		private string _watermark;
 
-		private AsyncButtonCommand _getSnippets;
-		private AsyncButtonCommand _insertSnippet;
-		private AsyncButtonCommand _showPreview;
-		private AsyncButtonCommand _hidePreview;
-		private AsyncButtonCommand _keyDown;
+		private AsyncCommand _getSnippets;
+		private AsyncCommand _insertSnippet;
+		private AsyncCommand _showPreview;
+		private AsyncCommand _hidePreview;
+		private AsyncCommand _keyDown;
+		private AsyncCommand _openProfile;
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		// Commands
-		public AsyncButtonCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
-		public AsyncButtonCommand InsertSnippet { get => _insertSnippet; set => _insertSnippet = value; }
-		public AsyncButtonCommand ShowPreview { get => _showPreview; set => _showPreview = value; }
-		public AsyncButtonCommand HidePreview { get => _hidePreview; set => _hidePreview = value; }
-		public AsyncButtonCommand KeyDown { get => _keyDown; set => _keyDown = value; }
+		public AsyncCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
+		public AsyncCommand InsertSnippet { get => _insertSnippet; set => _insertSnippet = value; }
+		public AsyncCommand ShowPreview { get => _showPreview; set => _showPreview = value; }
+		public AsyncCommand HidePreview { get => _hidePreview; set => _hidePreview = value; }
+		public AsyncCommand KeyDown { get => _keyDown; set => _keyDown = value; }
+		public AsyncCommand OpenProfile { get => _openProfile; set => _openProfile = value; }
 
 		// Search parameters
 		public string Term { get => _term; set => _term = value; }
@@ -95,6 +100,8 @@ namespace Extension.SearchWindow.View
 		public ObservableCollection<VisualStudioSnippet> Snippets { get; set; }
 
 		// View behaviour
+		public string UserName { get => _userName; set => _userName = value; }
+
 		public bool EditorOpen { 
 			get 
 			{
@@ -132,11 +139,12 @@ namespace Extension.SearchWindow.View
 
 			Snippets = new ObservableCollection<VisualStudioSnippet>();
 
-			GetSnippets = new AsyncButtonCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
-			InsertSnippet = new AsyncButtonCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
-			ShowPreview = new AsyncButtonCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
-			HidePreview = new AsyncButtonCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
-			KeyDown = new AsyncButtonCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
+			GetSnippets = new AsyncCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
+			InsertSnippet = new AsyncCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
+			ShowPreview = new AsyncCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
+			HidePreview = new AsyncCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
+			KeyDown = new AsyncCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
+			OpenProfile = new AsyncCommand(OpenProfileInBrowser, IsValidProfile) { ViewModel= this };
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -145,7 +153,16 @@ namespace Extension.SearchWindow.View
 			{
 				return await VS.Windows.GetAllDocumentWindowsAsync();
 			});
-			 
+
+			var result = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				var provider = new DefaultCodigaClientProvider();
+				var client = provider.GetClient();
+				return await client.GetUserAsync();
+			});
+
+			UserName = result.Data?.User?.UserName ?? "";
+
 			EditorOpen = windows.Any();
 			OnEditorOpenChanged();
 
@@ -244,6 +261,21 @@ namespace Extension.SearchWindow.View
 		}
 		#endregion
 
+		#region Open Profile command
+
+		public bool IsValidProfile(object param)
+		{
+			return !string.IsNullOrEmpty(UserName);
+		}
+
+		public async Task OpenProfileInBrowser(object param)
+		{
+			var e = (RequestNavigateEventArgs)param;
+			Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+			e.Handled = true;
+		}
+
+		#endregion
 
 		protected void OnPropertyChanged([CallerMemberName] string name = null)
 		{

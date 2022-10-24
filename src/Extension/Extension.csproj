@@ -75,7 +75,7 @@
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
     <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SnippetSearch\View\AsyncButtonCommand.cs" />
+    <Compile Include="SnippetSearch\View\AsyncCommand.cs" />
     <Compile Include="SnippetSearch\View\SnippetSearchViewModel.cs" />
     <Compile Include="SnippetSearch\SearchWindow.cs" />
     <Compile Include="SnippetSearch\SearchWindowMenuCommand.cs" />

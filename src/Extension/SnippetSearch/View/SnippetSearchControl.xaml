@@ -132,7 +132,43 @@
 		</Grid.RowDefinitions>
 
 		<!--Title-->
-		<TextBlock Grid.Row="0" Margin="10" HorizontalAlignment="Left">Code Snippet Search</TextBlock>
+		<Grid Grid.Row="0">
+
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+			
+			<TextBlock Grid.Column="0" Margin="10" HorizontalAlignment="Left" Text="Code Snippet Search"/>
+			
+			<DockPanel Grid.Column="1" HorizontalAlignment="Right">
+				<TextBlock  Margin="10" HorizontalAlignment="Right" Text="Logged as" />
+				<TextBlock Margin="0 10 10 0" HorizontalAlignment="Right" >
+					<Hyperlink NavigateUri="https://app.codiga.io/account/profile">
+					<i:Interaction.Triggers>
+						<i:EventTrigger EventName="RequestNavigate">
+							<i:EventTrigger.Actions>
+								<i:InvokeCommandAction Command="{Binding OpenProfile}" PassEventArgsToCommand="True"/>
+							</i:EventTrigger.Actions>
+						</i:EventTrigger>
+					</i:Interaction.Triggers>
+					<Run Text="{Binding UserName, Mode=OneWay}"></Run>
+					</Hyperlink>
+				</TextBlock>
+
+				<DockPanel.Style>
+					<Style TargetType="{x:Type DockPanel}">
+						<Setter Property="Visibility" Value="Visible"/>
+						<Style.Triggers>
+							<DataTrigger Binding="{Binding UserName}" Value="">
+							<Setter Property="Visibility" Value="Collapsed"/>
+						</DataTrigger>
+						</Style.Triggers>
+					</Style>
+				</DockPanel.Style>
+			</DockPanel>
+		</Grid>
+		
 		
 		<!--Search box-->
 		<Grid Grid.Row="1" Margin="5">
@@ -145,7 +181,7 @@
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="KeyUp">
 						<i:EventTrigger.Actions>
-							<i:InvokeCommandAction Command="{Binding Path=DataContext.KeyDown, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" PassEventArgsToCommand="True"/>
+							<i:InvokeCommandAction Command="{Binding KeyDown}" PassEventArgsToCommand="True"/>
 						</i:EventTrigger.Actions>
 					</i:EventTrigger>
 				</i:Interaction.Triggers>
@@ -210,7 +246,7 @@
 									<TextBlock Padding="10"  Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" FontSize="18" HorizontalAlignment="Left" Text="{Binding CodeSnippet.Header.Title}" TextTrimming="WordEllipsis"/>
 									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPrivate, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Private Snippet" x:Name="imgPrivate" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Lock}"/>
 									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsPublic, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Public Snippet" x:Name="imgPublic" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Unlock}"/>
-									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsSubscribed, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Public Snippet" x:Name="imgSubscribed" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Favorite}"/>
+									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsSubscribed, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Favorite Snippet" x:Name="imgSubscribed" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Favorite}"/>
 								</DockPanel>
 								
 								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">

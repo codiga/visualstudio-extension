@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace Extension.SearchWindow.View
 {
-	internal class AsyncButtonCommand : ICommand
+	internal class AsyncCommand : ICommand
 	{
 		private readonly Func<object, Task> _action;
 		private readonly Predicate<object> _canExecute;
@@ -21,7 +21,7 @@ namespace Extension.SearchWindow.View
 			remove { CommandManager.RequerySuggested -= value; }
 		}
 
-		public AsyncButtonCommand(Func<object, Task> action, Predicate<object> canExecute)
+		public AsyncCommand(Func<object, Task> action, Predicate<object> canExecute)
 		{
 			_action = action;
 			_canExecute = canExecute;

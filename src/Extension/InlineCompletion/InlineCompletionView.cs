@@ -85,13 +85,14 @@ namespace Extension.InlineCompletion
 		{
 			var triggeringLine = GetTriggeringLine();
 			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
+			
 			var textBlock = new TextBlock
 			{
-				Width = 600, //TODO calculate
+				Width = 600, 
 				Foreground = _textBrush,
 				Height = geometry.Bounds.Height,
 				FontFamily = new FontFamily(_settings.FontFamily),
-				FontSize = _fontSize,
+				FontSize = triggeringLine.Baseline,
 				Text = $"[{_currentSnippetIndex}/{_totalSnippetCount}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
 
@@ -166,7 +167,7 @@ namespace Extension.InlineCompletion
 				Focusable = false,
 				Background = _textBackgroundBrush,
 				FontFamily = new FontFamily(_settings.FontFamily),
-				FontSize = _fontSize,
+				FontSize = triggeringLine.Baseline,
 				Height = height,
 				Text = content
 			};

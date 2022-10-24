@@ -148,7 +148,7 @@
 					<i:Interaction.Triggers>
 						<i:EventTrigger EventName="RequestNavigate">
 							<i:EventTrigger.Actions>
-								<i:InvokeCommandAction Command="{Binding OpenProfile}" PassEventArgsToCommand="True"/>
+								<i:InvokeCommandAction Command="{Binding OpenProfileCommand}" PassEventArgsToCommand="True"/>
 							</i:EventTrigger.Actions>
 						</i:EventTrigger>
 					</i:Interaction.Triggers>
@@ -175,13 +175,13 @@
 			
 			<TextBox x:Name="txtSearch" VerticalContentAlignment="Center" IsEnabled="{Binding EditorOpen}" Text="{Binding Term, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 				<TextBox.InputBindings>
-					<KeyBinding Key="Enter" Command="{Binding Path=GetSnippets}"></KeyBinding>
+					<KeyBinding Key="Enter" Command="{Binding GetSnippetsCommand}"></KeyBinding>
 				</TextBox.InputBindings>
 
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="KeyUp">
 						<i:EventTrigger.Actions>
-							<i:InvokeCommandAction Command="{Binding KeyDown}" PassEventArgsToCommand="True"/>
+							<i:InvokeCommandAction Command="{Binding KeyUpCommand}" PassEventArgsToCommand="True"/>
 						</i:EventTrigger.Actions>
 					</i:EventTrigger>
 				</i:Interaction.Triggers>
@@ -249,17 +249,17 @@
 									<imaging:CrispImage Visibility="{Binding CodeSnippet.Header.IsSubscribed, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Left" ToolTip="Favorite Snippet" x:Name="imgSubscribed" Margin="0 0 5 0" Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Favorite}"/>
 								</DockPanel>
 								
-								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippet, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
+								<Button Grid.Column="1" Margin="10" HorizontalAlignment="Right" Template="{DynamicResource PreviewButton}" Command="{Binding Path=DataContext.InsertSnippetCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding }">
 									<i:Interaction.Triggers>
 										<i:EventTrigger EventName="MouseEnter">
 											<i:EventTrigger.Actions>
-												<i:InvokeCommandAction Command="{Binding Path=DataContext.ShowPreview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+												<i:InvokeCommandAction Command="{Binding Path=DataContext.ShowPreviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
 											</i:EventTrigger.Actions>
 										</i:EventTrigger>
 
 										<i:EventTrigger EventName="MouseLeave">
 											<i:EventTrigger.Actions>
-												<i:InvokeCommandAction Command="{Binding Path=DataContext.HidePreview, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
+												<i:InvokeCommandAction Command="{Binding Path=DataContext.HidePreviewCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}}" CommandParameter="{Binding}"/>
 											</i:EventTrigger.Actions>
 										</i:EventTrigger>
 									</i:Interaction.Triggers>
@@ -274,7 +274,7 @@
 							</StackPanel>
 							
 							<!--Code-->
-							<TextBox  Margin="30 0 0 0" Height="Auto" Grid.Row="2" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="true" Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.BackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding CodeSnippet.Snippet.Code.CodeString, Mode=OneWay}"></TextBox>
+							<TextBox  Margin="30 0 0 0" Height="Auto" Grid.Row="2" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Auto" IsReadOnly="true" Padding="10" Foreground="{DynamicResource {x:Static vsshell:VsBrushes.VizSurfaceGreenMediumKey}}" Background="{DynamicResource {x:Static vsshell:VsBrushes.BackgroundKey}}" FontFamily="Cascadia Code" Text="{Binding PreviewCode, Mode=OneWay}"></TextBox>
 							
 							<!--Description-->
 							<TextBlock Padding="10" Grid.Row="3" TextWrapping="Wrap" Width="Auto" Text="{Binding CodeSnippet.Header.Description}"></TextBlock>

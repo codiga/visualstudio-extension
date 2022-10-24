@@ -41,12 +41,12 @@ namespace Extension.SearchWindow.View
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		// Commands
-		public AsyncCommand GetSnippets { get => _getSnippets; set => _getSnippets = value; }
-		public AsyncCommand InsertSnippet { get => _insertSnippet; set => _insertSnippet = value; }
-		public AsyncCommand ShowPreview { get => _showPreview; set => _showPreview = value; }
-		public AsyncCommand HidePreview { get => _hidePreview; set => _hidePreview = value; }
-		public AsyncCommand KeyDown { get => _keyDown; set => _keyDown = value; }
-		public AsyncCommand OpenProfile { get => _openProfile; set => _openProfile = value; }
+		public AsyncCommand GetSnippetsCommand { get => _getSnippets; set => _getSnippets = value; }
+		public AsyncCommand InsertSnippetCommand { get => _insertSnippet; set => _insertSnippet = value; }
+		public AsyncCommand ShowPreviewCommand { get => _showPreview; set => _showPreview = value; }
+		public AsyncCommand HidePreviewCommand { get => _hidePreview; set => _hidePreview = value; }
+		public AsyncCommand KeyUpCommand { get => _keyDown; set => _keyDown = value; }
+		public AsyncCommand OpenProfileCommand { get => _openProfile; set => _openProfile = value; }
 
 		// Search parameters
 		public string Term { get => _term; set => _term = value; }
@@ -139,12 +139,12 @@ namespace Extension.SearchWindow.View
 
 			Snippets = new ObservableCollection<VisualStudioSnippet>();
 
-			GetSnippets = new AsyncCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
-			InsertSnippet = new AsyncCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
-			ShowPreview = new AsyncCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
-			HidePreview = new AsyncCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
-			KeyDown = new AsyncCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
-			OpenProfile = new AsyncCommand(OpenProfileInBrowser, IsValidProfile) { ViewModel= this };
+			GetSnippetsCommand = new AsyncCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
+			InsertSnippetCommand = new AsyncCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
+			ShowPreviewCommand = new AsyncCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
+			HidePreviewCommand = new AsyncCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
+			KeyUpCommand = new AsyncCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
+			OpenProfileCommand = new AsyncCommand(OpenProfileInBrowser, IsValidProfile) { ViewModel= this };
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -284,11 +284,11 @@ namespace Extension.SearchWindow.View
 
 		private void OnEditorOpenChanged()
 		{
-			GetSnippets.RaiseCanExecuteChanged();
-			InsertSnippet.RaiseCanExecuteChanged();
-			ShowPreview.RaiseCanExecuteChanged();
-			HidePreview.RaiseCanExecuteChanged();
-			KeyDown.RaiseCanExecuteChanged();
+			GetSnippetsCommand.RaiseCanExecuteChanged();
+			InsertSnippetCommand.RaiseCanExecuteChanged();
+			ShowPreviewCommand.RaiseCanExecuteChanged();
+			HidePreviewCommand.RaiseCanExecuteChanged();
+			KeyUpCommand.RaiseCanExecuteChanged();
 
 			if (EditorOpen)
 				Watermark = "Search for Snippets";

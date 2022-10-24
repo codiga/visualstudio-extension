@@ -19,6 +19,15 @@ namespace Extension.SnippetFormats
 	{
 		[XmlElement(ElementName = "CodeSnippet")]
 		public CodeSnippet CodeSnippet { get; set; }
+
+		[XmlIgnore]
+		public string PreviewCode
+		{
+			get
+			{
+				return SnippetParser.GetPreviewCode(this);
+			}
+		}
 	}
 
 	/// <summary>

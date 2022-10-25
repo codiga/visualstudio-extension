@@ -65,7 +65,7 @@ namespace Extension.Caching
 
 			_currentPollingSessions.Add(language, session);
 
-			ThreadHelper.JoinableTaskFactory.RunAsync(async () => await PollSnippetsAsync(tokenSource.Token, language));
+			PollSnippetsAsync(tokenSource.Token, language);
 			return true;
 		}
 

@@ -118,8 +118,15 @@ namespace Extension.InlineCompletion
 
 				ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
 				{
-					await client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
-					.ContinueWith(OnQueryFinished, TaskScheduler.Default);
+					try
+					{
+						await client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
+						.ContinueWith(OnQueryFinished, TaskScheduler.Default);
+					}
+					catch (CodigaAPIException e)
+					{
+						ExtensionLogger.LogException(e);
+					}
 				});
 
 				_completionView = new InlineCompletionView(_wpfTextView, lineTrackingSpan);

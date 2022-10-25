@@ -247,7 +247,15 @@ namespace Extension.AssistantCompletion
 			
 			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
 			{
-				await client.RecordRecipeUseAsync(id);
+				try
+				{
+					await client.RecordRecipeUseAsync(id);
+				}
+				catch (CodigaAPIException e)
+				{
+					ExtensionLogger.LogException(e);
+					return;
+				}
 			});
 		}
 

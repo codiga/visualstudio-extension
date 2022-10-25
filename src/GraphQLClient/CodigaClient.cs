@@ -3,29 +3,76 @@ using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.SystemTextJson;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GraphQLClient
 {
+	/// <summary>
+	/// GraphQL client to query the Codiga API.
+	/// </summary>
 	public interface ICodigaClient : IDisposable
 	{
 		public string Fingerprint { get; }
 
 		public void SetApiToken(string apiToken);
 
+		/// <summary>
+		/// Get the logged user identfied by the configured API token.
+		/// </summary>
+		/// <returns></returns>
 		public Task<GraphQLResponse<GetUserResult>> GetUserAsync();
 
+		/// <summary>
+		/// Get shortcut snippets for the specified language
+		/// </summary>
+		/// <param name="language"></param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns></returns>
 		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language);
 
+		/// <summary>
+		/// Get the timestamp of the latest snippet for the specified language.
+		/// </summary>
+		/// <param name="language"></param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns></returns>
 		public Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language);
 
+		/// <summary>
+		/// Reports usage of the specified recipe to the Codiga service.
+		/// </summary>
+		/// <param name="recipeId"></param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns></returns>
 		public Task<string> RecordRecipeUseAsync(long recipeId);
 
+		/// <summary>
+		/// Get recipes by matching the keywords semantically.
+		/// </summary>
+		/// <param name="keywords"></param>
+		/// <param name="languages"></param>
+		/// <param name="onlyPublic"></param>
+		/// <param name="howMany"></param>
+		/// <param name="skip"></param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns></returns>
 		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, int howMany, int skip);
 
+		/// <summary>
+		/// Get recipes by matching the keywords semantically.
+		/// </summary>
+		/// <param name="keywords"></param>
+		/// <param name="languages"></param>
+		/// <param name="onlyPublic"></param>
+		/// <param name="onlyPrivate"></param>
+		/// <param name="onlySubscribed"></param>
+		/// <param name="howMany"></param>
+		/// <param name="skip"></param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns></returns>
 		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate, bool onlySubscribed, int howMany, int skip);
 	}
-
 
 	public class CodigaClient : ICodigaClient, IDisposable
 	{
@@ -82,6 +129,8 @@ namespace GraphQLClient
 			var request = new GraphQLHttpRequest(QueryProvider.ShortcutQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesByShortcutResult>(request);
 
+			ThrowOnErrors(result);
+
 			return result.Data.GetRecipesForClientByShortcut;
 		}
 
@@ -95,6 +144,9 @@ namespace GraphQLClient
 
 			var request = new GraphQLHttpRequest(QueryProvider.ShortcutLastTimestampQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesByShortcutLastTimestampResult>(request);
+
+			ThrowOnErrors(result);
+
 			return result.Data.GetRecipesForClientByShortcutLastTimestamp;
 		}
 
@@ -107,6 +159,8 @@ namespace GraphQLClient
 
 			var request = new GraphQLHttpRequest(QueryProvider.RecordRecipeUseMutation, variables);
 			var result = await _client.SendMutationAsync<RecordRecipeUseMutationResult>(request);
+
+			ThrowOnErrors(result);
 
 			return result.Data.RecordAccess;
 		}
@@ -137,6 +191,9 @@ namespace GraphQLClient
 
 			var request = new GraphQLHttpRequest(QueryProvider.SemanticQuery, variables);
 			var result = await _client.SendQueryAsync<GetRecipesSemanticResult>(request);
+
+			ThrowOnErrors(result);
+
 			return result.Data.AssistantRecipesSemanticSearch;
 		}
 
@@ -154,8 +211,30 @@ namespace GraphQLClient
 				_ => errorMessage,
 			};
 		}
+		private void ThrowOnErrors(IGraphQLResponse response)
+		{
+			if (response.Errors == null || !response.Errors.Any())
+				return;
+
+			var error = response.Errors.First();
+			var message = $"{error.Message} from {error.Path} at {error.Locations}";
+			throw new CodigaAPIException(message);
+		}
 	}
 
+	public class CodigaAPIException : Exception
+	{
+		public CodigaAPIException()
+		{
+			
+		}
+
+		public CodigaAPIException(string message) : base(message)
+		{ 
+
+		}
+		
+	}
 
 	public class GetUserResult
 	{

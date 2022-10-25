@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Extension.Logging;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio.Shell;
@@ -124,14 +126,34 @@ namespace Extension.Caching
 
 				if(!_clientProvider.TryGetClient(out var client))
 					return;
-				
-				var ts = await client.GetRecipesForClientByShortcutLastTimestampAsync(language.GetName());
+
+				long ts;
+
+				try
+				{
+					ts = await client.GetRecipesForClientByShortcutLastTimestampAsync(language.GetName());
+				}
+				catch (CodigaAPIException e)
+				{
+					ExtensionLogger.LogException(e);
+					return;
+				}
+
 				var lastTs = session.LastTimeStamp;
 				if (lastTs == null || ts > lastTs)
 				{
-					var snippets = await client.GetRecipesForClientByShortcutAsync(language.GetName());
-					_cachedSnippets[language] = snippets;
-					session.LastTimeStamp = ts;
+					try
+					{
+						var snippets = await client.GetRecipesForClientByShortcutAsync(language.GetName());
+						_cachedSnippets[language] = snippets;
+						session.LastTimeStamp = ts;
+					}
+					catch (CodigaAPIException e)
+					{
+						ExtensionLogger.LogException(e);
+						return;
+					}
+					
 				}
 				session.LastTimeStamp ??= ts;
 

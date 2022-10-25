@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Windows.Navigation;
 using System;
 using Extension.Logging;
+using GraphQLClient;
 
 namespace Extension.SearchWindow.View
 {
@@ -190,7 +191,8 @@ namespace Extension.SearchWindow.View
 					return await client.GetUserAsync();
 				});
 
-				UserName = result.Data?.User?.UserName ?? "";
+				if(result.Errors == null || !result.Errors.Any())
+					UserName = result.Data?.User?.UserName ?? "";
 			}
 
 			EditorOpen = windows.Any();
@@ -241,16 +243,23 @@ namespace Extension.SearchWindow.View
 
 			var languages = new ReadOnlyCollection<string>(new[] { CurrentLanguage });
 
-			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
-
-			Snippets.Clear();
-
-			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var vsSnippets = result.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
-
-			foreach (var snippet in vsSnippets)
+			try
 			{
-				Snippets.Add(snippet);
+				var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
+
+				Snippets.Clear();
+
+				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+				var vsSnippets = result.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
+
+				foreach (var snippet in vsSnippets)
+				{
+					Snippets.Add(snippet);
+				}
+			}
+			catch (CodigaAPIException e)
+			{
+				ExtensionLogger.LogException(e);
 			}
 		}
 		#endregion

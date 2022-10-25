@@ -259,6 +259,7 @@ namespace Extension.SearchWindow.View
 
 			var client = new ExpansionClient();
 			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+			await currentDocView.WindowFrame.ShowAsync();
 			client.StartExpansion(currentDocView.TextView, snippet, false);
 		}
 

@@ -2,7 +2,9 @@
 using Microsoft.VisualStudio.GraphModel.CodeSchema;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Shapes;
 
 namespace Extension.SnippetSearch.Preview
 {
@@ -40,12 +42,20 @@ namespace Extension.SnippetSearch.Preview
 
 			var previewCode = SnippetParser.GetPreviewCode(snippet);
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+
 			var indentedCode = EditorUtils.IndentCodeBlock(previewCode, caret, settings);
 
 			ITextSnapshot currentSnapshot;
 			using (var edit = textView.TextBuffer.CreateEdit())
 			{
-				edit.Insert(caretBufferPosition, indentedCode);
+				var insertPosition = caretBufferPosition;
+
+				// if non-virtual indented line we need to insert at the beginning of the line
+				var currentLine = textView.TextSnapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);
+				if (currentLine.GetText().All(c => c == ' ' || c == '\t'))
+					insertPosition = currentLine.Start.Position;
+				
+				edit.Insert(insertPosition, indentedCode);
 				currentSnapshot = edit.Apply();
 			}
 

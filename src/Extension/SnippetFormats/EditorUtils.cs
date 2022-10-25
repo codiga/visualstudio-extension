@@ -13,6 +13,9 @@ namespace Extension.SnippetFormats
 {
 	public static class EditorUtils
 	{
+
+		public const string LineEnding = "\r\n";
+
 		/// <summary>
 		/// Checks if the input text contains any readable characters.
 		/// </summary>
@@ -106,17 +109,15 @@ namespace Extension.SnippetFormats
 		{
 			var lines = code.Split('\n');
 			string finalIndent = GetIndent(indentLevel, indentSize, tabSize, useSpace);
-			
-			//TODO get line ending settings
-			
+						
 			var i = indentFirstLine ? 0 : 1;
 			for (; i < lines.Length; i++)
 			{
-				lines[i] = lines[i] + "\r\n";
+				lines[i] = lines[i] + LineEnding;
 				lines[i] = lines[i].Insert(0, finalIndent);
 			}
 			if(!indentFirstLine)
-				lines[0] = lines[0] + "\r\n";
+				lines[0] = lines[0] + LineEnding;
 
 			var indentedCode = string.Concat(lines);
 			return indentedCode;

@@ -52,13 +52,14 @@ namespace Extension.AssistantCompletion
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var indentedCode = EditorUtils.IndentCodeBlock(snippet.CodeSnippet.Snippet.Code.RawCode, caret, settings);
 			snippet.CodeSnippet.Snippet.Code.CodeString = indentedCode;
+			var currentLine = textView.TextSnapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);
 
 			// determine span for insertion, insert at caret or replace whole line
 			// as the expansion client is a legacy API we have to transform the spans to TextSpan.
 			TextSpan insertionPosition;
-			if (replaceLine)
+			if (replaceLine || (currentLine.GetText().All(c => c == ' ' || c == '\t')))
 			{
-				var currentLine = textView.TextSnapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);			
+						
 				insertionPosition = currentLine.Extent.GetLegacySpan();
 			}
 			else

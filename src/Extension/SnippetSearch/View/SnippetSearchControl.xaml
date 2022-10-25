@@ -140,10 +140,18 @@
 			</Grid.ColumnDefinitions>
 			
 			<TextBlock Grid.Column="0" Margin="10" HorizontalAlignment="Left" Text="Code Snippet Search"/>
-			
-			<DockPanel Grid.Column="1" HorizontalAlignment="Right">
-				<TextBlock  Margin="10" HorizontalAlignment="Right" Text="Logged as" />
-				<TextBlock Margin="0 10 10 0" HorizontalAlignment="Right" >
+
+
+			<Grid Grid.Column="1" HorizontalAlignment="Right">
+
+				<Grid.RowDefinitions>
+					<RowDefinition></RowDefinition>
+					<RowDefinition></RowDefinition>
+				</Grid.RowDefinitions>
+
+				<DockPanel Grid.Row="0" HorizontalAlignment="Right">
+					<TextBlock  Margin="10"  Text="Logged as" />
+					<TextBlock Margin="0 10 10 0">
 					<Hyperlink NavigateUri="https://app.codiga.io/account/profile">
 					<i:Interaction.Triggers>
 						<i:EventTrigger EventName="RequestNavigate">
@@ -154,19 +162,24 @@
 					</i:Interaction.Triggers>
 					<Run Text="{Binding UserName, Mode=OneWay}"></Run>
 					</Hyperlink>
-				</TextBlock>
+					</TextBlock>
 
-				<DockPanel.Style>
-					<Style TargetType="{x:Type DockPanel}">
-						<Setter Property="Visibility" Value="Visible"/>
-						<Style.Triggers>
-							<DataTrigger Binding="{Binding UserName}" Value="">
-							<Setter Property="Visibility" Value="Collapsed"/>
-						</DataTrigger>
-						</Style.Triggers>
-					</Style>
-				</DockPanel.Style>
-			</DockPanel>
+					<DockPanel.Style>
+						<Style TargetType="{x:Type DockPanel}">
+							<Setter Property="Visibility" Value="Visible"/>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding UserName}" Value="">
+									<Setter Property="Visibility" Value="Collapsed"/>
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</DockPanel.Style>
+				</DockPanel>
+
+				<TextBlock Grid.Row="1" HorizontalAlignment="Right" Margin="0 0 10 0" Text="{Binding CurrentLanguage, Mode=OneWay}"/>
+
+			</Grid>
+
 		</Grid>
 		
 		

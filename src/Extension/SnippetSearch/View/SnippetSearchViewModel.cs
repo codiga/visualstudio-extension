@@ -27,6 +27,7 @@ namespace Extension.SearchWindow.View
 		private bool _onlyPrivate;
 		private bool _onlyFavorite;
 		private string _userName;
+		private string _currentLanguage;
 
 		private bool _editorOpen = false;
 		private string _watermark;
@@ -49,7 +50,19 @@ namespace Extension.SearchWindow.View
 		public AsyncCommand OpenProfileCommand { get => _openProfile; set => _openProfile = value; }
 
 		// Search parameters
-		public string Term { get => _term; set => _term = value; }
+		public string Term
+		{
+			get => _term; 
+			
+			set
+			{
+				if(_term != value)
+				{
+					_term = value;
+					OnPropertyChanged();
+				}
+			}
+		}
 		public bool OnlyFavorite
 		{
 			get => _onlyFavorite; 
@@ -102,11 +115,25 @@ namespace Extension.SearchWindow.View
 		// View behaviour
 		public string UserName { get => _userName; set => _userName = value; }
 
-		public bool EditorOpen { 
-			get 
+		public string CurrentLanguage
+		{
+			get => _currentLanguage; 
+			
+			set
 			{
-				return _editorOpen;
+				if(_currentLanguage != value)
+				{
+					_currentLanguage = value;
+					OnPropertyChanged();
+					ThreadHelper.JoinableTaskFactory.RunAsync(OnLanguageChangedAsync);
+				}
 			}
+		}
+
+		public bool EditorOpen {
+
+			get => _editorOpen;
+
 			set
 			{
 				if (_editorOpen != value) 
@@ -120,10 +147,8 @@ namespace Extension.SearchWindow.View
 
 		public string Watermark
 		{
-			get
-			{
-				return _watermark;
-			}
+			get => _watermark;
+
 			set
 			{	if (_watermark != value)
 				{
@@ -132,6 +157,7 @@ namespace Extension.SearchWindow.View
 				}
 			}
 		}
+
 
 		public SnippetSearchViewModel()
 		{
@@ -148,6 +174,7 @@ namespace Extension.SearchWindow.View
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
+			VS.Events.WindowEvents.ActiveFrameChanged += WindowEvents_ActiveFrameChanged;
 
 			var windows = ThreadHelper.JoinableTaskFactory.Run( async () =>
 			{
@@ -169,6 +196,20 @@ namespace Extension.SearchWindow.View
 			AllSnippets = true;
 		}
 
+		private void WindowEvents_ActiveFrameChanged(ActiveFrameChangeEventArgs obj)
+		{
+			var doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				return await obj.NewFrame.GetDocumentViewAsync();
+			});
+
+			if (doc == null)
+				return;
+
+			var ext = Path.GetExtension(doc.FilePath);
+			var lang = LanguageUtils.Parse(ext);
+			CurrentLanguage = lang.GetName();
+		}
 
 		private async void DocumentEvents_Closed(string obj)
 		{
@@ -192,11 +233,8 @@ namespace Extension.SearchWindow.View
 
 		public async Task QuerySnippetsAsync(object param)
 		{
-			var currentDocView =  await VS.Documents.GetActiveDocumentViewAsync();
-
 			var client = _clientProvider.GetClient();
-			var ext = Path.GetExtension(currentDocView.Document.FilePath);
-			var languages = new ReadOnlyCollection<string>(new[] { LanguageUtils.Parse(ext).GetName() });
+			var languages = new ReadOnlyCollection<string>(new[] { CurrentLanguage });
 
 			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
 
@@ -291,9 +329,27 @@ namespace Extension.SearchWindow.View
 			KeyUpCommand.RaiseCanExecuteChanged();
 
 			if (EditorOpen)
+			{
 				Watermark = "Search for Snippets";
+			}
 			else
+			{
+				Snippets.Clear();
 				Watermark = "Open a file to search for snippets";
+			}
+		}
+
+		private async Task OnLanguageChangedAsync()
+		{
+			GetSnippetsCommand.RaiseCanExecuteChanged();
+			InsertSnippetCommand.RaiseCanExecuteChanged();
+			ShowPreviewCommand.RaiseCanExecuteChanged();
+			HidePreviewCommand.RaiseCanExecuteChanged();
+			KeyUpCommand.RaiseCanExecuteChanged();
+
+			Term = string.Empty;
+
+			await QuerySnippetsAsync(null);
 		}
 	}
 }

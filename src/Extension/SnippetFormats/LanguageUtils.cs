@@ -48,11 +48,15 @@ namespace Extension.SnippetFormats
 			return Enum.GetName(type, language);
 		}
 
+		/// <summary>
+		/// Parses the given file extension to LanguageEnumeration
+		/// </summary>
+		/// <param name="extension"></param>
+		/// <returns></returns>
 		public static LanguageEnumeration Parse(string extension)
 		{
 			return extension switch
 			{
-				//TODO complete list
 				".cs" => LanguageEnumeration.Csharp,
 				".css" => LanguageEnumeration.Css,
 				".html" => LanguageEnumeration.Html,

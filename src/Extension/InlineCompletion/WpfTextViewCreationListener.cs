@@ -48,11 +48,11 @@ namespace Extension.InlineCompletion
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView)
 		{
-			textView.Closed += TextView_Closed;
-			var client = new InlineCompletionClient();
-			InlineCompletionClients.Add(textView, client);
 			try
 			{
+				textView.Closed += TextView_Closed;
+				var client = new InlineCompletionClient();
+				InlineCompletionClients.Add(textView, client);
 				client.Initialize(textView, ExpansionClient);
 			}
 			catch(Exception e)

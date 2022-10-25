@@ -27,17 +27,18 @@ namespace Extension.Caching
 
 		public void VsTextViewCreated(IVsTextView textViewAdapter)
 		{
-			ITextView textView = AdapterService.GetWpfTextView(textViewAdapter);
-			if (textView == null)
-				return;
-			textView.Closed += TextView_Closed;
-			textView.TextBuffer.Changed += TextBuffer_Changed;
-			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
-			var ext = Path.GetExtension(path);
-			var codigaLanguage = LanguageUtils.Parse(ext);
-
 			try
 			{
+				ITextView textView = AdapterService.GetWpfTextView(textViewAdapter);
+				if (textView == null)
+					return;
+				textView.Closed += TextView_Closed;
+				textView.TextBuffer.Changed += TextBuffer_Changed;
+				var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
+				var ext = Path.GetExtension(path);
+				var codigaLanguage = LanguageUtils.Parse(ext);
+
+
 				Cache.StartPolling(codigaLanguage);
 			}
 			catch (Exception e)

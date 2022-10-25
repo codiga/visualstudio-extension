@@ -1,5 +1,6 @@
 ﻿using Extension.AssistantCompletion;
 using Extension.Caching;
+using Extension.Logging;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
@@ -67,64 +68,74 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
 		{
-			var codigaSettings = EditorSettingsProvider.GetCurrentCodigaSettings();
-
-			if (!codigaSettings.UseInlineCompletion)
+			try
 			{
+				var codigaSettings = EditorSettingsProvider.GetCurrentCodigaSettings();
+
+				if (!codigaSettings.UseInlineCompletion)
+				{
+					return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				}
+
+				var typedChar = char.MinValue;
+				//make sure the input is a char before getting it
+				if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
+				{
+					typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
+				}
+
+				if (_completionView != null)
+				{
+					return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				}
+
+				var caretPos = _wpfTextView.Caret.Position.BufferPosition.Position;
+				var triggeringLine = _wpfTextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
+				var triggeringLineText = triggeringLine.GetText();
+				var lineTrackingSpan = _wpfTextView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
+				var language = LanguageUtils.Parse(Path.GetExtension(_wpfTextView.ToDocumentView().FilePath));
+
+
+				var shouldTriggerCompletion = char.IsWhiteSpace(typedChar)
+					&& EditorUtils.IsSemanticSearchComment(triggeringLineText, language)
+					&& _completionView == null;
+
+				if (!shouldTriggerCompletion)
+				{
+					return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				}
+
+				// start inline completion session
+
+				// query snippets based on keywords
+				var sign = LanguageUtils.GetCommentSign(language);
+				var term = triggeringLineText.Replace(sign, "").Trim();
+
+				var languages = new ReadOnlyCollection<string>(new[] { language.GetName() });
+
+				if(!_clientProvider.TryGetClient(out var client))
+					return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
+				ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+				{
+					await client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
+					.ContinueWith(OnQueryFinished, TaskScheduler.Default);
+				});
+
+				_completionView = new InlineCompletionView(_wpfTextView, lineTrackingSpan);
+
+				// start drawing the adornments for the instructions
+				_completionView.StartDrawingInstructions();
+
 				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
 
-			var typedChar = char.MinValue;
-			//make sure the input is a char before getting it
-			if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
+			catch (Exception e)
 			{
-				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
-			}
-
-			if(_completionView != null)
-			{
-				return HandleSessionCommand(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-			}
-
-			var caretPos = _wpfTextView.Caret.Position.BufferPosition.Position;
-			var triggeringLine = _wpfTextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
-			var triggeringLineText = triggeringLine.GetText();
-			var lineTrackingSpan = _wpfTextView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
-			var language = LanguageUtils.Parse(Path.GetExtension(_wpfTextView.ToDocumentView().FilePath));
-
-
-			var shouldTriggerCompletion = char.IsWhiteSpace(typedChar) 
-				&& EditorUtils.IsSemanticSearchComment(triggeringLineText, language)
-				&& _completionView == null;
-
-			//TODO adjust triggering logic so that only a direct whitespace after search words will trigger
-			if (!shouldTriggerCompletion)
-			{
+				ExtensionLogger.LogException(e);
+				Dispose();
 				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 			}
-
-			// start inline completion session
-
-			// query snippets based on keywords
-			var sign = LanguageUtils.GetCommentSign(language);
-			var term = triggeringLineText.Replace(sign, "").Trim();
-			
-			var languages = new ReadOnlyCollection<string>(new[] { language.GetName() });
-
-			var client = _clientProvider.GetClient();
-
-			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-			{
-				await client.GetRecipesForClientSemanticAsync(term, languages, false, 10, 0)
-				.ContinueWith(OnQueryFinished, TaskScheduler.Default);
-			});
-
-			_completionView = new InlineCompletionView(_wpfTextView, lineTrackingSpan);
-
-			// start drawing the adornments for the instructions
-			_completionView.StartDrawingInstructions();
-
-			return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
 		}
 
 		/// <summary>
@@ -133,7 +144,16 @@ namespace Extension.InlineCompletion
 		/// <returns></returns>
 		private int CommitCurrentSnippet()
 		{
-			_expansionClient.StartExpansion(_wpfTextView, _snippetNavigator.CurrentItem, true);
+			try
+			{
+				_expansionClient.StartExpansion(_wpfTextView, _snippetNavigator.CurrentItem, true);
+			}
+			catch(Exception e)
+			{
+				ExtensionLogger.LogException(e);
+				return VSConstants.S_FALSE;
+			}
+			
 			return VSConstants.S_OK;
 		}
 

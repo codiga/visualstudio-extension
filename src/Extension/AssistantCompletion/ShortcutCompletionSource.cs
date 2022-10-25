@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Extension.Caching;
 using Community.VisualStudio.Toolkit;
 using System.IO;
+using Extension.Logging;
 
 namespace Extension.AssistantCompletion
 {
@@ -34,26 +35,34 @@ namespace Extension.AssistantCompletion
 
         public CompletionStartData InitializeCompletion(CompletionTrigger trigger, SnapshotPoint triggerLocation, CancellationToken token)
         {
-			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+			try
+			{
+				var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
 
-			if (trigger.Character != '.' || !settings.UseCodingAssistant)
-            {
-                return CompletionStartData.DoesNotParticipateInCompletion;
-            }
+				if (trigger.Character != '.' || !settings.UseCodingAssistant)
+				{
+					return CompletionStartData.DoesNotParticipateInCompletion;
+				}
 
-            var lineStart = triggerLocation.GetContainingLine().Start;
-            var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
-            var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
+				var lineStart = triggerLocation.GetContainingLine().Start;
+				var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
+				var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
 
-            if (!EditorUtils.IsStartOfLine(textBeforeCaret.Substring(0, textBeforeCaret.Length-1)))
-            {
-	            return CompletionStartData.DoesNotParticipateInCompletion;
+				if (!EditorUtils.IsStartOfLine(textBeforeCaret.Substring(0, textBeforeCaret.Length - 1)))
+				{
+					return CompletionStartData.DoesNotParticipateInCompletion;
+				}
+
+				m_triggerLocation = triggerLocation;
+				var tokenSpan = FindTokenSpanAtPosition(triggerLocation);
+				return new CompletionStartData(CompletionParticipation.ProvidesItems, tokenSpan);
 			}
-
-			m_triggerLocation = triggerLocation;
-            var tokenSpan = FindTokenSpanAtPosition(triggerLocation);
-            return new CompletionStartData(CompletionParticipation.ProvidesItems, tokenSpan);
-        }
+			catch (Exception e)
+			{
+                ExtensionLogger.LogException(e);
+				return CompletionStartData.DoesNotParticipateInCompletion;
+			}
+		}
 
         private SnapshotSpan FindTokenSpanAtPosition(SnapshotPoint triggerLocation)
         {
@@ -106,14 +115,22 @@ namespace Extension.AssistantCompletion
 
         public async Task<CompletionContext> GetCompletionContextAsync(IAsyncCompletionSession session, CompletionTrigger trigger, SnapshotPoint triggerLocation, SnapshotSpan applicableToSpan, CancellationToken token)
         {
-			var doc = await VS.Documents.GetActiveDocumentViewAsync();
-			var path = doc.Document.FilePath;
-            var ext = Path.GetExtension(path);
-            var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var chachedSnippets = Cache.GetSnippets(LanguageUtils.Parse(ext)).Select(s => SnippetParser.FromCodigaSnippet(s, settings));
-            var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
+            try
+            {
+				var doc = await VS.Documents.GetActiveDocumentViewAsync();
+				var path = doc.Document.FilePath;
+				var ext = Path.GetExtension(path);
+				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
+				var chachedSnippets = Cache.GetSnippets(LanguageUtils.Parse(ext)).Select(s => SnippetParser.FromCodigaSnippet(s, settings));
+				var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
 
-            return new CompletionContext(completionItems);
+				return new CompletionContext(completionItems);
+			}
+            catch (Exception e)
+            {
+                ExtensionLogger.LogException(e);
+                return new CompletionContext(new ImmutableArray<CompletionItem>());
+            }
         }
 
         /// <summary>

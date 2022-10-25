@@ -1,17 +1,11 @@
-﻿using Community.VisualStudio.Toolkit;
-using EnvDTE;
-using Extension.AssistantCompletion;
-using Extension.Caching;
-using Microsoft.VisualStudio;
+﻿using Extension.AssistantCompletion;
+using Extension.Logging;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 
 namespace Extension.InlineCompletion
 {
@@ -57,7 +51,14 @@ namespace Extension.InlineCompletion
 			textView.Closed += TextView_Closed;
 			var client = new InlineCompletionClient();
 			InlineCompletionClients.Add(textView, client);
-			client.Initialize(textView, ExpansionClient);
+			try
+			{
+				client.Initialize(textView, ExpansionClient);
+			}
+			catch(Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		private void TextView_Closed(object sender, System.EventArgs e)

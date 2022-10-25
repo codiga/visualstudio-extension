@@ -14,6 +14,8 @@ using System.Runtime.CompilerServices;
 using Extension.Settings;
 using System.Diagnostics;
 using System.Windows.Navigation;
+using System;
+using Extension.Logging;
 
 namespace Extension.SearchWindow.View
 {
@@ -181,14 +183,15 @@ namespace Extension.SearchWindow.View
 				return await VS.Windows.GetAllDocumentWindowsAsync();
 			});
 
-			var result = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			if (_clientProvider.TryGetClient(out var client))
 			{
-				var provider = new DefaultCodigaClientProvider();
-				var client = provider.GetClient();
-				return await client.GetUserAsync();
-			});
+				var result = ThreadHelper.JoinableTaskFactory.Run(async () =>
+				{
+					return await client.GetUserAsync();
+				});
 
-			UserName = result.Data?.User?.UserName ?? "";
+				UserName = result.Data?.User?.UserName ?? "";
+			}
 
 			EditorOpen = windows.Any();
 			OnEditorOpenChanged();
@@ -233,7 +236,9 @@ namespace Extension.SearchWindow.View
 
 		public async Task QuerySnippetsAsync(object param)
 		{
-			var client = _clientProvider.GetClient();
+			if (!_clientProvider.TryGetClient(out var client))
+				return;
+
 			var languages = new ReadOnlyCollection<string>(new[] { CurrentLanguage });
 
 			var result = await client.GetRecipesForClientSemanticAsync(Term, languages, OnlyPublic, OnlyPrivate, OnlyFavorite, 15, 0);
@@ -260,7 +265,15 @@ namespace Extension.SearchWindow.View
 			var client = new ExpansionClient();
 			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
 			await currentDocView.WindowFrame.ShowAsync();
-			client.StartExpansion(currentDocView.TextView, snippet, false);
+
+			try 
+			{
+				client.StartExpansion(currentDocView.TextView, snippet, false);
+			}
+			catch (Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		#endregion
@@ -268,18 +281,32 @@ namespace Extension.SearchWindow.View
 		#region Preview commands
 		public async Task ShowPreviewAsync(object param)
 		{
-			var snippet = (VisualStudioSnippet)param;
-			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+			try
+			{
+				var snippet = (VisualStudioSnippet)param;
+				var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
 
-			var previewEditor = new CodePreviewSession();
-			previewEditor.StartPreviewing(currentDocView.TextView, snippet);
+				var previewEditor = new CodePreviewSession();
+				previewEditor.StartPreviewing(currentDocView.TextView, snippet);
+			}
+			catch(Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		public async Task HidePreviewAsync(object param)
 		{
-			var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
-			var previewEditor = new CodePreviewSession();
-			previewEditor.StopPreviewing(currentDocView.TextView);
+			try
+			{
+				var currentDocView = await VS.Documents.GetActiveDocumentViewAsync();
+				var previewEditor = new CodePreviewSession();
+				previewEditor.StopPreviewing(currentDocView.TextView);
+			}
+			catch(Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 		#endregion
 

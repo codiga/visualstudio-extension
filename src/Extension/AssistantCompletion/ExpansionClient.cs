@@ -1,6 +1,7 @@
 ﻿using Community.VisualStudio.Toolkit;
 using EnvDTE;
 using Extension.Caching;
+using Extension.Logging;
 using Extension.SnippetFormats;
 using GraphQLClient;
 using Microsoft.VisualStudio;
@@ -125,50 +126,60 @@ namespace Extension.AssistantCompletion
 		/// <exception cref="NotImplementedException"></exception>
 		public int Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
 		{
-			if (_currentExpansionSession == null)
-				return VSConstants.S_OK;
-
-			//make a copy of this so we can look at it after forwarding some commands
-			var commandID = nCmdID;
-			var typedChar = char.MinValue;
-			//make sure the input is a char before getting it
-			if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
+			try
 			{
-				typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
-			}
-
-			//check for a commit character
-			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
-			    || nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
-			    || (char.IsWhiteSpace(typedChar)))
-			{
-				if (nCmdID == (uint)VSConstants.VSStd2KCmdID.BACKTAB)
-				{
-					_currentExpansionSession.GoToPreviousExpansionField();
+				if (_currentExpansionSession == null)
 					return VSConstants.S_OK;
-				}
-				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
-				{
 
-					_currentExpansionSession
-						.GoToNextExpansionField(0); //false to support cycling through all the fields
-					return VSConstants.S_OK;
-				}
-				else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN ||
-				         nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
+				//make a copy of this so we can look at it after forwarding some commands
+				var commandID = nCmdID;
+				var typedChar = char.MinValue;
+				//make sure the input is a char before getting it
+				if (pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR)
 				{
-					if (_currentExpansionSession.EndCurrentExpansion(0) == VSConstants.S_OK)
+					typedChar = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
+				}
+
+				//check for a commit character
+				if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN
+					|| nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB
+					|| (char.IsWhiteSpace(typedChar)))
+				{
+					if (nCmdID == (uint)VSConstants.VSStd2KCmdID.BACKTAB)
 					{
-						_currentExpansionSession = null;
+						_currentExpansionSession.GoToPreviousExpansionField();
 						return VSConstants.S_OK;
 					}
+					else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
+					{
+
+						_currentExpansionSession
+							.GoToNextExpansionField(0); //false to support cycling through all the fields
+						return VSConstants.S_OK;
+					}
+					else if (nCmdID == (uint)VSConstants.VSStd2KCmdID.RETURN ||
+							 nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
+					{
+						if (_currentExpansionSession.EndCurrentExpansion(0) == VSConstants.S_OK)
+						{
+							_currentExpansionSession = null;
+							return VSConstants.S_OK;
+						}
+					}
 				}
+
+				//pass along the command so the char is added to the buffer
+				var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+
+				return result;
 			}
 
-			//pass along the command so the char is added to the buffer
-			var result = _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
-
-			return result;
+			catch( Exception e)
+			{
+				ExtensionLogger.LogException(e);
+				Dispose();
+				return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+			}
 		}
 
 		public int GetExpansionFunction(IXMLDOMNode xmlFunctionNode, string bstrFieldName,
@@ -230,27 +241,14 @@ namespace Extension.AssistantCompletion
 		private void ReportUsage(long id)
 		{
 			var clientProvider = new DefaultCodigaClientProvider();
-			var client = clientProvider.GetClient();
+
+			if(!clientProvider.TryGetClient(out var client))
+				return;
+			
 			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
 			{
 				await client.RecordRecipeUseAsync(id);
 			});
-		}
-
-		/// <summary>
-		/// Formats snippet code based on the indention of the passed base line
-		/// </summary>
-		/// <param name="snippetCode"></param>
-		/// <param name="baseLine"></param>
-		/// <returns></returns>
-		private string FormatSnippet(string snippetCode, string baseLine)
-		{
-			if (baseLine == null)
-				return snippetCode;
-
-			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var indentLevel = EditorUtils.GetIndentLevel(baseLine, settings);
-			return EditorUtils.IndentCodeBlock(snippetCode, indentLevel, settings, false);
 		}
 
 		public void Dispose()

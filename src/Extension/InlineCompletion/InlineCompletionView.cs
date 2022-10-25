@@ -1,19 +1,13 @@
-﻿using Extension.SnippetFormats;
-using Microsoft.VisualStudio.Package;
+﻿using Extension.Logging;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio.Utilities;
 using System;
-using System.Drawing;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Brushes = System.Windows.Media.Brushes;
 using FontFamily = System.Windows.Media.FontFamily;
-using FontStyle = System.Drawing.FontStyle;
 
 namespace Extension.InlineCompletion
 {
@@ -41,9 +35,8 @@ namespace Extension.InlineCompletion
 		private string? _currentSnippetCode;
 		private int _currentSnippetIndex = 0;
 		private int _totalSnippetCount = 0;
-		private double _fontSize;
-		private SolidColorBrush _textBrush;
-		private SolidColorBrush _textBackgroundBrush;
+		private SolidColorBrush _textBrush = new SolidColorBrush(Colors.DarkGreen);
+		private SolidColorBrush _textBackgroundBrush = new SolidColorBrush(Colors.DarkGray);
 
 		public const string PreviewLayerName = "InlineCompletionLayer";
 
@@ -63,13 +56,25 @@ namespace Extension.InlineCompletion
 
 			_layer = view.GetAdornmentLayer(PreviewLayerName);
 
-			_settings = EditorSettingsProvider.GetCurrentFontSettings();
+			try
+			{
+				_settings = EditorSettingsProvider.GetCurrentFontSettings();
+			}
+			catch(ArgumentException e)
+			{
+				ExtensionLogger.LogException(e);
+			}
+
 			_view = view;
 			_triggeringLine = triggeringLine;
-			_fontSize = GetFontSize(_settings.FontFamily, _settings.FontSize);
-			_textBrush = new SolidColorBrush(_settings.CommentColor);
+
+			if (_settings != null)
+			{
+				_textBrush = new SolidColorBrush(_settings.CommentColor);
+				_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
+			}
+
 			_textBrush.Opacity = 0.7;
-			_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
 		}
 
 		internal void StartDrawingInstructions()
@@ -128,10 +133,18 @@ namespace Extension.InlineCompletion
 			_totalSnippetCount = total;
 			_layer.RemoveAllAdornments();
 
-			if(ShowInstructions)
-				DrawCompletionInstructions();
-			if(ShowPreview)
-				DrawSnippetPreview();
+			try
+			{
+				if (ShowInstructions)
+					DrawCompletionInstructions();
+				if (ShowPreview)
+					DrawSnippetPreview();
+			}
+
+			catch (Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		/// <summary>
@@ -195,24 +208,6 @@ namespace Extension.InlineCompletion
 			_totalSnippetCount = 0;
 			_view.LayoutChanged -= OnLayoutChanged;
 			_layer.RemoveAllAdornments();
-		}
-
-		/// <summary>
-		/// Helper class to calculate the font size within the TextBlock
-		/// </summary>
-		/// <param name="familyName"></param>
-		/// <param name="size"></param>
-		/// <returns></returns>
-		private double GetFontSize(string familyName, short size)
-		{
-			var f = new Font(familyName, size);
-			var family = new System.Drawing.FontFamily(familyName);
-			var d = family.GetCellDescent(FontStyle.Regular);
-			var emHeight = family.GetEmHeight(FontStyle.Regular);
-			var descend = (f.Size * d) / emHeight;
-			var textBlockSize = f.Height - descend;
-
-			return textBlockSize;
 		}
 
 		private ITextViewLine GetTriggeringLine()

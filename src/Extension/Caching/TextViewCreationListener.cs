@@ -1,4 +1,5 @@
 ﻿using Community.VisualStudio.Toolkit;
+using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Text;
@@ -34,7 +35,15 @@ namespace Extension.Caching
 			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
 			var ext = Path.GetExtension(path);
 			var codigaLanguage = LanguageUtils.Parse(ext);
-			Cache.StartPolling(codigaLanguage);
+
+			try
+			{
+				Cache.StartPolling(codigaLanguage);
+			}
+			catch (Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)

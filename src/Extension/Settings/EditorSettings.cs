@@ -59,6 +59,7 @@ namespace Extension
 		/// Provides the current DTE-based font settings for the text editor
 		/// </summary>
 		/// <param name="dte"></param>
+		/// <exception cref="ArgumentException"> When not on UI thread</exception>
 		/// <returns></returns>
 		public static FontSettings GetCurrentFontSettings()
 		{
@@ -67,6 +68,8 @@ namespace Extension
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
+
+			ThreadHelper.ThrowIfNotOnUIThread();
 
 			var vssp = VS.GetMefService<SVsServiceProvider>();
 			var dte = (_DTE)vssp.GetService(typeof(_DTE));
@@ -121,8 +124,10 @@ namespace Extension
 		}
 
 		/// <summary>
-		/// Get the current extension settings that are set under Tools->Options->Codiga
+		/// Get the current extension settings that are set under Tools->Options->Codiga.
+		/// Also takes care of the switch to the UI thread.
 		/// </summary>
+		/// <exception cref="ArgumentException">When not on UI thread</exception>
 		/// <returns></returns>
 		public static CodigaOptions GetCurrentCodigaSettings()
 		{
@@ -130,6 +135,8 @@ namespace Extension
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			});
+
+			ThreadHelper.ThrowIfNotOnUIThread();
 
 			if(string.IsNullOrEmpty(CodigaOptions.Instance.Fingerprint))
 			{

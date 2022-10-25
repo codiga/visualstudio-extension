@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
@@ -47,7 +49,14 @@ namespace Extension.AssistantCompletion
 			// get current editor settings to be able to format the code correctly
 
 			// start a snippet session using in memory xml rather than .xml files
-			ExpansionClient.StartExpansion(wpfTextView, snippet, true);
+			try
+			{
+				ExpansionClient.StartExpansion(wpfTextView, snippet, true);
+			}
+			catch(Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;

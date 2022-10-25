@@ -12,8 +12,6 @@ namespace Extension.Settings
 	/// </summary>
 	public partial class OptionsPage : UserControl
 	{
-		private ICodigaClient CodigaClient { get; set; }
-
 		internal CodigaOptionPage extensionOptionsPage;
 
 		public OptionsPage()
@@ -24,8 +22,6 @@ namespace Extension.Settings
 		public void Initialize()
 		{
 			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
-			var provider = new DefaultCodigaClientProvider();
-			CodigaClient = provider.GetClient();
 
 			cbUseCodingAssistant.IsChecked = settings.UseCodingAssistant;
 			cbUseInlineCompletion.IsChecked = settings.UseInlineCompletion;
@@ -59,7 +55,11 @@ namespace Extension.Settings
 
 		private void VerifyToken_Clicked(object sender, System.Windows.RoutedEventArgs e)
 		{
-			CodigaClient.SetApiToken(txtToken.Text);
+			var provider = new DefaultCodigaClientProvider();
+			if (!provider.TryGetClient(out var client))
+				return;
+
+			client.SetApiToken(txtToken.Text);
 
 			btnVerify.IsEnabled = false;
 			lblUserName.Text = "";
@@ -68,13 +68,13 @@ namespace Extension.Settings
 			
 			var result = ThreadHelper.JoinableTaskFactory.Run(async () =>
 			{
-				return await CodigaClient.GetUserAsync();
+				return await client.GetUserAsync();
 			});
 
 			string response;
 			if (result.Errors != null && result.Errors.Any())
 			{
-				response = GraphQLClient.CodigaClient.GetReadableErrorMessage(result.Errors.First().Message);
+				response = CodigaClient.GetReadableErrorMessage(result.Errors.First().Message);
 				imgError.Visibility = Visibility.Visible;
 			}
 			else

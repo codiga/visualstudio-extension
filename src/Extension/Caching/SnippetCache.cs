@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Extension.SnippetFormats;
 using GraphQLClient;
+using Microsoft.VisualStudio.Shell;
 using CodigaSnippet = GraphQLClient.CodigaSnippet;
 
 namespace Extension.Caching
@@ -63,8 +64,8 @@ namespace Extension.Caching
 			session.IdleTimerElapsed += Session_IdleTimerElapsed;
 
 			_currentPollingSessions.Add(language, session);
-			PollSnippetsAsync(tokenSource.Token, language);
 
+			ThreadHelper.JoinableTaskFactory.RunAsync(async () => await PollSnippetsAsync(tokenSource.Token, language));
 			return true;
 		}
 
@@ -121,13 +122,13 @@ namespace Extension.Caching
 				if (!_currentPollingSessions.TryGetValue(language, out var session))
 					return;
 
-				var client = _clientProvider.GetClient();
-
+				if(!_clientProvider.TryGetClient(out var client))
+					return;
+				
 				var ts = await client.GetRecipesForClientByShortcutLastTimestampAsync(language.GetName());
 				var lastTs = session.LastTimeStamp;
 				if (lastTs == null || ts > lastTs)
 				{
-					// TODO only add diff
 					var snippets = await client.GetRecipesForClientByShortcutAsync(language.GetName());
 					_cachedSnippets[language] = snippets;
 					session.LastTimeStamp = ts;

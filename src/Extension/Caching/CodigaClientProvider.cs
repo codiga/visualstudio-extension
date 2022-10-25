@@ -1,6 +1,8 @@
-﻿using Extension.Settings;
+﻿using Extension.Logging;
+using Extension.Settings;
 using GraphQLClient;
 using Microsoft.VisualStudio.Shell;
+using System;
 using System.ComponentModel.Composition;
 
 namespace Extension.Caching
@@ -11,6 +13,7 @@ namespace Extension.Caching
 	/// </summary>
 	public interface ICodigaClientProvider
 	{
+		public bool TryGetClient(out ICodigaClient client);
 		public ICodigaClient GetClient();
 	}
 
@@ -22,6 +25,22 @@ namespace Extension.Caching
 		public ICodigaClient GetClient()
 		{
 			return GlobalCodigaClient.Instance;
+		}
+
+		public bool TryGetClient(out ICodigaClient client)
+		{
+			try
+			{
+				client = GetClient();
+			}
+			catch (ArgumentException e)
+			{
+				client = null;
+				ExtensionLogger.LogException(e);
+				return false;
+			}
+
+			return true;
 		}
 	}
 
@@ -38,11 +57,6 @@ namespace Extension.Caching
 			{
 				if (_client == null)
 				{
-					ThreadHelper.JoinableTaskFactory.Run(async () =>
-					{
-						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-					});
-
 					var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
 					_client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
 

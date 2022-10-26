@@ -1,53 +1,47 @@
-# visualstudio-extension
-Codiga extension for Visual Studio for the fastest code analysis and code snippets management
+[![Slack](https://img.shields.io/badge/Slack-@codigahq.svg?logo=slack)](https://join.slack.com/t/codigahq/shared_invite/zt-9hvmfwie-9BUVFwZDwvpIGlkHv2mzYQ)
+[![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.vscode-plugin.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
+[![Download](https://vsmarketplacebadge.apphb.com/downloads-short/codiga.vscode-plugin.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 
-![example workflow](https://github.com/codiga/visualstudio-extension/actions/workflows/main.yml/badge.svg)
+[Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
 
-# Debug with the VS experimental instance 
-This section describes how you can build and debug the extension experimental instance of Visual Studio.
+# Codiga: Code Snippets on Steroids
 
-### Prerequisites
-* Installation of Visual Studio ([Visual Studio 2022](https://visualstudio.microsoft.com/vs/) is recommended)
+Look for snippets using a shortcut or search using inline completions like GitHub Copilot.
 
-### Start the experimental instance
-1. Open `Extension.sln` with Visual Studio
-2. Hit `Ctrl + F5` to bring up the experimental instance
+Adapt the list of snippets by adding your own.
 
-The experimental instance will have the extension automatically installed and updated.
+## Quick Start
 
-## Test out the extension
-To see how the extension is working create or open a `.cs`-File and type `.` anywhere to bring up the shortcut completion window.
+Start a comment and type what you want to have. Like GitHub Copilot, it suggests a list of snippets you can insert in your code.
 
-# Build and test
+![Use of smart code snippet in C#](images/inline.gif)
 
-This section describes how you can build and test the extension with your local Visual Studio installation.
-### Prerequisites
-* Installation of Visual Studio ([Visual Studio 2022](https://visualstudio.microsoft.com/vs/) is recommended)
-* MSBuild version `17.3.1`
+## Use Snippets using Shortcuts
 
-MSBuild can be found in this folder for a standard installation:
+Install the extension and type `.` in Visual Studio to list all available smart code snippets for your project. Accept a smart code snippet using either Enter ↩ or Tab ↹. Go through the snippet variables using the Tab key.
 
- `C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin`
-  
-  You might want to add this folder to your PATH.
-### Build the extension
-To build the extension navigate to the project root and execute
+![Use of smart code snippet in C#](images/shortcut.gif)
 
-`msbuild .\Extension.sln`
-### Run unit tests
+## Find and Reuse Smart Code Snippets
 
->_**Note: Does not work at the moment.**_
+Find snippets using an internal search engine using `CTRL` + `1` , `C` and search for a snippet.
 
-To run the unit tests execute
+![Coding Assistant to find snippets](images/search.gif)
 
-`dotnet test .\Extension.sln`
-### Install the extension
-Navigate to the project root and double click
+## Supported Languages
 
-`bin\Debug\Extension.vsix` .
+C, C++, CSS, HTML, Java, Javascript, Typescript, Python, Dart, Ruby, PHP, Scala, Apex, Terraform, Docker, Go, Rust, Shell, Solidity, YAML.
 
-This will install the extension to your local Visual Studio installation.
+## Getting API keys from Codiga
 
-  
+You need an API Token from [Codiga](https://codiga.io).
+Log on [Codiga](https://app.codiga.io) using your GitHub, GitLab or Bitbucket account.
 
-  
+Then, in your preferences, generate a new API key as shown below.
+
+![Generate API Token on Codiga](images/api-token-creation.gif)
+
+Add the token in the Visual Studio settings (Tools/Options).
+
+![Enter your API keys](images/settings.png)

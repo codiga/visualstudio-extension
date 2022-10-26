@@ -1,0 +1,13 @@
+{
+	"$schema": "http://json.schemastore.org/vsix-publish",
+	"categories": [ "snippets", "linters", "programming languages" ],
+	"identity": {
+		"internalName": "Codiga"
+	},
+	"overview": "README.md",
+	"priceCategory": "free",
+	"publisher": "codiga",
+	"private": false,
+	"qna": true,
+	"repo": "https://github.com/codiga/visualstudio-extension"
+}

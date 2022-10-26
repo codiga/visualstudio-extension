@@ -9,10 +9,10 @@ namespace Extension
     {
         public const string Id = "Codiga.2c544927-3588-41b4-9bfe-e80a0b99df80";
         public const string Name = "Codiga";
-        public const string Description = @"Empty VSIX Project.";
+        public const string Description = @"Code Snippets for 15+ languages and Code Analysis with Custom Rules.";
         public const string Language = "en-US";
         public const string Version = "1.0";
-        public const string Author = "Malte Klapper";
+        public const string Author = "Codiga";
         public const string Tags = "";
     }
 }

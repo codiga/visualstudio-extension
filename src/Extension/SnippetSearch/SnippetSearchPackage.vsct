@@ -6,6 +6,7 @@
 	<!--This header contains the command ids for the menus provided by the shell. -->
 	<Extern href="vsshlids.h"/>
 	<Include href="VSGlobals.vsct" />
+	<!--Enable usage of knwon monikers-->
 	<Include href="KnownImageIds.vsct"/>
 	
 	<!--The Commands section is where commands, menus, and menu groups are defined.
@@ -33,15 +34,6 @@
     <GuidSymbol name="guidSnippetSearchPackageCmdSet" value="{e05530d0-618b-4eea-bbf7-49728865ebbd}">
       <IDSymbol name="SnippetSearchCommandId" value="0x0100"/>
     </GuidSymbol>
-
-    <!--<GuidSymbol name="guidImages" value="{8bb3f701-48db-4b56-81e9-137f2d5092f5}">
-      <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-      <IDSymbol name="bmpPicStrikethrough" value="6" />
-    </GuidSymbol>-->
 
   </Symbols>
 

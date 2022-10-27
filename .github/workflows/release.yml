@@ -32,7 +32,7 @@ jobs:
 
       - name: Set version for VSIX
         run: |
-          $manifestPath = 'bin\Extension.vsix'
+          $manifestPath = 'bin\extension.vsixmanifest'
           $manifestXml = [xml](Get-Content $manifestPath -Raw)
           $manifestXml.PackageManifest.Metadata.Identity.Version = $env:Version
           $manifestXml.save($manifestPath)

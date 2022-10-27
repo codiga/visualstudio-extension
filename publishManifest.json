@@ -1,6 +1,6 @@
 {
 	"$schema": "http://json.schemastore.org/vsix-publish",
-	"categories": [ "snippets", "linters", "programming languages" ],
+	"categories": [ "coding", "programming languages" ],
 	"identity": {
 		"internalName": "Codiga"
 	},

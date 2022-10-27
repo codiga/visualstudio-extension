@@ -72,7 +72,7 @@ namespace Extension.Logging
 				return await VS.GetServiceAsync<SVsExtensionManager, IVsExtensionManager>();
 			});
 
-			var codigaExtension = extensionManager.GetInstalledExtension("Codiga.2c544927-3588-41b4-9bfe-e80a0b99df80");
+			var codigaExtension = extensionManager.GetInstalledExtension("Codiga.7f415e9f-9649-4ced-bbb2-64044b3d0a72");
 			
 			return codigaExtension.Header.Version;
 		}

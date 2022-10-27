@@ -20,6 +20,7 @@ jobs:
         run: ./NUnit.ConsoleRunner.3.13.0/tools/nunit3-console.exe  src\Tests\bin\Debug\net48\Tests.dll
 
   publish:
+    needs: build-and-test
     runs-on: windows-latest
     steps:
       - name: Calculate next version

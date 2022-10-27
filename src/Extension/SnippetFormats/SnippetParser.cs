@@ -202,6 +202,14 @@ namespace Extension.SnippetFormats
 			return sb.ToString();
 		}
 
+		//internal static List<Reference> GetReference(IReadOnlyCollection<string> codigaImport)
+		//{
+		//	foreach (var import in codigaImport)
+		//	{
+		//		yield return new Reference()
+		//	}
+		//}
+
 		/// <summary>
 		/// Represents the Codiga user variables that allow user defined placeholders
 		/// </summary>

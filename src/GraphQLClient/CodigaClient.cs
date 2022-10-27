@@ -76,7 +76,7 @@ namespace GraphQLClient
 
 	public class CodigaClient : ICodigaClient, IDisposable
 	{
-		private GraphQLHttpClient? _client;
+		private GraphQLHttpClient _client;
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
 
@@ -238,7 +238,7 @@ namespace GraphQLClient
 
 	public class GetUserResult
 	{
-		public User User { get; set; }
+		public User? User { get; set; }
 	}
 
 	internal class GetRecipesByShortcutResult

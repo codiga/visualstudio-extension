@@ -1,7 +1,7 @@
 [![Slack](https://img.shields.io/badge/Slack-@codigahq.svg?logo=slack)](https://join.slack.com/t/codigahq/shared_invite/zt-9hvmfwie-9BUVFwZDwvpIGlkHv2mzYQ)
 [![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
-[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.vscode-plugin.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
-[![Download](https://vsmarketplacebadge.apphb.com/downloads-short/codiga.vscode-plugin.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
+[![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.codiga.Codiga.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
+[![Download](https://vsmarketplacebadge.apphb.com/downloads-short/codiga.Codiga.svg.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vscode-plugin)
 
 [Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
 

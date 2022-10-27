@@ -4,7 +4,8 @@ on:
       - created
 
 jobs:
-  build:
+
+  get-version:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,12 +18,13 @@ jobs:
           patch-pattern: '.*'
           output-to-env-variable: 'Version'
 
-      - name: Build release version
-        uses: ./.github/workflows/build.yml
-        with:
-          config: Release
-          collect-artifacts: true
-          version: $env:Version
+  build:
+    needs: get-version
+    uses: ./.github/workflows/build.yml
+    with:
+      config: Release
+      collect-artifacts: true
+      version: $env:Version
 
   publish:
     needs: build

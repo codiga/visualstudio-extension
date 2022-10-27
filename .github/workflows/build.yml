@@ -15,15 +15,34 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+
       # using msbuild https://github.com/dotnet/sdk/issues/12421
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.0.2
+
       - name: Build Solution
         run:  msbuild Extension.sln /restore /v:m /property:Configuration=${{ inputs.config }}
+
       - name: Install NUnit.ConsoleRunner
         run:  nuget install NUnit.ConsoleRunner -Version 3.13.0 -DirectDownload -OutputDirectory .   
+
       - name: Run UnitTests
         run:  ./NUnit.ConsoleRunner.3.13.0/tools/nunit3-console.exe  src\Tests\bin\${{ inputs.config }}\net48\Tests.dll
+
+      - name: Calculate next version
+        uses: cezarypiatek/NextVersionGeneratorAction@0.4
+        with:
+          major-pattern: 'BREAKING CHANGES:'
+          minor-pattern: 'FEATURE:'
+          patch-pattern: '.*'
+          output-to-env-variable: 'Version'
+
+      - name: Set version for VSIX
+        uses: cezarypiatek/VsixVersionAction@1.0
+        with:
+          version: ${{ env.Version }}
+          vsix-manifest-file: bin\${{ inputs.config }}
+
       - name: Collect artifacts
         if: inputs.collect-artifacts
         uses: actions/upload-artifact@v2

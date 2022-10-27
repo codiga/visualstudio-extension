@@ -4,23 +4,23 @@ on:
       - created
 
 jobs:
-  build-and-test:
+  build:
+    uses: .github/build.yml
+    with:
+      config: Release
+
+  publish:
+    needs: build
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Setup MSBuild.exe
-        uses: microsoft/setup-msbuild@v1.0.2
-      - name: Build Solution
-        run: "msbuild Extension.sln /restore /v:m '/property:Configuration=Release'"
-      - name: Install NUnit.ConsoleRunner
-        run: nuget install NUnit.ConsoleRunner -Version 3.13.0 -DirectDownload -OutputDirectory .   
-      - name: Run UnitTests
-        run: ./NUnit.ConsoleRunner.3.13.0/tools/nunit3-console.exe  src\Tests\bin\Debug\net48\Tests.dll
 
-  publish:
-    needs: build-and-test
-    runs-on: windows-latest
-    steps:
+      - name: Get vsix file
+      - uses: actions/download-artifact@v3
+        with:
+          name: vs-extension
+          path: bin
+
       - name: Calculate next version
         uses: cezarypiatek/NextVersionGeneratorAction@0.4
         with:
@@ -28,22 +28,18 @@ jobs:
           minor-pattern: 'FEATURE:'
           patch-pattern: '.*'
           output-to-env-variable: 'Version'
+
       - name: Set version for VSIX
         run: |
-          $manifestPath = 'bin\Release\Extension.vsix'
+          $manifestPath = 'bin\Extension.vsix'
           $manifestXml = [xml](Get-Content $manifestPath -Raw)
           $manifestXml.PackageManifest.Metadata.Identity.Version = $env:Version
           $manifestXml.save($manifestPath)
-          - name: Collect artifacts - VSIX
-      - name: Collect artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: Extension
-          path: bin\Release\Extension.vsix
+
       - name: Publish extension to Marketplace
         uses: cezarypiatek/VsixPublisherAction@0.1
         with:
-          extension-file: 'bin\Release\Extension.vsix'
+          extension-file: 'bin\Extension.vsix'
           publish-manifest-file: 'publishManifest.json'
           personal-access-code: ${{ secrets.VS_PUBLISHER_ACCESS_TOKEN }}
       

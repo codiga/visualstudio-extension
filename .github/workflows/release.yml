@@ -7,6 +7,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Get latest tag
         id: latesttag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"

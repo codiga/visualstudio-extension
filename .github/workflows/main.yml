@@ -3,7 +3,7 @@ name: Build and test on push
 on: [push, pull_request]
 
 jobs:
-  Build:
-    uses: .github/build.yml
+  build:
+    uses: .github/build.yml@main
     with:
       config: Debug

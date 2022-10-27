@@ -15,6 +15,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
+      # using msbuild https://github.com/dotnet/sdk/issues/12421
       - name: Setup MSBuild.exe
         uses: microsoft/setup-msbuild@v1.0.2
       - name: Build Solution

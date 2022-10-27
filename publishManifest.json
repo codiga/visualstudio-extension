@@ -2,7 +2,7 @@
 	"$schema": "http://json.schemastore.org/vsix-publish",
 	"categories": [ "coding", "programming languages" ],
 	"identity": {
-		"internalName": "Codiga"
+		"internalName": "vsextension"
 	},
 	"overview": "README.md",
 	"priceCategory": "free",

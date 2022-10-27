@@ -4,6 +4,6 @@ on: [push, pull_request]
 
 jobs:
   build:
-    uses: .github/build.yml@main
+    uses: .github/workflows/build.yml@main
     with:
       config: Debug

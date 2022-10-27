@@ -36,6 +36,12 @@ jobs:
           $manifestXml = [xml](Get-Content $manifestPath -Raw)
           $manifestXml.PackageManifest.Metadata.Identity.Version = $env:Version
           $manifestXml.save($manifestPath)
+          - name: Collect artifacts - VSIX
+      - name: Collect artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Extension
+          path: bin\Release\Extension.vsix
       - name: Publish extension to Marketplace
         uses: cezarypiatek/VsixPublisherAction@0.1
         with:

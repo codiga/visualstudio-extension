@@ -17,7 +17,10 @@ jobs:
   build-and-test:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+
+      - name: Checkout
+        if: inputs.version == ''
+        uses: actions/checkout@v2
 
       - name: Update version
         if: inputs.version != ''

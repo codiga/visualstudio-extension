@@ -8,6 +8,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       config: Release
+      collect-artifacts: true
 
   publish:
     needs: build

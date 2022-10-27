@@ -7,3 +7,4 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       config: Debug
+      collect-artifacts: false

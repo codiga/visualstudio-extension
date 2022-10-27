@@ -6,7 +6,6 @@ on:
 jobs:
 
   build:
-    needs: set-version
     uses: ./.github/workflows/build.yml
     with:
       config: Release

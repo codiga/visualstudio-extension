@@ -9,22 +9,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get latest tag
-        id: latesttag
-        uses: "WyriHaximus/github-action-get-previous-tag@v1"
-
-      - name: Get version
-        id: semver
-        uses: LykkeBusiness/get-semver-from-tag-action@v1.0.2
+      - name: Calculate next version
+        uses: cezarypiatek/NextVersionGeneratorAction@0.4
         with:
-          tag: ${{ steps.latesttag.outputs.tag }}
+          major-pattern: 'BREAKING CHANGES:'
+          minor-pattern: 'FEATURE:'
+          patch-pattern: '.*'
+          output-to-env-variable: 'Version'
 
       - name: Build release version
         uses: ./.github/workflows/build.yml
         with:
           config: Release
           collect-artifacts: true
-          version: ${{ steps.semver.outputs.non-prefixed }}
+          version: $env:Version
 
   publish:
     needs: build

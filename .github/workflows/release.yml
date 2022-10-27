@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Get vsix file
-      - uses: actions/download-artifact@v3
+      - name: Get artifacts
+        uses: actions/download-artifact@v3
         with:
           name: vs-extension
           path: bin

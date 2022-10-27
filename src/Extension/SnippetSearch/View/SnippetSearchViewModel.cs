@@ -11,7 +11,6 @@ using Extension.SnippetSearch.Preview;
 using System.Windows.Input;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Extension.Settings;
 using System.Diagnostics;
 using System.Windows.Navigation;
 using System;
@@ -196,7 +195,18 @@ namespace Extension.SearchWindow.View
 			}
 
 			EditorOpen = windows.Any();
-			OnEditorOpenChanged();
+
+			if (EditorOpen)
+			{
+				var doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
+				{
+					return await VS.Documents.GetActiveDocumentViewAsync();
+				});
+
+				var ext = Path.GetExtension(doc.FilePath);
+				var lang = LanguageUtils.Parse(ext);
+				CurrentLanguage = lang.GetName();
+			}
 
 			AllSnippets = true;
 		}

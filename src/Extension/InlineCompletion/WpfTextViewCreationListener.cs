@@ -48,6 +48,9 @@ namespace Extension.InlineCompletion
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView)
 		{
+			if (textView == null)
+				return;
+
 			try
 			{
 				textView.Closed += TextView_Closed;

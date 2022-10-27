@@ -5,10 +5,18 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
-    with:
-      config: Release
-      collect-artifacts: true
+    runs-on: windows-latest
+    steps:
+      - name: Get latest tag
+        id: latesttag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: Build release version
+        uses: ./.github/workflows/build.yml
+        with:
+          config: Release
+          collect-artifacts: true
+          version: ${{ steps.latesttag.outputs.tag }}
 
   publish:
     needs: build

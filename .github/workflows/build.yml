@@ -24,7 +24,7 @@ jobs:
       - name: Run UnitTests
         run:  ./NUnit.ConsoleRunner.3.13.0/tools/nunit3-console.exe  src\Tests\bin\${{ inputs.config }}\net48\Tests.dll
       - name: Collect artifacts
-        if: ${{ inputs.collect-artifacts }} == true
+        if: inputs.collect-artifacts
         uses: actions/upload-artifact@v2
         with:
           name: vs-extension

@@ -28,7 +28,7 @@ The build and release process is automated via GitHub Actions. The release workf
 ## Versioning
 
 
-The version of the extension is stored in the manifest file `src/source.extension.vsixmanifest`. The vsix manifest editor in Visual Studio generates the C#-Class `src/source.extension.cs` that is used to version the assemblies. To update the Version of the Extension I recommend doing it in the VSIX-editor.
+The version of the extension is stored in the manifest file [`src/source.extension.vsixmanifest`](src/Extension/source.extension.vsixmanifest). The vsix manifest editor in Visual Studio generates the C#-Class [`src/Extension/source.extension.cs`](src/Extension/source.extension.cs) that is used to version the assemblies. To update the Version of the Extension I recommend doing it in the VSIX-editor.
 ## Releasing a new version to the marketplace
 <img align="right" src="images/version.png"/>
 
@@ -42,9 +42,9 @@ To trigger a new release build follow these steps:
 
 # Project structure
 The project is divided into three projects:
-* `Extension.csproj` - for the actual extension
-* `GraphQLClient.csproj` - for handling the Codiga API
-* `Tests.csproj` - for the unit tests
+* [`Extension.csproj`](src/Extension/Extension.csproj) - for the actual extension
+* [`GraphQLClient.csproj`](src/GraphQLClient/GraphQLClient.csproj) - for handling the Codiga API
+* [`Tests.csproj`](src/Tests/Tests.csproj) - for the unit tests
 
 Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual Studio itself is not migrated to .NET 6 or 7. That means for all libraries and packages we reference in our `Extension.csproj` we can only use [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0).
 
@@ -75,7 +75,7 @@ The key part here is that we prevent the normal code completion session from com
 For the completion menu and triggering we use the standard API based on [this example](https://github.com/microsoft/VSSDK-Extensibility-Samples/tree/master/AsyncCompletion).
 
 ### Inserting
-Snippet insertion sessions are called [*Expansion*](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-implementing-code-snippets?view=vs-2022&tabs=csharp) on the Visual Studio API. The insertion process is the same for all three features and is done in `AssistantCompletion/ExpansionManager.cs`. We bypass the regular `.snippet` files by calling:
+Snippet insertion sessions are called [*Expansion*](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-implementing-code-snippets?view=vs-2022&tabs=csharp) on the Visual Studio API. The insertion process is the same for all three features and is done in [`AssistantCompletion/ExpansionClient.cs`](src/Extension/AssistantCompletion/ExpansionClient.cs). We bypass the regular `.snippet` files by calling:
 ```csharp
 public int IVsExpansion.InsertSpecificExpansion (
     MSXML.IXMLDOMNode pSnippet, 
@@ -100,31 +100,31 @@ During the expansion session, we use [`IOleCommandTarget`](https://learn.microso
  ## Inline completion
 The inline completion is triggered by starting a line comment on a new line.
 ### Triggering
-To be able to trigger the inline completion we make use of another `IOleCommandTarget` in `InlineCompletion/InlineCompletionClient.cs`. Where we check if a session should be started based on the typed text of the current line.
+To be able to trigger the inline completion we make use of another `IOleCommandTarget` in [`InlineCompletion/InlineCompletionClient.cs`](src/Extension/InlineCompletion/InlineCompletionClient.cs). Where we check if a session should be started based on the typed text of the current line.
 ### Preview
-The preview is done by drawing on the editor Canvas by using [TextAdornments](https://learn.microsoft.com/de-de/archive/blogs/lucian/visual-studio-text-adornment-vsix-using-roslyn) which allows adding WPF controls in relation to editor text lines. The drawing of the instructions and the preview is done in `InlineCompletionView.cs`.
+The preview is done by drawing on the editor Canvas by using [TextAdornments](https://learn.microsoft.com/de-de/archive/blogs/lucian/visual-studio-text-adornment-vsix-using-roslyn) which allows adding WPF controls in relation to editor text lines. The drawing of the instructions and the preview is done in [`InlineCompletionView.cs`](src/Extension/InlineCompletion/InlineCompletionView.cs).
 > An approach inserting styled code directly to the editor was dismissed as scrolling through suggestions would add all of those to the undo/redo stack which resulted in a bad UX.
 
 ### Inserting
 Inserting is handled the same way as with the shortcut snippets using `ExpansionClient.StartExpansion()`.
 
 ## Snippet search
-The snippet search is implemented using a [ToolWindow](https://learn.microsoft.com/en-us/visualstudio/extensibility/adding-a-tool-window?view=vs-2022). Tool windows are written using WPF and the search window UI is defined in `SnippetSearch/View/SnippetSearchControl.xaml`. We try to follow [MVVM](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm) as much as possible, therefore the UI is mostly driven by the Binding on `SnippetSearchViewModel.cs`. 
+The snippet search is implemented using a [ToolWindow](https://learn.microsoft.com/en-us/visualstudio/extensibility/adding-a-tool-window?view=vs-2022). Tool windows are written using WPF and the search window UI is defined in [`SnippetSearch/View/SnippetSearchControl.xaml`](src/Extension/SnippetSearch/View/SnippetSearchControl.xaml). We try to follow [MVVM](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm) as much as possible, therefore the UI is mostly driven by the Binding on [`SnippetSearchViewModel.cs`](src/Extension/SnippetSearch/View/SnippetSearchViewModel.cs). 
 
 ### Preview
-The preview for snippets from the Snippet Search is done by inserting the code in the editor and using a [Classifier](https://learn.microsoft.com/en-us/visualstudio/extensibility/language-service-and-editor-extension-points?view=vs-2022#extend-classification-types-and-classification-formats) to style the span in a way that makes it obvious to users that this is a preview. The classifier is polling the text spans to be classified on changes to the editor. While the preview is active we provide a static span to be used. When the preview ends, it is set to `null`. The whole preview and classification logic is grouped under `SnippetSearch/Preview`.
+The preview for snippets from the Snippet Search is done by inserting the code in the editor and using a [Classifier](https://learn.microsoft.com/en-us/visualstudio/extensibility/language-service-and-editor-extension-points?view=vs-2022#extend-classification-types-and-classification-formats) to style the span in a way that makes it obvious to users that this is a preview. The classifier is polling the text spans to be classified on changes to the editor. While the preview is active we provide a static span to be used. When the preview ends, it is set to `null`. The whole preview and classification logic is grouped under [`SnippetSearch/Preview`](/src/Extension/SnippetSearch/Preview/).
 
 ### Inserting
-When inserting the snippet the preview span is replaced by the new Expansion via the `ExpansionClient`.
+When inserting the snippet the preview span is replaced by the new Expansion via the [`ExpansionClient`](src/Extension/AssistantCompletion/ExpansionClient.cs).
 
 ### Menu item
 To be able to bring up the tool window via the menu, two parts are needed:
-1. Define the menu item command in a [VS command table](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/visual-studio-command-table-dot-vsct-files?view=vs-2022) (`SnippetSearchPackage.vsct`)
-2. Implement the command that gets fired when clicking the menu item (done in `SearchWindowMenuCommand.cs`)
+1. Define the menu item command in a [VS command table](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/visual-studio-command-table-dot-vsct-files?view=vs-2022) ([`SnippetSearchPackage.vsct`](src/Extension/SnippetSearch/SnippetSearchPackage.vsct))
+2. Implement the command that gets fired when clicking the menu item (done in [`SearchWindowMenuCommand.cs`](/src/Extension/SnippetSearch/SearchWindowMenuCommand.cs))
 
 ## Settings
 The settings dialog is also divided into the settings model and the options dialog that shows up in the VS settings.
-The definition and registration of the Codiga settings are done in `Settings/ExtensionOptions.cs`. These settings are stored in the Windows registry and can be accessed via a singleton instance `CodigaOptions.Instance`. The UI for the settings is defined in `OptionsPage.xaml`. For the simple settings dialog, the minimal logic is done in the [code-behind](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/code-behind-and-xaml-in-wpf?view=netframeworkdesktop-4.8) file `OptionsPage.xaml.cs`.
+The definition and registration of the Codiga settings are done in [`Settings/ExtensionOptions.cs`](src/Extension/Settings/ExtensionOptions.cs). These settings are stored in the Windows registry and can be accessed via a singleton instance `CodigaOptions.Instance`. The UI for the settings is defined in [`OptionsPage.xaml`](src/Extension/Settings/OptionsPage.xaml). For the simple settings dialog, the minimal logic is done in the [code-behind](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/code-behind-and-xaml-in-wpf?view=netframeworkdesktop-4.8) file [`OptionsPage.xaml.cs`](src/Extension/Settings/OptionsPage.xaml.cs).
 
 # Frameworks/Packages
 List of used third-party frameworks and packages:

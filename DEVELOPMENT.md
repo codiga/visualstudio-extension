@@ -56,7 +56,7 @@ Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual 
 * `Caching` - everything related to Snippet caching
 * `InlineCompletion` - support for inline snippet completion
 * `Logging` - Helper classes for Rollbar logging
-* `Settings` - Handling current VS setting including the Codiga    settings dialog
+* `Settings` - Handling current VS setting including the Codiga settings dialog
 * `SnippetFormats` - The different snippet models and the parsing
 * `SnippetSearch` - The menu entry and the tool window for the snippet search
 * `ExtensionPackage.cs` - registrations for settings dialog and search window

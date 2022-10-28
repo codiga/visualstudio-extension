@@ -19,6 +19,9 @@ using GraphQLClient;
 
 namespace Extension.SearchWindow.View
 {
+	/// <summary>
+	/// View model representing the view logic of the search window.
+	/// </summary>
 	internal class SnippetSearchViewModel : INotifyPropertyChanged
 	{
 		private ICodigaClientProvider _clientProvider;
@@ -44,11 +47,34 @@ namespace Extension.SearchWindow.View
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		// Commands
+		/// <summary>
+		/// The command for executing a snippet search.
+		/// </summary>
 		public AsyncCommand GetSnippetsCommand { get => _getSnippets; set => _getSnippets = value; }
+
+		/// <summary>
+		/// Command to insert the snippet into the editor.
+		/// </summary>
 		public AsyncCommand InsertSnippetCommand { get => _insertSnippet; set => _insertSnippet = value; }
+
+		/// <summary>
+		/// Command to show a preview of a snippet.
+		/// </summary>
 		public AsyncCommand ShowPreviewCommand { get => _showPreview; set => _showPreview = value; }
+
+		/// <summary>
+		/// Command to remove the preview from the editor.
+		/// </summary>
 		public AsyncCommand HidePreviewCommand { get => _hidePreview; set => _hidePreview = value; }
+
+		/// <summary>
+		/// Key up command used to support live search in the search box.
+		/// </summary>
 		public AsyncCommand KeyUpCommand { get => _keyDown; set => _keyDown = value; }
+
+		/// <summary>
+		/// Command for opening the profile page on click on the link.
+		/// </summary>
 		public AsyncCommand OpenProfileCommand { get => _openProfile; set => _openProfile = value; }
 
 		// Search parameters
@@ -147,6 +173,8 @@ namespace Extension.SearchWindow.View
 			}
 		}
 
+		public bool ValidEditor => EditorOpen && CurrentLanguage != "Unknown";
+
 		public string Watermark
 		{
 			get => _watermark;
@@ -160,6 +188,7 @@ namespace Extension.SearchWindow.View
 			}
 		}
 
+		
 
 		public SnippetSearchViewModel()
 		{
@@ -209,8 +238,15 @@ namespace Extension.SearchWindow.View
 			}
 
 			AllSnippets = true;
+
+			RefreshWatermark();
 		}
 
+		/// <summary>
+		/// Triggered when switching between open editors. 
+		/// We update the search window based on the language of the opened file.
+		/// </summary>
+		/// <param name="obj"></param>
 		private void WindowEvents_ActiveFrameChanged(ActiveFrameChangeEventArgs obj)
 		{
 			var doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
@@ -226,6 +262,11 @@ namespace Extension.SearchWindow.View
 			CurrentLanguage = lang.GetName();
 		}
 
+		/// <summary>
+		/// Triggered when closing an editor.
+		/// We check here if all editors are closed.
+		/// </summary>
+		/// <param name="obj"></param>
 		private async void DocumentEvents_Closed(string obj)
 		{
 			var windows = await VS.Windows.GetAllDocumentWindowsAsync();
@@ -233,6 +274,10 @@ namespace Extension.SearchWindow.View
 			OnEditorOpenChanged();
 		}
 
+		/// <summary>
+		/// Update if an editor was opened.
+		/// </summary>
+		/// <param name="obj"></param>
 		private async void DocumentEvents_Opened(string obj)
 		{
 			EditorOpen = true;
@@ -241,11 +286,21 @@ namespace Extension.SearchWindow.View
 
 		#region GetSnippets command
 
+		/// <summary>
+		/// Used as the CanExecute predicate for the commands.
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public bool IsEditorOpen(object param)
 		{
-			return EditorOpen;
+			return ValidEditor;
 		}
 
+		/// <summary>
+		/// Queries snippets from the GraphQL API and puts them in the ObservableCollection.
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public async Task QuerySnippetsAsync(object param)
 		{
 			if (!_clientProvider.TryGetClient(out var client))
@@ -276,6 +331,11 @@ namespace Extension.SearchWindow.View
 
 		#region InsertSnippet command
 
+		/// <summary>
+		/// Insert the snippet using the ExpansionClient
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public async Task InsertSnippetAsync(object param)
 		{
 			await HidePreviewAsync(param);
@@ -298,6 +358,12 @@ namespace Extension.SearchWindow.View
 		#endregion
 
 		#region Preview commands
+
+		/// <summary>
+		/// Show preview by starting a new CodePreviewSession.
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public async Task ShowPreviewAsync(object param)
 		{
 			try
@@ -314,6 +380,11 @@ namespace Extension.SearchWindow.View
 			}
 		}
 
+		/// <summary>
+		/// Remove the preview from the editor.
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public async Task HidePreviewAsync(object param)
 		{
 			try
@@ -330,6 +401,11 @@ namespace Extension.SearchWindow.View
 		#endregion
 
 		#region Live search commands
+		/// <summary>
+		/// Perform a search after two keywords were typed.
+		/// </summary>
+		/// <param name="param"></param>
+		/// <returns></returns>
 		public async Task OnKeyUp(object param)
 		{
 			if (Term == null)
@@ -362,6 +438,10 @@ namespace Extension.SearchWindow.View
 
 		#endregion
 
+		/// <summary>
+		/// Used to inform the view of changed properties so that the bound values are refreshed.
+		/// </summary>
+		/// <param name="name"></param>
 		protected void OnPropertyChanged([CallerMemberName] string name = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -375,14 +455,12 @@ namespace Extension.SearchWindow.View
 			HidePreviewCommand.RaiseCanExecuteChanged();
 			KeyUpCommand.RaiseCanExecuteChanged();
 
-			if (EditorOpen)
-			{
-				Watermark = "Search for Snippets";
-			}
-			else
+			OnPropertyChanged(nameof(ValidEditor));
+			RefreshWatermark();
+
+			if (!ValidEditor)
 			{
 				Snippets.Clear();
-				Watermark = "Open a file to search for snippets";
 			}
 		}
 
@@ -396,7 +474,27 @@ namespace Extension.SearchWindow.View
 
 			Term = string.Empty;
 
-			await QuerySnippetsAsync(null);
+			OnPropertyChanged(nameof(ValidEditor));
+			RefreshWatermark();
+
+			if (ValidEditor)
+			{
+				await QuerySnippetsAsync(null);
+			}
+			else
+			{
+				Snippets.Clear();
+			}
+		}
+
+		private void RefreshWatermark()
+		{
+			if(ValidEditor)
+				Watermark = "Search for Snippets";
+			else if(EditorOpen && !ValidEditor)
+				Watermark = "Language not supported";
+			else
+				Watermark = "Open a file to search for snippets";
 		}
 	}
 }

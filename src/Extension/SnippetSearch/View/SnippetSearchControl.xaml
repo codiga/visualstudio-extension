@@ -185,7 +185,7 @@
 		<!--Search box-->
 		<Grid Grid.Row="1" Margin="5">
 			
-			<TextBox x:Name="txtSearch" VerticalContentAlignment="Center" IsEnabled="{Binding EditorOpen}" Text="{Binding Term, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+			<TextBox x:Name="txtSearch" VerticalContentAlignment="Center" IsEnabled="{Binding ValidEditor}" Text="{Binding Term, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 				<TextBox.InputBindings>
 					<KeyBinding Key="Enter" Command="{Binding GetSnippetsCommand}"></KeyBinding>
 				</TextBox.InputBindings>
@@ -225,10 +225,10 @@
 				<RowDefinition/>
 				<RowDefinition/>
 			</Grid.RowDefinitions>
-			<RadioButton Grid.Column="0" Grid.Row="0" GroupName="Filter" IsEnabled="{Binding EditorOpen}" IsChecked="{Binding AllSnippets, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">All snippets</RadioButton>
-			<RadioButton Grid.Column="0" Grid.Row="1" GroupName="Filter" IsEnabled="{Binding EditorOpen}" IsChecked="{Binding OnlyPrivate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Private Snippets Only</RadioButton>
-			<RadioButton Grid.Column="1" Grid.Row="0" GroupName="Filter" IsEnabled="{Binding EditorOpen}" IsChecked="{Binding OnlyPublic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Public Snippets Only</RadioButton>
-			<CheckBox Grid.Column="1" Grid.Row="1" IsEnabled="{Binding EditorOpen}" IsChecked="{Binding OnlyFavorite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Favorite Snippets Only</CheckBox>
+			<RadioButton Grid.Column="0" Grid.Row="0" GroupName="Filter" IsEnabled="{Binding ValidEditor}" IsChecked="{Binding AllSnippets, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">All snippets</RadioButton>
+			<RadioButton Grid.Column="0" Grid.Row="1" GroupName="Filter" IsEnabled="{Binding ValidEditor}" IsChecked="{Binding OnlyPrivate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Private Snippets Only</RadioButton>
+			<RadioButton Grid.Column="1" Grid.Row="0" GroupName="Filter" IsEnabled="{Binding ValidEditor}" IsChecked="{Binding OnlyPublic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Public Snippets Only</RadioButton>
+			<CheckBox Grid.Column="1" Grid.Row="1" IsEnabled="{Binding ValidEditor}" IsChecked="{Binding OnlyFavorite, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Favorite Snippets Only</CheckBox>
 		</Grid>
 		
 		<!--Snippet scroll area-->

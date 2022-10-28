@@ -29,6 +29,8 @@ This section describes how you can build and debug the extension with the [exper
 
 The experimental instance will have the extension automatically installed and updated.
 
+> Always check that you don't have a installation of the extension from the marketplace in your experimental instance. If the id changed it can happen that you have two versions of the same extension which will result in conflicts.
+
 ### Test out the extension
 To see how the extension is working create or open a `.cs`-File and type `.` anywhere to bring up the shortcut completion window. The extension should also appear under *Extensions -> Manage Extensions -> Installed*.
 

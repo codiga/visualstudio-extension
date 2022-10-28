@@ -4,7 +4,7 @@ on:
   push:
     # prevent normal build on tag push as this will be done by the release action
     tags-ignore:        
-      - '*'
+      - v*
 
 jobs:
   build:

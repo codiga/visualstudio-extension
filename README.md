@@ -2,6 +2,8 @@
 [![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/installs-short/codiga.vsextension.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=codiga.vsextension)
 [![Download](https://vsmarketplacebadge.apphb.com/downloads-short/codiga.vsextension.svg)](https://marketplace.visualstudio.com/items?itemName=codiga.vsextension)
+[![GitHub tag latest SemVer](https://img.shields.io/github/v/tag/codiga/visualstudio-extension)](https://github.com/codiga/visualstudio-extension/releases/latest)
+
 
 [Codiga](https://www.codiga.io) is a [Smart Code Snippets](https://www.codiga.io/code-snippets/smart-code-snippets/) manager. Create, share, search and use Smart Code Snippets from your IDE.
 

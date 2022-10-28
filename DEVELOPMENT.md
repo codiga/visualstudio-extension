@@ -22,7 +22,7 @@ As Visual Studio has a long history, the SDK also has different APIs. The older 
 The Managed Extensibility Framework is working like a dependency injection framework for Visual Studio components. Registering implementations of a type or interface is done via the `[Export]` attribute and receiving already registered components and services is done via `[Import]`. Depending on the context most exported components are instantiated as singletons.
 
 # Releasing
-<img align="right" src="images/version.png"/>
+
 
 The build and release process is automated via GitHub Actions. The release workflow is defined in [release.yml](.github/workflows/release.yml). 
 ## Versioning
@@ -30,6 +30,8 @@ The build and release process is automated via GitHub Actions. The release workf
 
 The version of the extension is stored in the manifest file `src/source.extension.vsixmanifest`. The vsix manifest editor in Visual Studio generates the C#-Class `src/source.extension.cs` that is used to version the assemblies. To update the Version of the Extension I recommend doing it in the VSIX-editor.
 ## Releasing a new version to the marketplace
+<img align="right" src="images/version.png"/>
+
 To trigger a new release build follow these steps:
 1. Update the manifest file with the new version number in Visual Studio
 2. Draft a new release on GitHub with a new tag matching the version of the manifest file
@@ -87,7 +89,7 @@ public int IVsExpansion.InsertSpecificExpansion (
 
  This API allows us to insert snippets from in-memory XML using the [Visual Studio snippet XML schema](https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference?view=vs-2022).
  We just need to serialize the incoming Codiga Recipes into the required XML format:
- 
+
  <img src="images/serializer-workflow.png">
  
 During the expansion session, we use [`IOleCommandTarget`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.ole.interop.iolecommandtarget?view=visualstudiosdk-2022) to handle incoming keystrokes and commands to pass `Tab` keys to the expansion and enable navigation between the user variables. The snippet usage reporting is also done in this module.

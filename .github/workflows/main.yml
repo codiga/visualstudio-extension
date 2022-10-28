@@ -1,6 +1,10 @@
 name: Build and test on push
 
-on: [push, pull_request]
+on: 
+  push:
+    # prevent normal build on tag push as this will be done by the release action
+    tags-ignore:        
+      - '*'
 
 jobs:
   build:

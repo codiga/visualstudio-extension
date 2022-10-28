@@ -188,8 +188,6 @@ namespace Extension.SearchWindow.View
 			}
 		}
 
-		
-
 		public SnippetSearchViewModel()
 		{
 			_clientProvider = new DefaultCodigaClientProvider();

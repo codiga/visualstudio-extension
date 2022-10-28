@@ -87,6 +87,7 @@ public int IVsExpansion.InsertSpecificExpansion (
 
  This API allows us to insert snippets from in-memory XML using the [Visual Studio snippet XML schema](https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference?view=vs-2022).
  We just need to serialize the incoming Codiga Recipes into the required XML format:
+ 
  <img src="images/serializer-workflow.png">
  
 During the expansion session, we use [`IOleCommandTarget`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.ole.interop.iolecommandtarget?view=visualstudiosdk-2022) to handle incoming keystrokes and commands to pass `Tab` keys to the expansion and enable navigation between the user variables. The snippet usage reporting is also done in this module.

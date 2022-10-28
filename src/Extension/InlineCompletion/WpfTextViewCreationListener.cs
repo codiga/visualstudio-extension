@@ -1,11 +1,14 @@
 ﻿using Extension.AssistantCompletion;
 using Extension.Logging;
+using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 
 namespace Extension.InlineCompletion
 {
@@ -53,6 +56,10 @@ namespace Extension.InlineCompletion
 
 			try
 			{
+				var ext = Path.GetExtension(textView.ToDocumentView().Document.FilePath);
+				if (LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
+					return;
+
 				textView.Closed += TextView_Closed;
 				var client = new InlineCompletionClient();
 				InlineCompletionClients.Add(textView, client);

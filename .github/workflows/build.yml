@@ -30,6 +30,12 @@ jobs:
       - name: Run UnitTests
         run:  ./NUnit.ConsoleRunner.3.13.0/tools/nunit3-console.exe  src\Tests\bin\${{ inputs.config }}\net48\Tests.dll     
 
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action/composite@v2
+        if: always()
+        with: 
+          nunit_files: "./**/TestResult.xml"
+
       - name: Collect artifacts
         if: inputs.collect-artifacts
         uses: actions/upload-artifact@v2

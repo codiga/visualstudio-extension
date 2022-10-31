@@ -172,7 +172,6 @@ namespace Extension.SnippetFormats
 			// Visual Studio supports defining tab size and indent size seperatly
 			// so one codiga indent can not always be replaced with one VS indent 1:1
 
-			// TODO replace hard coded level with algorithm
 			var vsIndentLevel1 = EditorUtils.GetIndent(1, settings);
 			var vsIndentLevel2 = EditorUtils.GetIndent(2, settings);
 			var vsIndentLevel3 = EditorUtils.GetIndent(3, settings);

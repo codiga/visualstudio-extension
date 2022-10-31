@@ -11,7 +11,6 @@ namespace Tests
 	[TestFixture]
 	internal class LanguageUtilsTest
 	{
-		//TODO complete the test
 		[Test]
 		[TestCase(".cs", ExpectedResult = LanguageUtils.LanguageEnumeration.Csharp)]
 		[TestCase(".py", ExpectedResult = LanguageUtils.LanguageEnumeration.Python)]

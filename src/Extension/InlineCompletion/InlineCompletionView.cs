@@ -37,6 +37,7 @@ namespace Extension.InlineCompletion
 		private int _totalSnippetCount = 0;
 		private SolidColorBrush _textBrush = new SolidColorBrush(Colors.DarkGreen);
 		private SolidColorBrush _textBackgroundBrush = new SolidColorBrush(Colors.DarkGray);
+		private FontFamily _fontFamliy = Fonts.SystemFontFamilies.First();
 
 		public const string PreviewLayerName = "InlineCompletionLayer";
 
@@ -72,6 +73,7 @@ namespace Extension.InlineCompletion
 			{
 				_textBrush = new SolidColorBrush(_settings.CommentColor);
 				_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
+				_fontFamliy = new FontFamily(_settings.FontFamily);
 			}
 
 			_textBrush.Opacity = 0.7;
@@ -89,14 +91,21 @@ namespace Extension.InlineCompletion
 		private void DrawCompletionInstructions()
 		{
 			var triggeringLine = GetTriggeringLine();
+
+			if (triggeringLine == null)
+				return;
+
 			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
-			
+
+			if (geometry == null)
+				return;
+
 			var textBlock = new TextBlock
 			{
 				Width = 600, 
 				Foreground = _textBrush,
 				Height = geometry.Bounds.Height,
-				FontFamily = new FontFamily(_settings.FontFamily),
+				FontFamily = _fontFamliy,
 				FontSize = triggeringLine.Baseline,
 				Text = $"[{_currentSnippetIndex}/{_totalSnippetCount}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
@@ -131,7 +140,9 @@ namespace Extension.InlineCompletion
 			_currentSnippetCode = code;
 			_currentSnippetIndex = current;
 			_totalSnippetCount = total;
-			_layer.RemoveAllAdornments();
+			
+			if(!_layer.IsEmpty)
+				_layer.RemoveAllAdornments();
 
 			try
 			{
@@ -179,7 +190,7 @@ namespace Extension.InlineCompletion
 				FontStyle = FontStyles.Italic,
 				Focusable = false,
 				Background = _textBackgroundBrush,
-				FontFamily = new FontFamily(_settings.FontFamily),
+				FontFamily = _fontFamliy,
 				FontSize = triggeringLine.Baseline,
 				Height = height,
 				Text = content

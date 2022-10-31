@@ -64,8 +64,8 @@
     <Compile Include="AssistantCompletion\ShortcutCompletionSource.cs" />
     <Compile Include="AssistantCompletion\ShortcutCompletionSourceProvider.cs" />
     <Compile Include="Caching\CodigaClientProvider.cs" />
-    <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
+    <Compile Include="Caching\TextViewCreationListener.cs" />
     <Compile Include="Logging\ExtensionLogger.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifier.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifierFormat.cs" />
@@ -74,7 +74,7 @@
     <Compile Include="InlineCompletion\InlineCompletionView.cs" />
     <Compile Include="SnippetSearch\Preview\CodePreviewSession.cs" />
     <Compile Include="InlineCompletion\SnippetNavigator.cs" />
-    <Compile Include="InlineCompletion\WpfTextViewCreationListener.cs" />
+    <Compile Include="InlineCompletion\TextViewCreationListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SnippetSearch\View\AsyncCommand.cs" />
     <Compile Include="SnippetSearch\View\SnippetSearchViewModel.cs" />
@@ -148,7 +148,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Text.Logic">
       <Version>17.3.198</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2116">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.4.2118">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

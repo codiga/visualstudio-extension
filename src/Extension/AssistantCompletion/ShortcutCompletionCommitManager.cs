@@ -40,18 +40,20 @@ namespace Extension.AssistantCompletion
         {
 			// This method runs synchronously
 
-			// use IVsEditorAdaptersFactoryService to get access to IVsTextview
-			var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
-			var wpfTextView = VsEditorAdapter.GetWpfTextView(vsTextView);
-
-			item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet), out var snippet);
-
-			// get current editor settings to be able to format the code correctly
-
 			// start a snippet session using in memory xml rather than .xml files
 			try
 			{
+				// use IVsEditorAdaptersFactoryService to get access to IVsTextview
+				var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
+				var wpfTextView = VsEditorAdapter.GetWpfTextView(vsTextView);
+
+				var success = item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet), out var snippet);
+
+				if (!success)
+					throw new ArgumentException("Could not find VisualStudioSnippet in property bag", nameof(item));
+
 				ExpansionClient.StartExpansion(wpfTextView, snippet, true);
+
 			}
 			catch(Exception e)
 			{

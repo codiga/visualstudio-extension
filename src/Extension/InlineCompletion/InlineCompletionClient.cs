@@ -47,13 +47,33 @@ namespace Extension.InlineCompletion
 			_clientProvider = new DefaultCodigaClientProvider();
 			_wpfTextView = wpfTextView;
 			var vsTextView = wpfTextView.ToIVsTextView();
+
+			if (vsTextView == null)
+				return;
+
 			_expansionClient = expansionClient;
 			vsTextView.AddCommandFilter(this, out _nextCommandHandler);
 		}
 
 		public int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
 		{
-			return _nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
+			int res = 0;
+			try
+			{
+				ThreadHelper.JoinableTaskFactory.Run(async () =>
+				{
+					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				});
+
+				ThreadHelper.ThrowIfNotOnUIThread();
+
+				res = _nextCommandHandler.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
+			}
+			catch (Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
+			return res;
 		}
 		
 		/// <summary>

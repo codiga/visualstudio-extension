@@ -161,7 +161,7 @@ namespace GraphQLClient
 			var result = await _client.SendMutationAsync<RecordRecipeUseMutationResult>(request);
 
 			ThrowOnErrors(result);
-
+			
 			return result.Data.RecordAccess;
 		}
 
@@ -200,7 +200,6 @@ namespace GraphQLClient
 		public void Dispose()
 		{
 			_client?.Dispose();
-			_client = null;
 		}
 
 		public static string GetReadableErrorMessage(string errorMessage)
@@ -213,7 +212,7 @@ namespace GraphQLClient
 		}
 		private void ThrowOnErrors(IGraphQLResponse response)
 		{
-			if (response.Errors == null || !response.Errors.Any())
+			if (response.Errors == null || !response.Errors.Any() || response.Data != null)
 				return;
 
 			var error = response.Errors.First();

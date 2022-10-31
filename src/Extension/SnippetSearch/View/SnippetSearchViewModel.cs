@@ -194,12 +194,12 @@ namespace Extension.SearchWindow.View
 
 			Snippets = new ObservableCollection<VisualStudioSnippet>();
 
-			GetSnippetsCommand = new AsyncCommand (QuerySnippetsAsync, IsEditorOpen){ ViewModel = this };
-			InsertSnippetCommand = new AsyncCommand (InsertSnippetAsync, IsEditorOpen) { ViewModel = this };
-			ShowPreviewCommand = new AsyncCommand (ShowPreviewAsync, IsEditorOpen) { ViewModel = this };
-			HidePreviewCommand = new AsyncCommand (HidePreviewAsync, IsEditorOpen) { ViewModel = this };
-			KeyUpCommand = new AsyncCommand (OnKeyUp, IsEditorOpen) { ViewModel = this };
-			OpenProfileCommand = new AsyncCommand(OpenProfileInBrowser, IsValidProfile) { ViewModel= this };
+			GetSnippetsCommand = new AsyncCommand (QuerySnippetsAsync, IsEditorOpen);
+			InsertSnippetCommand = new AsyncCommand (InsertSnippetAsync, IsEditorOpen);
+			ShowPreviewCommand = new AsyncCommand (ShowPreviewAsync, IsEditorOpen);
+			HidePreviewCommand = new AsyncCommand (HidePreviewAsync, IsEditorOpen);
+			KeyUpCommand = new AsyncCommand (OnKeyUpAsync, IsEditorOpen);
+			OpenProfileCommand = new AsyncCommand(OpenProfileInBrowserAsync, IsValidProfile);
 
 			VS.Events.DocumentEvents.Opened += DocumentEvents_Opened;
 			VS.Events.DocumentEvents.Closed += DocumentEvents_Closed;
@@ -404,7 +404,7 @@ namespace Extension.SearchWindow.View
 		/// </summary>
 		/// <param name="param"></param>
 		/// <returns></returns>
-		public async Task OnKeyUp(object param)
+		public async Task OnKeyUpAsync(object param)
 		{
 			if (Term == null)
 				return;
@@ -427,10 +427,10 @@ namespace Extension.SearchWindow.View
 			return !string.IsNullOrEmpty(UserName);
 		}
 
-		public async Task OpenProfileInBrowser(object param)
+		public async Task OpenProfileInBrowserAsync(object param)
 		{
 			var e = (RequestNavigateEventArgs)param;
-			Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+			await Task.Run(() => Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri)));
 			e.Handled = true;
 		}
 
@@ -440,8 +440,11 @@ namespace Extension.SearchWindow.View
 		/// Used to inform the view of changed properties so that the bound values are refreshed.
 		/// </summary>
 		/// <param name="name"></param>
-		protected void OnPropertyChanged([CallerMemberName] string name = null)
+		protected void OnPropertyChanged([CallerMemberName] string name = "")
 		{
+			if (string.IsNullOrEmpty(name))
+				return;
+
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 		}
 

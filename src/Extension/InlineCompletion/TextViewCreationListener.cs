@@ -1,7 +1,9 @@
-﻿using Extension.AssistantCompletion;
+﻿using Community.VisualStudio.Toolkit;
+using Extension.AssistantCompletion;
 using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
@@ -19,7 +21,7 @@ namespace Extension.InlineCompletion
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("text")]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	internal sealed class WpfTextViewCreationListener : IWpfTextViewCreationListener
+	internal sealed class TextViewCreationListener : IWpfTextViewCreationListener
 	{
 		/// <summary>
 		/// Defines the adornment layer for the adornment. This layer is ordered
@@ -31,7 +33,7 @@ namespace Extension.InlineCompletion
 		private AdornmentLayerDefinition editorAdornmentLayer;
 
 		[Import]
-		internal IVsEditorAdaptersFactoryService AdapterService = null;
+		internal IVsEditorAdaptersFactoryService AdapterService;
 
 		[Import]
 		internal ExpansionClient ExpansionClient;
@@ -39,7 +41,7 @@ namespace Extension.InlineCompletion
 		internal Dictionary<IWpfTextView, InlineCompletionClient> InlineCompletionClients { get;}
 
 
-		public WpfTextViewCreationListener()
+		public TextViewCreationListener()
 		{
 			InlineCompletionClients = new Dictionary<IWpfTextView, InlineCompletionClient>();
 		}
@@ -54,9 +56,23 @@ namespace Extension.InlineCompletion
 			if (textView == null)
 				return;
 
+			DocumentView doc;
 			try
 			{
-				var ext = Path.GetExtension(textView.ToDocumentView().Document.FilePath);
+				doc = textView.ToDocumentView();
+			}
+			catch
+			{
+				doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
+				{
+					return await VS.Documents.GetActiveDocumentViewAsync();
+				});
+			}
+
+			try
+			{
+				var ext = Path.GetExtension(doc.FilePath);
+
 				if (LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
 					return;
 

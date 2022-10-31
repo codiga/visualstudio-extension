@@ -48,10 +48,14 @@ namespace Extension.AssistantCompletion
 		public int StartExpansion(IWpfTextView textView, VisualStudioSnippet snippet, bool replaceLine)
 		{
 			var caret = textView.Caret;
+			var code = snippet?.CodeSnippet?.Snippet?.Code?.RawCode;
+
+			if (code == null)
+				return VSConstants.S_FALSE;
 
 			// indent code based on caret
 			var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-			var indentedCode = EditorUtils.IndentCodeBlock(snippet.CodeSnippet.Snippet.Code.RawCode, caret, settings);
+			var indentedCode = EditorUtils.IndentCodeBlock(code, caret, settings);
 			snippet.CodeSnippet.Snippet.Code.CodeString = indentedCode;
 			var currentLine = textView.TextSnapshot.GetLineFromPosition(caret.Position.BufferPosition.Position);
 

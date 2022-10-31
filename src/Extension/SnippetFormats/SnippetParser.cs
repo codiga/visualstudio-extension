@@ -218,6 +218,13 @@ namespace Extension.SnippetFormats
 			public string PlaceholderText { get; set; }
 			public int Order { get; set; }
 			public string Default { get; set; }
+
+			public CodigaUserVariable()
+			{
+				PlaceholderText = string.Empty; 
+				Order = 0; 
+				Default = string.Empty;	
+			}
 		}
 
 	}

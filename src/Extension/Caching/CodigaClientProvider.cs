@@ -57,10 +57,17 @@ namespace Extension.Caching
 			{
 				if (_client == null)
 				{
-					var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
-					_client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
+					try
+					{
+						var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+						_client = new CodigaClient(settings.ApiToken, settings.Fingerprint);
 
-					CodigaOptions.Saved += CodigaOptions_Saved;
+						CodigaOptions.Saved += CodigaOptions_Saved;
+					}
+					catch(Exception e)
+					{
+						ExtensionLogger.LogException(e);
+					}
 				}
 
 				return _client;

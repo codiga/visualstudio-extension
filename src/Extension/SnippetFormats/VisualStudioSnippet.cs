@@ -1,6 +1,7 @@
 ﻿using MSXML;
 using Newtonsoft.Json.Linq;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Linq;
@@ -224,6 +225,13 @@ namespace Extension.SnippetFormats
 
 		[XmlElement(ElementName = "Code")]
 		public Code Code { get; set; }
+
+		public Snippet()
+		{
+			Declarations = new List<Literal>();
+			References = new List<Reference>();
+			Code = new Code();
+		}
 	}
 
 	[XmlRoot(ElementName = "CodeSnippet")]
@@ -237,5 +245,19 @@ namespace Extension.SnippetFormats
 
 		[XmlAttribute(AttributeName = "Format")]
 		public string Format { get; set; }
+
+		public CodeSnippet()
+		{
+			Header = new Header();
+			Snippet = new Snippet();
+			Format = "1.0.0";
+		}
+
+		public CodeSnippet(Header header, Snippet snippet, string format)
+		{
+			Header = header;
+			Snippet = snippet;
+			Format = format;	
+		}
 	}
 }

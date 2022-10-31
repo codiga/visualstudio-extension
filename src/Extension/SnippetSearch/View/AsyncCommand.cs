@@ -12,8 +12,6 @@ namespace Extension.SearchWindow.View
 		private readonly Func<object, Task> _action;
 		private readonly Predicate<object> _canExecute;
 
-		public SnippetSearchViewModel ViewModel { get; set; }
-
 		public event EventHandler CanExecuteChanged
 		{
 			add { CommandManager.RequerySuggested += value; }

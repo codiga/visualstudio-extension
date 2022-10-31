@@ -18,23 +18,39 @@ namespace Extension.Logging
 
 		static ExtensionLogger()
 		{
-			var config = new RollbarInfrastructureConfig("f3faf24332054e00a2612c40a44f408d");
+			var environment = "production";
+
+#if DEBUG
+			environment = "development";
+#endif
+
+			var config = new RollbarInfrastructureConfig("f3faf24332054e00a2612c40a44f408d", environment);
+
+#if DEBUG
+			config.RollbarLoggerConfig.RollbarDeveloperOptions.RethrowExceptionsAfterReporting = true;
+#endif
+
 			config.RollbarLoggerConfig.RollbarPayloadAdditionOptions.CodeVersion = GetExtensionVersion().ToString();
 			RollbarInfrastructure.Instance.Init(config);
 		}
 
 		public static ILogger LogException(Exception exception)
 		{
-			var version = GetExtensionVersion();
 			var parameters = new Dictionary<string, object>()
 			{
-				{"Version", version }
+				{"Source", exception.Source }
 			};
 
 			var logger = RollbarLocator.RollbarInstance.Error(exception, parameters);
 
 			LogActivityError(exception);
 
+			return logger;
+		}
+
+		public static ILogger LogWarning(string message)
+		{
+			var logger = RollbarLocator.RollbarInstance.Warning(message);
 			return logger;
 		}
 

@@ -33,7 +33,7 @@ Find snippets using an internal search engine using `CTRL` + `1` , `C` and searc
 
 ## Supported Languages
 
-C, C++, CSS, HTML, Java, Javascript, Typescript, Python, Dart, Ruby, PHP, Scala, Apex, Terraform, Docker, Go, Rust, Shell, Solidity, YAML.
+C#, C, C++, CSS, HTML, Java, Javascript, Typescript, Python, Dart, Ruby, PHP, Scala, Apex, Terraform, Docker, Go, Rust, Shell, Solidity, YAML.
 
 ## Getting API keys from Codiga
 

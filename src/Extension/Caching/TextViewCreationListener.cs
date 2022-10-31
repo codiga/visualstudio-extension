@@ -2,6 +2,7 @@
 using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -9,31 +10,49 @@ using Microsoft.VisualStudio.Utilities;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
 
 namespace Extension.Caching
 {
-	[Export(typeof(IVsTextViewCreationListener))]
-	[Name("text view creation listener")]
+	/// <summary>
+	/// Starts polling session on opened editors.
+	/// </summary>
+	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("text")]
-	[TextViewRole(PredefinedTextViewRoles.Editable)]
-	public class TextViewCreationListener : IVsTextViewCreationListener
+	[TextViewRole(PredefinedTextViewRoles.Document)]
+	internal sealed class TextViewCreationListener : IWpfTextViewCreationListener
 	{
 		[Import]
-		internal IVsEditorAdaptersFactoryService AdapterService = null;
+		internal IVsEditorAdaptersFactoryService AdapterService;
 
 		[Import]
 		internal SnippetCache Cache;
 
-		public void VsTextViewCreated(IVsTextView textViewAdapter)
+		/// <summary>
+		/// Called when a text view having matching roles is created over a text data model having a matching content type.
+		/// Instantiates a TextAdornment1 manager when the textView is created.
+		/// </summary>
+		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
+		public void TextViewCreated(IWpfTextView textView)
 		{
+			if (textView == null)
+				return;
+
+			DocumentView doc;
 			try
 			{
-				var textView = AdapterService.GetWpfTextView(textViewAdapter);
-				if (textView == null)
-					return;
-				var path = textView.ToDocumentView().Document.FilePath;
-				var ext = Path.GetExtension(path);
+				doc = textView.ToDocumentView();
+			}
+			catch
+			{
+				doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
+				{
+					return await VS.Documents.GetActiveDocumentViewAsync();
+				});
+			}
+
+			try
+			{
+				var ext = Path.GetExtension(doc.FilePath);
 				var codigaLanguage = LanguageUtils.Parse(ext);
 
 				if (codigaLanguage == LanguageUtils.LanguageEnumeration.Unknown)
@@ -50,6 +69,23 @@ namespace Extension.Caching
 			}
 		}
 
+		private void TextView_Closed(object sender, System.EventArgs e)
+		{
+			var textView = (ITextView)sender;
+			var type = textView.TextBuffer.ContentType;
+
+			var doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				return await VS.Documents.GetActiveDocumentViewAsync();
+			});
+
+			var ext = Path.GetExtension(doc.FilePath);
+			var codigaLanguage = LanguageUtils.Parse(ext);
+			Cache.StopPolling(codigaLanguage);
+			textView.TextBuffer.Changed -= TextBuffer_Changed;
+			textView.Closed -= TextView_Closed;
+		}
+
 		private void TextBuffer_Changed(object sender, TextContentChangedEventArgs e)
 		{
 			var buffer = (ITextBuffer)sender;
@@ -57,18 +93,6 @@ namespace Extension.Caching
 			var ext = Path.GetExtension(path);
 			var codigaLanguage = LanguageUtils.Parse(ext);
 			Cache.ReportActivity(codigaLanguage);
-		}
-
-		private void TextView_Closed(object sender, System.EventArgs e)
-		{
-			var textView = (ITextView)sender;
-			var type = textView.TextBuffer.ContentType;
-			var path = VS.Documents.GetActiveDocumentViewAsync().GetAwaiter().GetResult().FilePath;
-			var ext = Path.GetExtension(path);
-			var codigaLanguage = LanguageUtils.Parse(ext);
-			Cache.StopPolling(codigaLanguage);
-			textView.TextBuffer.Changed -= TextBuffer_Changed;
-			textView.Closed -= TextView_Closed;
 		}
 	}
 }

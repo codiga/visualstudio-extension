@@ -1,4 +1,5 @@
 ﻿using Extension.Caching;
+using Extension.Logging;
 using GraphQLClient;
 using Microsoft.VisualStudio.Shell;
 using System.Linq;
@@ -21,13 +22,20 @@ namespace Extension.Settings
 		
 		public void Initialize()
 		{
-			var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
+			try
+			{
+				var settings = EditorSettingsProvider.GetCurrentCodigaSettings();
 
-			cbUseCodingAssistant.IsChecked = settings.UseCodingAssistant;
-			cbUseInlineCompletion.IsChecked = settings.UseInlineCompletion;
-			txtToken.Text = settings.ApiToken;
+				cbUseCodingAssistant.IsChecked = settings.UseCodingAssistant;
+				cbUseInlineCompletion.IsChecked = settings.UseInlineCompletion;
+				txtToken.Text = settings.ApiToken;
 
-			CodigaOptions.Instance.Save();
+				CodigaOptions.Instance.Save();
+			}
+			catch (System.Exception e)
+			{
+				ExtensionLogger.LogException(e);
+			}
 		}
 
 		private void UseCodingAssistant_Checked(object sender, System.Windows.RoutedEventArgs e)

@@ -227,7 +227,12 @@ namespace Extension.InlineCompletion
 			var textViewLines = _view.TextViewLines.GetTextViewLinesIntersectingSpan(lineSpan);
 
 			if (!textViewLines.Any())
+			{
+				if(_view.TextViewLines.Any())
+					return _view.TextViewLines.First();
+
 				throw new ArgumentOutOfRangeException(nameof(_triggeringLine), "Cannot map tracking span to a valid view line");
+			}
 
 			return textViewLines.First();
 		}

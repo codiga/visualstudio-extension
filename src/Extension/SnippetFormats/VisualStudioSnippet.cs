@@ -1,4 +1,5 @@
-﻿using MSXML;
+﻿using Microsoft.VisualStudio.Shell.Interop;
+using MSXML;
 using Newtonsoft.Json.Linq;
 using System;
 using System.CodeDom;
@@ -147,6 +148,16 @@ namespace Extension.SnippetFormats
 		/// </summary>
 		[XmlElement(ElementName = "Assembly")]
 		public string Assembly { get; set; }
+
+		public Reference()
+		{
+
+		}
+
+		public Reference(string assembly)
+		{
+			Assembly = assembly;
+		}
 	}
 
 	[XmlRoot(ElementName = "Code")]

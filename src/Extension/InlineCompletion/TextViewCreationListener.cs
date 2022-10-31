@@ -69,6 +69,9 @@ namespace Extension.InlineCompletion
 				});
 			}
 
+			if (doc == null)
+				return;
+
 			try
 			{
 				var ext = Path.GetExtension(doc.FilePath);

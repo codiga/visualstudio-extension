@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -322,6 +323,24 @@ namespace Tests
 
 			// assert
 			Assert.That(preview, Is.EqualTo("MessageBox.Show(\"first\");     MessageBox.Show(\"second\");"));
+		}
+
+		[Test]
+		[TestCase("using System;", ExpectedResult = "System.dll")]
+		[TestCase("using System.Collections.Generic;", ExpectedResult = "System.Collections.Generic.dll")]
+		[TestCase("using NUnit.Framework;", ExpectedResult = "NUnit.Framework.dll")]
+		public string GetClrReference_should_parse_to_assembly_name(string usingStatement)
+		{
+			// arrange
+			var collection = new ReadOnlyCollection<string>(new[] { usingStatement });
+
+			// act
+			var references = SnippetParser.GetClrReference(collection);
+
+			// assert
+			Assert.That(references.Count, Is.EqualTo(1));
+
+			return references.Single().Assembly;
 		}
 
 		private static class SnippetTestData

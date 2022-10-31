@@ -66,10 +66,7 @@ namespace Extension.SnippetFormats
 						IsPrivate = !codigaSnippet.IsPublic ?? true,
 						IsSubscribed = codigaSnippet.IsSubscribed ?? false,
 					},
-					Snippet = new Snippet
-					{
-						Declarations = new List<Literal>()
-					}
+					Snippet = new Snippet()
 				}
 			};
 
@@ -201,13 +198,22 @@ namespace Extension.SnippetFormats
 			return sb.ToString();
 		}
 
-		//internal static List<Reference> GetReference(IReadOnlyCollection<string> codigaImport)
-		//{
-		//	foreach (var import in codigaImport)
-		//	{
-		//		yield return new Reference()
-		//	}
-		//}
+		/// <summary>
+		/// Parses the incoming "using" statement into a assembly name to be used in the Visual Studio Snippet. 
+		/// See https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference?view=vs-2022#assembly-element
+		/// </summary>
+		/// <param name="codigaImport"></param>
+		/// <returns></returns>
+		internal static IEnumerable<Reference> GetClrReference(IReadOnlyCollection<string> codigaImport)
+		{
+			foreach (var import in codigaImport)
+			{
+				var sb = new StringBuilder(import);
+				sb.Replace("using ","");
+				sb.Replace(";", ".dll");
+				yield return new Reference(sb.ToString());
+			}
+		}
 
 		/// <summary>
 		/// Represents the Codiga user variables that allow user defined placeholders

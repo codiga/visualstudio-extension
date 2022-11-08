@@ -1,0 +1,9 @@
+query GetRulesetsLastUpdatedTimestamp(
+	$names: [String!]!, 
+	$fingerprint: String
+){
+	ruleSetsLastUpdatedTimestamp(
+		names: $names, 
+		fingerprint: $fingerprint
+	)
+}

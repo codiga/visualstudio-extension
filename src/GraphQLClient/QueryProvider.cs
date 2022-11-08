@@ -14,14 +14,20 @@ namespace GraphQLClient
 		private const string RecordRecipeUseMutationFile = Namespace + "RecordRecipeUse.graphql";
 		private const string SemanticQueryFile = Namespace + "GetRecipesForClientSemantic.graphql";
 		private const string GetUserQueryFile = Namespace + "GetUser.graphql";
+		private const string GetRulesetsForClientQueryFile = Namespace + "GetRulesetsForClient.graphql";
+		private const string GetRulesetsLastUpdatedTimestampQueryFile = Namespace + "GetRulesetsLastUpdatedTimestamp.graphql";
 
-		public static string ShortcutQuery { get; }
+
+    public static string ShortcutQuery { get; }
 		public static string ShortcutLastTimestampQuery { get; }
 		public static string SemanticQuery { get; }
 		public static string RecordRecipeUseMutation { get; }
 		public static string GetUserQuery { get; }
+    public static string GetRulesetsForClientQuery { get; }
+    public static string GetRulesetsLastUpdatedTimestampQuery { get; }
 
-		static QueryProvider()
+
+    static QueryProvider()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
 
@@ -54,6 +60,18 @@ namespace GraphQLClient
 				using StreamReader reader = new StreamReader(stream);
 				GetUserQuery = reader.ReadToEnd();
 			}
-		}
+
+      using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsForClientQueryFile))
+      {
+        using StreamReader reader = new StreamReader(stream);
+        GetRulesetsForClientQuery = reader.ReadToEnd();
+      }
+
+      using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsLastUpdatedTimestampQueryFile))
+      {
+        using StreamReader reader = new StreamReader(stream);
+        GetRulesetsLastUpdatedTimestampQuery = reader.ReadToEnd();
+      }
+    }
 	}
 }

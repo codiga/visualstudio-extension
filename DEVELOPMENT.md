@@ -96,6 +96,8 @@ During the expansion session, we use [`IOleCommandTarget`](https://learn.microso
 
 >For more details look at the answer on [this thread](https://learn.microsoft.com/en-us/answers/questions/1018899/visual-studio-extensibility-addinginstalling-snipp.html).
 
+For a detailed explanation on the async completion API, there is a great GitHub issue at [microsoft/vs-editor-api#Async Completion API discussion](https://github.com/microsoft/vs-editor-api/issues/9).
+
 
  ## Inline completion
 The inline completion is triggered by starting a line comment on a new line.

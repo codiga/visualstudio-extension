@@ -37,7 +37,7 @@ namespace Extension.InlineCompletion
 		private int _totalSnippetCount = 0;
 		private SolidColorBrush _textBrush = new SolidColorBrush(Colors.DarkGreen);
 		private SolidColorBrush _textBackgroundBrush = new SolidColorBrush(Colors.DarkGray);
-		private FontFamily _fontFamliy = Fonts.SystemFontFamilies.First();
+		private FontFamily _fontFamily = Fonts.SystemFontFamilies.First();
 
 		public const string PreviewLayerName = "InlineCompletionLayer";
 
@@ -73,7 +73,7 @@ namespace Extension.InlineCompletion
 			{
 				_textBrush = new SolidColorBrush(_settings.CommentColor);
 				_textBackgroundBrush = new SolidColorBrush(_settings.TextBackgroundColor);
-				_fontFamliy = new FontFamily(_settings.FontFamily);
+				_fontFamily = new FontFamily(_settings.FontFamily);
 			}
 
 			_textBrush.Opacity = 0.7;
@@ -105,7 +105,7 @@ namespace Extension.InlineCompletion
 				Width = 600, 
 				Foreground = _textBrush,
 				Height = geometry.Bounds.Height,
-				FontFamily = _fontFamliy,
+				FontFamily = _fontFamily,
 				FontSize = triggeringLine.Baseline,
 				Text = $"[{_currentSnippetIndex}/{_totalSnippetCount}] [←]Previous [→]Next [Tab]Commit [ESC]Cancel"
 			};
@@ -177,7 +177,7 @@ namespace Extension.InlineCompletion
 			var content = _currentSnippetCode;
 			if (_currentSnippetCode == null)
 			{
-				content = "fetching snipppets...";
+				content = "fetching snippets...";
 			}
 			var loc = content.Split('\n').Length;
 
@@ -190,7 +190,7 @@ namespace Extension.InlineCompletion
 				FontStyle = FontStyles.Italic,
 				Focusable = false,
 				Background = _textBackgroundBrush,
-				FontFamily = _fontFamliy,
+				FontFamily = _fontFamily,
 				FontSize = triggeringLine.Baseline,
 				Height = height,
 				Text = content
@@ -221,7 +221,10 @@ namespace Extension.InlineCompletion
 			_layer.RemoveAllAdornments();
 		}
 
-		private ITextViewLine GetTriggeringLine()
+		/// <summary>
+		/// Finds the line on which the inline completion was triggered.
+		/// </summary>
+        private ITextViewLine GetTriggeringLine()
 		{
 			var lineSpan = _triggeringLine.GetSpan(_view.TextSnapshot);
 			var textViewLines = _view.TextViewLines.GetTextViewLinesIntersectingSpan(lineSpan);

@@ -39,7 +39,7 @@ namespace Extension.SnippetFormats
 		}
 
 		/// <summary>
-		/// A semantic search comment is comment line that constist of at least two keywords.
+		/// A semantic search comment is comment line that consists of at least two keywords.
 		/// </summary>
 		/// <param name="line"></param>
 		/// <returns></returns>

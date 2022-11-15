@@ -34,6 +34,15 @@ The experimental instance will have the extension automatically installed and up
 If you encounter an error dialog saying *A project with Output Type of Class Library cannot be started directly.*, make sure to set the Extension project as the startup project
 in the Solution settings. Here's an article to help you with that: https://ourcodeworld.com/articles/read/194/a-project-with-an-output-type-of-class-library-cannot-be-started-directly
 
+#### Resetting/cleaning the experimental instance
+
+If you are looking to change the default settings values, you will probably need to reset the VS experimental instance to see it taking effect.
+You can find details about it here:
+- [MSDN: CreateExpInstance utility](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/createexpinstance-utility?view=vs-2022)
+- [CodeProject: Resetting the Visual Studio Experimental Instance](https://www.codeproject.com/Tips/832362/Resetting-the-Visual-Studio-Experimental-Instance)
+
+Alternatively, you can just delete the mentioned directory.
+
 ### Test out the extension
 To see how the extension is working create or open a `.cs`-File and type `.` anywhere to bring up the shortcut completion window. The extension should also appear under *Extensions -> Manage Extensions -> Installed*.
 

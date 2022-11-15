@@ -38,12 +38,12 @@ namespace Extension.Settings
 	public class CodigaOptions : BaseOptionModel<CodigaOptions>
 	{
 		[Category("Codiga")]
-		[DefaultValue(true)]
-		public bool UseCodingAssistant { get; set; } = true;
+		[DefaultValue(false)]
+		public bool UseCodingAssistant { get; set; } = false;
 
 		[Category("Codiga")]
-		[DefaultValue(true)]
-		public bool UseInlineCompletion { get; set; } = true;
+		[DefaultValue(false)]
+		public bool UseInlineCompletion { get; set; } = false;
 
 		[Category("Codiga")]
 		[DefaultValue(true)]

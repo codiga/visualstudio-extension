@@ -166,6 +166,9 @@
     <PackageReference Include="Microsoft.VisualStudio.Language">
       <Version>17.3.198</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Language.Intellisense">
+      <Version>17.3.198</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Text.Data">
       <Version>17.3.198</Version>
     </PackageReference>

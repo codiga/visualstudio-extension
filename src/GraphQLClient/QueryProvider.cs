@@ -1,11 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
-using System.Text;
 
 namespace GraphQLClient
 {
+	/// <summary>
+	/// Stores and provides the GraphQL queries for all Codiga features.
+	/// <br/>
+	/// The queries are loaded upon instantiation of this class.
+	/// <br/>
+	/// For proper initialization of this class, when adding a new query, make sure that the .graphql
+	/// files are configured in the GraphQLClient.csproj file as well.
+	/// </summary>
 	public static class QueryProvider
 	{
 		private const string Namespace = "GraphQLClient.Queries.";
@@ -14,12 +19,16 @@ namespace GraphQLClient
 		private const string RecordRecipeUseMutationFile = Namespace + "RecordRecipeUse.graphql";
 		private const string SemanticQueryFile = Namespace + "GetRecipesForClientSemantic.graphql";
 		private const string GetUserQueryFile = Namespace + "GetUser.graphql";
+		private const string GetRulesetsForClientQueryFile = Namespace + "GetRulesetsForClient.graphql";
+		private const string GetRulesetsLastUpdatedTimestampQueryFile = Namespace + "GetRulesetsForClientLastTimestamp.graphql";
 
 		public static string ShortcutQuery { get; }
 		public static string ShortcutLastTimestampQuery { get; }
 		public static string SemanticQuery { get; }
 		public static string RecordRecipeUseMutation { get; }
 		public static string GetUserQuery { get; }
+		public static string GetRulesetsForClientQuery { get; }
+		public static string GetRulesetsLastUpdatedTimestampQuery { get; }
 
 		static QueryProvider()
 		{
@@ -53,6 +62,18 @@ namespace GraphQLClient
 			{
 				using StreamReader reader = new StreamReader(stream);
 				GetUserQuery = reader.ReadToEnd();
+			}
+			
+			using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsForClientQueryFile))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				GetRulesetsForClientQuery = reader.ReadToEnd();
+			}
+			
+			using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsLastUpdatedTimestampQueryFile))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				GetRulesetsLastUpdatedTimestampQuery = reader.ReadToEnd();
 			}
 		}
 	}

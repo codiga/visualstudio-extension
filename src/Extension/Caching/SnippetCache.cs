@@ -34,7 +34,7 @@ namespace Extension.Caching
 		private IDictionary<LanguageUtils.LanguageEnumeration, IReadOnlyCollection<CodigaSnippet>> _cachedSnippets;
 		private IDictionary<LanguageUtils.LanguageEnumeration, PollingSession> _currentPollingSessions;
 
-		public SnippetCache()
+        public SnippetCache()
 		{
 			_clientProvider = new DefaultCodigaClientProvider();
 			_cachedSnippets = new Dictionary<LanguageUtils.LanguageEnumeration, IReadOnlyCollection<CodigaSnippet>>();
@@ -43,18 +43,20 @@ namespace Extension.Caching
 
 		public SnippetCache(ICodigaClientProvider provider)
 		{
-			_clientProvider = provider;
+            _clientProvider = provider;
 			_cachedSnippets = new Dictionary<LanguageUtils.LanguageEnumeration, IReadOnlyCollection<CodigaSnippet>>();
 			_currentPollingSessions = new Dictionary<LanguageUtils.LanguageEnumeration, PollingSession>();
 		}
 
 		public bool StartPolling(LanguageUtils.LanguageEnumeration language)
 		{
+			//If there is no polling for the language or we don't support the file type in the editor, then no new polling is started 
 			if (_currentPollingSessions.TryGetValue(language, out var session) || language == LanguageUtils.LanguageEnumeration.Unknown)
 			{
 				return false;
 			}
-
+			
+			//We initiate a new polling session for the language of the currently open file
 			var tokenSource = new CancellationTokenSource();
 			session = new PollingSession
 			{
@@ -121,17 +123,19 @@ namespace Extension.Caching
 		{
 			while (true)
 			{
+				//If there is no polling session available for the language of the open file,
+				//or if there is no CodigaClient available, we can't do any polling.
 				if (!_currentPollingSessions.TryGetValue(language, out var session))
 					return;
 
 				if(!_clientProvider.TryGetClient(out var client))
 					return;
 
-				long ts;
-
+				//Retrieve the last timestamp for the shortcuts of the given language from the server to see if there was any change
+				long timestampFromServer;
 				try
 				{
-					ts = await client.GetRecipesForClientByShortcutLastTimestampAsync(language.GetName());
+					timestampFromServer = await client.GetRecipesForClientByShortcutLastTimestampAsync(language.GetName());
 				}
 				catch (CodigaAPIException e)
 				{
@@ -139,26 +143,27 @@ namespace Extension.Caching
 					return;
 				}
 
-				var lastTs = session.LastTimeStamp;
-				if (lastTs == null || ts > lastTs)
+				//If there was a change on the server (based on the timestamp), we can get and cache the shortcuts themselves
+				var lastTimestamp = session.LastTimeStamp;
+				if (lastTimestamp == null || timestampFromServer > lastTimestamp)
 				{
 					try
 					{
 						var snippets = await client.GetRecipesForClientByShortcutAsync(language.GetName());
 						_cachedSnippets[language] = snippets;
-						session.LastTimeStamp = ts;
+						session.LastTimeStamp = timestampFromServer;
 					}
 					catch (CodigaAPIException e)
 					{
 						ExtensionLogger.LogException(e);
 						return;
 					}
-					
 				}
-				session.LastTimeStamp ??= ts;
+				session.LastTimeStamp ??= timestampFromServer;
 
+				//Wait for 'PollIntervalInSeconds' before starting a new round of polling.
+				//The combination of 'while(true)' and 'Task.Delay()' forms the periodic polling of shortcuts.
 				var task = Task.Delay(TimeSpan.FromSeconds(PollIntervalInSeconds), cancellationToken);
-
 				try
 				{
 					await task;

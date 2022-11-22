@@ -70,10 +70,6 @@
     <Compile Include="Rosie\RosieClientProvider.cs" />
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />
-    <Compile Include="Rosie\Annotation\ApplyRosieFixSuggestedAction.cs" />
-    <Compile Include="Rosie\Annotation\DisableRosieAnalysisSuggestedAction.cs" />
-    <Compile Include="Rosie\Annotation\OpenOnCodigaHubSuggestedAction.cs" />
-    <Compile Include="Rosie\Annotation\RosieHighlightActionsSourceProvider.cs" />
     <Compile Include="Rosie\Model\RosieAnnotation.cs" />
     <Compile Include="Rosie\Model\RosieAnnotationJetBrains.cs" />
     <Compile Include="Rosie\Model\RosiePosition.cs" />
@@ -86,10 +82,8 @@
     <Compile Include="Rosie\Model\RosieViolationFixEdit.cs" />
     <Compile Include="Rosie\IRosieClient.cs" />
     <Compile Include="Rosie\RosieClient.cs" />
-    <Compile Include="Rosie\RosieEditTypes.cs" />
     <Compile Include="Rosie\RosieRulesCache.cs" />
     <Compile Include="Rosie\RosieRulesCacheValue.cs" />
-    <Compile Include="Rosie\RosieSeverities.cs" />
     <Compile Include="Rosie\RosieUtils.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifier.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifierFormat.cs" />

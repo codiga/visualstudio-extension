@@ -96,9 +96,9 @@ namespace Extension.Rosie
         /// and on the server, and updates the cache when there is any update.
         /// </summary>
         /// <returns></returns>
-        private void StartPolling(CancellationTokenSource? cancellationTokenSource = null)
+        private void StartPolling()
         {
-            _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
+            _cancellationTokenSource = new CancellationTokenSource();
 
             //Retrieve the DTE object from which the Solution can be accessed
             ThreadHelper.ThrowIfNotOnUIThread();

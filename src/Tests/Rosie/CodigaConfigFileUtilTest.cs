@@ -169,6 +169,7 @@ rulesets:
         [TestCase("ru", ExpectedResult = false)]
         [TestCase("rul", ExpectedResult = false)]
         [TestCase("rule", ExpectedResult = false)]
+        [TestCase("rule-that-longer-than-thirty-two-", ExpectedResult = false)]
         //Valid cases
         [TestCase("5long", ExpectedResult = true)]
         [TestCase("123456789", ExpectedResult = true)]

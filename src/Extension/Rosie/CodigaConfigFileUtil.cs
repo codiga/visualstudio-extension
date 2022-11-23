@@ -20,7 +20,15 @@ namespace Extension.Rosie
         private static readonly IDeserializer ConfigDeserializer = new DeserializerBuilder()
             .WithNamingConvention(LowerCaseNamingConvention.Instance)
             .Build();
-        private static readonly Regex CodigaRulesetNamePattern = new Regex("^[a-z0-9][a-z0-9-]{4,}$");
+        /// <summary>
+        /// Combines the following validations for the ruleset name:
+        /// - it must be at least 5 characters long
+        /// - it must be at most 32 character long
+        /// - it must start with a lowercase letter or number, but not a dash
+        /// - it must consist of lowercase alphanumerical characters and dash
+        /// </summary>
+        /// <seealso cref="https://regexr.com/730qs"/>
+        private static readonly Regex CodigaRulesetNamePattern = new Regex("^[a-z0-9][a-z0-9-]{4,31}$");
         private const string CodigaConfigFileName = "codiga.yml";
 
         /// <summary>

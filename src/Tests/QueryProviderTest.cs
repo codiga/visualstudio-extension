@@ -15,6 +15,8 @@ namespace Tests
 			var recordAccessMutation = QueryProvider.RecordRecipeUseMutation;
 			var semanticQuery = QueryProvider.SemanticQuery;
 			var userQuery = QueryProvider.GetUserQuery;
+			var rulesetsQuery = QueryProvider.GetRulesetsForClientQuery;
+			var rulesetsTimestampQuery = QueryProvider.GetRulesetsLastUpdatedTimestampQuery;
 
 			// assert
 			Assert.NotNull(lastTimeStampQuery);
@@ -31,6 +33,12 @@ namespace Tests
 
 			Assert.NotNull(userQuery);
 			Assert.IsNotEmpty(userQuery);
+			
+			Assert.NotNull(rulesetsQuery);
+			Assert.IsNotEmpty(rulesetsQuery);
+			
+			Assert.NotNull(rulesetsTimestampQuery);
+			Assert.IsNotEmpty(rulesetsTimestampQuery);
 		}
 	}
 }

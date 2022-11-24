@@ -23,6 +23,9 @@
     <GraphQLConfig Include="queries\IgnoreViolation.graphql" />
     <GraphQLConfig Include="queries\RecordAccess.graphql" />
     <GraphQLConfig Include="queries\RecordRecipeUse.graphql" />
+    <GraphQLConfig Include="queries\RecordRecipeUse.graphql" />
+    <GraphQLConfig Include="queries\GetRulesetsForClient.graphql" />
+    <GraphQLConfig Include="queries\GetRulesetsForClientLastTimestamp.graphql" />
     <GraphQLConfig Include="queries\RemoveViolationToIgnore.graphql" />
   </ItemGroup>
 
@@ -43,11 +46,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AdditionalFiles Remove="queries\GetRulesetsForClient.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="queries\GetRulesetsForClientLastTimestamp.graphql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Queries\GetRecipesForClientByShortcut.graphql" />
     <None Remove="Queries\GetRecipesForClientByShortcutLastTimestamp.graphql" />
     <None Remove="Queries\GetRecipesForClientSemantic.graphql" />
     <None Remove="Queries\GetUser.graphql" />
     <None Remove="Queries\RecordRecipeUse.graphql" />
+    <None Remove="Queries\GetRulesetsForClient.graphql" />
+    <None Remove="Queries\GetRulesetsForClientLastTimestamp.graphql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,6 +69,8 @@
     <EmbeddedResource Include="Queries\GetRecipesForClientSemantic.graphql" />
     <EmbeddedResource Include="Queries\GetUser.graphql" />
     <EmbeddedResource Include="Queries\RecordRecipeUse.graphql" />
+    <EmbeddedResource Include="Queries\GetRulesetsForClient.graphql" />
+    <EmbeddedResource Include="Queries\GetRulesetsForClientLastTimestamp.graphql" />
   </ItemGroup>
 
 </Project>

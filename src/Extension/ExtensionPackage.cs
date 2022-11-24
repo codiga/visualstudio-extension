@@ -4,8 +4,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Extension.Rosie;
 using Task = System.Threading.Tasks.Task;
 using Extension.SnippetSearch;
+using Microsoft.VisualStudio.Shell.Events;
+using Microsoft.VisualStudio;
+using System.Threading.Tasks;
 
 namespace Extension
 {
@@ -16,21 +20,24 @@ namespace Extension
 	[Guid(ExtensionPackage.PackageGuidString)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	[ProvideOptionPage(typeof(Settings.CodigaOptionPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
-	public sealed class ExtensionPackage : AsyncPackage
+	//See https://github.com/madskristensen/SolutionLoadSample
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
+    public sealed class ExtensionPackage : AsyncPackage
 	{
 		/// <summary>
 		/// SnippetSearchPackage GUID string.
 		/// </summary>
 		public const string PackageGuidString = "e8d2d8f8-96dc-4c92-bb81-346b4d2318e4";
 
+		private CancellationToken _cancellationToken;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ExtensionPackage"/> class.
 		/// </summary>
 		public ExtensionPackage()
 		{
-
 		}
-
+		
 		#region Package Members
 
 		/// <summary>
@@ -42,14 +49,34 @@ namespace Extension
 		/// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			// When initialized asynchronously, the current thread may be a background thread at this point.
-			// Do any initialization that requires the UI thread after switching to the UI thread.
-			await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			_cancellationToken = cancellationToken;
+            var isSolutionLoaded = await IsSolutionLoadedAsync();
+
+            if (isSolutionLoaded)
+	            InitializeRulesCache();
+
+            //Inits the cache only after a solution is loaded completely 
+            SolutionEvents.OnAfterBackgroundSolutionLoadComplete += InitializeRulesCache;
+            SolutionEvents.OnAfterCloseSolution += DisposeRulesCache;
+
+            // When initialized asynchronously, the current thread may be a background thread at this point.
+            // Do any initialization that requires the UI thread after switching to the UI thread.
+            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			await SnippetSearchMenuCommand.InitializeAsync(this);
+        }
 
-		}
+		//See https://github.com/madskristensen/SolutionLoadSample
+        private async Task<bool> IsSolutionLoadedAsync()
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            var vsSolution = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
 
-		public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
+            ErrorHandler.ThrowOnFailure(vsSolution.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object value));
+
+            return value is bool isSolutionOpen && isSolutionOpen;
+        }
+        
+        public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
 		{
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (toolWindowType == typeof(SnippetSearch.SearchWindow).GUID)
@@ -69,6 +96,18 @@ namespace Extension
 
 			return base.GetToolWindowTitle(toolWindowType, id);
 		}
+
+		private async void InitializeRulesCache(object sender = null, EventArgs e = null)
+		{
+			//Switching back to main thread due to RosieRulesCache.StartPolling()
+			await JoinableTaskFactory.SwitchToMainThreadAsync(_cancellationToken);
+			RosieRulesCache.Initialize();
+		}
+
+		private static void DisposeRulesCache(object sender, EventArgs e)
+		{
+            RosieRulesCache.Dispose();
+        }
 
 		#endregion
 	}

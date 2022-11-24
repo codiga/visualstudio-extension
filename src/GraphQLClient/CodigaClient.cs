@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GraphQLClient.Model.Rosie;
 
 namespace GraphQLClient
 {
@@ -18,7 +19,7 @@ namespace GraphQLClient
 		public void SetApiToken(string apiToken);
 
 		/// <summary>
-		/// Get the logged user identfied by the configured API token.
+		/// Get the logged user identified by the configured API token.
 		/// </summary>
 		/// <returns></returns>
 		public Task<GraphQLResponse<GetUserResult>> GetUserAsync();
@@ -72,6 +73,22 @@ namespace GraphQLClient
 		/// <exception cref="CodigaAPIException"></exception>
 		/// <returns></returns>
 		public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords, IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate, bool onlySubscribed, int howMany, int skip);
+		
+		/// <summary>
+		/// Get ruleset information based on the ruleset names used in Codiga config file (codiga.yml).
+		/// </summary>
+		/// <param name="names">The ruleset names to send</param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns>The collection of rulesets.</returns>
+		public Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(IReadOnlyCollection<string> names);
+
+		/// <summary>
+		/// Get the most recent timestamp of the given rulesets in the Codiga config file (codiga.yml)
+		/// </summary>
+		/// <param name="names">The ruleset names to send</param>
+		/// <exception cref="CodigaAPIException"></exception>
+		/// <returns>The timestamp when the sent rulesets were last updated.</returns>
+		public Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names);
 	}
 
 	public class CodigaClient : ICodigaClient, IDisposable
@@ -196,6 +213,36 @@ namespace GraphQLClient
 
 			return result.Data.AssistantRecipesSemanticSearch;
 		}
+		
+		public async Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(IReadOnlyCollection<string> names)
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = Fingerprint;
+			variablesDict["names"] = names;
+
+			var request = new GraphQLHttpRequest(QueryProvider.GetRulesetsForClientQuery, variables);
+			var result = await _client.SendQueryAsync<GetRulesetsForClientResult>(request);
+
+			ThrowOnErrors(result);
+
+			return result.Data.RuleSetsForClient;
+		}
+
+		public async Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names)
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = Fingerprint;
+			variablesDict["names"] = names;
+
+			var request = new GraphQLHttpRequest(QueryProvider.GetRulesetsLastUpdatedTimestampQuery, variables);
+			var result = await _client.SendQueryAsync<GetRulesetsLastUpdatedTimestampResult>(request);
+
+			ThrowOnErrors(result);
+
+			return result.Data.RuleSetsLastUpdatedTimestamp;
+		}
 
 		public void Dispose()
 		{
@@ -225,14 +272,11 @@ namespace GraphQLClient
 	{
 		public CodigaAPIException()
 		{
-			
 		}
 
 		public CodigaAPIException(string message) : base(message)
-		{ 
-
+		{
 		}
-		
 	}
 
 	public class GetUserResult
@@ -253,6 +297,16 @@ namespace GraphQLClient
 	internal class GetRecipesByShortcutLastTimestampResult
 	{
 		public long GetRecipesForClientByShortcutLastTimestamp { get; set; }
+	}
+	
+	internal class GetRulesetsForClientResult
+	{
+		public IReadOnlyCollection<RuleSetsForClient>? RuleSetsForClient { get; set; }
+	}
+
+	internal class GetRulesetsLastUpdatedTimestampResult
+	{
+		public long RuleSetsLastUpdatedTimestamp { get; set; }
 	}
 
 	internal class RecordRecipeUseMutationResult

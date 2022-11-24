@@ -96,6 +96,7 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Javascript:
 				case LanguageEnumeration.Typescript:
 				case LanguageEnumeration.C:
+				case LanguageEnumeration.Csharp:
 				case LanguageEnumeration.Apex:
 				case LanguageEnumeration.Cpp:
 				case LanguageEnumeration.Scala:

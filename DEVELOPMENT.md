@@ -56,6 +56,7 @@ Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual 
 * `Caching` - everything related to Snippet caching
 * `InlineCompletion` - support for inline snippet completion
 * `Logging` - Helper classes for Rollbar logging
+* `Rosie` - Static code analysis and its lightbulb actions
 * `Settings` - Handling current VS setting including the Codiga settings dialog
 * `SnippetFormats` - The different snippet models and the parsing
 * `SnippetSearch` - The menu entry and the tool window for the snippet search
@@ -99,7 +100,7 @@ During the expansion session, we use [`IOleCommandTarget`](https://learn.microso
 For a detailed explanation on the async completion API, there is a great GitHub issue at [microsoft/vs-editor-api#Async Completion API discussion](https://github.com/microsoft/vs-editor-api/issues/9).
 
 
- ## Inline completion
+## Inline completion
 The inline completion is triggered by starting a line comment on a new line.
 ### Triggering
 To be able to trigger the inline completion we make use of another `IOleCommandTarget` in [`InlineCompletion/InlineCompletionClient.cs`](src/Extension/InlineCompletion/InlineCompletionClient.cs). Where we check if a session should be started based on the typed text of the current line.
@@ -124,6 +125,106 @@ To be able to bring up the tool window via the menu, two parts are needed:
 1. Define the menu item command in a [VS command table](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/visual-studio-command-table-dot-vsct-files?view=vs-2022) ([`SnippetSearchPackage.vsct`](src/Extension/SnippetSearch/SnippetSearchPackage.vsct))
 2. Implement the command that gets fired when clicking the menu item (done in [`SearchWindowMenuCommand.cs`](/src/Extension/SnippetSearch/SearchWindowMenuCommand.cs))
 
+## Rosie code analysis
+
+Rosie is the static code analysis tool and service of Codiga. Its implementation requirements are available
+at [Implementing an IDE plugin for analyzing custom rules](https://doc.codiga.io/docs/rosie/ide-specification/).
+
+### Rules cache
+
+In order to perform code analysis, users must have a `codiga.yml` file in their Solution's root directory,
+with at least one valid ruleset name. If there is no ruleset name, or no valid ruleset name defined, then code analysis
+will not be performed.
+
+[`CodigaConfigFileUtil`]() is responsible for finding this config file in the Solution root, and for parsing this config file into a
+[`CodigaCodeAnalysisConfig`]() containing the list of ruleset names.
+
+Here comes in [`RosieRulesCache`]() which provides a periodic background thread for polling the contents of this config file,
+and looking for rule changes on Codiga Hub, as well as the caches the received rules per language.
+
+The rules are retrieved via [`RosieClient`](), and this is where `RosieRulesCache` is initialized before sending the first
+request to the Rosie server. This way, it is initialized only when code analysis is actually needed.
+
+For response/request (de)serialization, you can find the model classes in the `Extension.Rosie.Model` namespace.
+
+### Tagging
+
+#### Tagging in general in Visual Studio extensions
+
+Tagging and lightbulb related classes are in the `Extension.Rosie.Annotation` namespace.
+
+Tagging text in Visual Studio extensions means that you can associate information and data to specified spans/ranges of text in an editor.
+This information can be user-visible or not, can hold arbitrary information or can provide error highlighting.
+
+To get a proper understanding of tagging, it is necessary to know a bit about the following editor related classes:
+
+| Class                                                                                                                              | Functionality                                                                                                                                                              |
+|------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`ITextView`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.editor.itextview?view=visualstudiosdk-2022) | It is a higher level view of a document being edited. This view may be associated with the editor itself, small code peek windows, or color highlighting on the scrollbar. |
+| [`ITextBuffer`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.itextbuffer?view=visualstudiosdk-2022)    | A lower level view of a document via which you can also perform certain types of edits on the document. An `ITextView` instance holds a reference to an `ITextBuffer`.     |
+
+The tagging functionality is provided by the VS platform via the following set of classes:
+
+| Class                 | Functionality                                                                                                                                                                                                                                                           |
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ITag`                | A type of marker to provide arbitrary information for a span of text.                                                                                                                                                                                                   |
+| `IErrorTag`           | An implementation of `ITag` that provides so-called squiggles for a span of text.<br/>You can configure the type of the squiggle, which can be a custom type defined by the extension developer, and the tooltip to show on mouse-hover of the associated span of text. | 
+| `ITagger`             | Provides the logic based on which `ITag` markers are created and associated with a span of text.                                                                                                                                                                        |
+| `IViewTaggerProvider` | Provides `ITagger` instances for an `ITextView`-`ITextBuffer` pair.                                                                                                                                                                                                     |
+| `ITagAggregator`      | Aggregates the list of tags of the specified `ITag` type from an editor.                                                                                                                                                                                                |
+
+**External resources:**
+- MSDN: [Highlighting text](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-highlighting-text?view=vs-2022&tabs=csharp)
+- Michael's Coding Spot: [Highlighting code in Editor](https://michaelscodingspot.com/visual-studio-2017-extension-development-tutorial-highlight-code-in-editor/)
+- Stackoverflow: [VSIX: IErrorTag tooltip content not displaying](https://stackoverflow.com/questions/64458987/vsix-ierrortag-tooltip-content-not-displaying/64497016#64497016)
+- MSDN forum: [How to get the ErrorTag ToolTipContent to work...](https://social.msdn.microsoft.com/Forums/sqlserver/en-US/157b3f6d-eadd-4693-b8f2-458f837b4394/mef-errortag-how-to-get-the-errortag-tooltipcontent-to-work-in-vs2010-extensibility-component?forum=vsx)
+
+#### Tagging in the Codiga extension
+
+The tagging logic is separated into two branches of classes to properly be able to provide Rosie violation and error squiggles related
+information. Their functionality is detailed in their code documentation.
+
+| Classification        | Rosie violations                                              | Squiggles                                                                       |
+|-----------------------|---------------------------------------------------------------|---------------------------------------------------------------------------------|
+|                       | Stores information about the violation returned from Rosie.   | Stores the color definition and tooltip of the violation to render it to users. |
+| `ITag`/`IErrorTag`    | [`RosieViolationTag`]()                                       | [`RosieViolationSquiggleTag`]()                                                 |
+| `ITagger`             | [`RosieViolationTagger`]()                                    | [`RosieViolationSquiggleTagger`]()                                              |
+| `IViewTaggerProvider` | [`RosieViolationTaggerProvider`]()                            | [`RosieViolationSquiggleTaggerProvider`]()                                      |
+
+#### Tagging flow on file open
+
+When a user opens a file, or a file is already open when a Solution is being opened, the following flow of actions are performed
+to have tagging in the editor, including the extension initialization steps:
+
+![Tagging flow initials](images\tagging-flow-initial.png)
+
+#### Tagging flow during document editing
+
+When a user makes a modification in a file (regardless of the file also being saved), the following event handling chain is performed,
+so that every affected component is notified that they should call an update on tagging and suggested actions:
+
+![Tagging flow during editing](images\tagging-flow-during-editing.png)
+
+The last step will trigger a call on `RosieViolationSquiggleTagger.GetTags()` and will perform the same tag generation and collection steps as on the flow diagram above.
+
+### Lightbulb actions
+
+Lightbulb actions are actions that are provided in a context of texts or language elements.
+They are available and created when there is at least one violation (a `RosieViolationTag`) available
+for a span of text in the editor. Lightbulb actions are provided by [`RosieHighlightActionsSourceProvider`]() and [`RosieHighlightActionsSource`]().
+
+MSDN documentation: [Displaying lightbulb suggestions](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-displaying-light-bulb-suggestions?view=vs-2022)
+
+There are three lightbulb actions (quick fixes) available for each violation:
+
+| Action                 | Behaviour                                                                                                            | Implementation classes                     | Availability                                                          |
+|------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------|-----------------------------------------------------------------------|
+| **Apply fix**          | It applies the fix, a series of code edits.                                                                          | [`ApplyRosieFixSuggestedAction`]()         | Available only when the violation returned from Rosie contains a fix. |
+| **Disable analysis**   | It adds the `codiga-disable` comment above the violation's line, thus tells Rosie to disable analysis for that line. | [`DisableRosieAnalysisSuggestedAction`]()  | Always available.                                                     |
+| **Open on Codiga Hub** | It opens the rule's page on Codiga Hub in a web browser.                                                             | [`OpenOnCodigaHubSuggestedAction`]()       | Always available.                                                     |
+
+<br>
+
 ## Settings
 The settings dialog is also divided into the settings model and the options dialog that shows up in the VS settings.
 The definition and registration of the Codiga settings are done in [`Settings/ExtensionOptions.cs`](src/Extension/Settings/ExtensionOptions.cs). These settings are stored in the Windows registry and can be accessed via a singleton instance `CodigaOptions.Instance`. The UI for the settings is defined in [`OptionsPage.xaml`](src/Extension/Settings/OptionsPage.xaml). For the simple settings dialog, the minimal logic is done in the [code-behind](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/code-behind-and-xaml-in-wpf?view=netframeworkdesktop-4.8) file [`OptionsPage.xaml.cs`](src/Extension/Settings/OptionsPage.xaml.cs).
@@ -131,19 +232,20 @@ The definition and registration of the Codiga settings are done in [`Settings/Ex
 # Frameworks/Packages
 List of used third-party frameworks and packages:
 
-| Library | Purpose|
-|-|-|
-| [NUnit](https://nunit.org/) | Unit test framework |
-| [Moq](https://github.com/Moq) | For mocking in unit tests |
-| [GraphQL .NET](https://github.com/graphql-dotnet/graphql-dotnet) | For consuming the Codiga API | 
+| Library                                                                                            | Purpose                                   |
+|----------------------------------------------------------------------------------------------------|-------------------------------------------|
+| [NUnit](https://nunit.org/)                                                                        | Unit test framework                       |
+| [Moq](https://github.com/Moq)                                                                      | For mocking in unit tests                 |
+| [GraphQL .NET](https://github.com/graphql-dotnet/graphql-dotnet)                                   | For consuming the Codiga API              | 
 | [Visual Studio Community Toolkit](https://github.com/VsixCommunity/Community.VisualStudio.Toolkit) | For easier development against the VS SDK |      
 
 # Testing
 Some general overview of features and edge cases beyond the defined extension main features that should be tested with Visual Studio:
-| Scenario | Expected|
-|-|-|
-| Drag a file tab out of the main VS window and create a new one | All extension features should work in both windows |
-| Changing the color theme under Tools -> Theme | The search window should adapt to the new theme. |
+
+| Scenario                                                                             | Expected                                                             |
+|--------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| Drag a file tab out of the main VS window and create a new one                       | All extension features should work in both windows                   |
+| Changing the color theme under Tools -> Theme                                        | The search window should adapt to the new theme.                     |
 | Changing the font settings under Tools -> Options -> Environment -> Fonts and Colors | Should also affect the inline completion and snippet search preview. |
 
 # Links/Help

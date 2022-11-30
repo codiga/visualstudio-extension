@@ -136,13 +136,13 @@ In order to perform code analysis, users must have a `codiga.yml` file in their 
 with at least one valid ruleset name. If there is no ruleset name, or no valid ruleset name defined, then code analysis
 will not be performed.
 
-[`CodigaConfigFileUtil`]() is responsible for finding this config file in the Solution root, and for parsing this config file into a
-[`CodigaCodeAnalysisConfig`]() containing the list of ruleset names.
+[`CodigaConfigFileUtil`](/src/Extension/Rosie/CodigaConfigFileUtil.cs) is responsible for finding this config file in the Solution root, and for parsing this config file into a
+[`CodigaCodeAnalysisConfig`](/src/Extension/Rosie/CodigaCodeAnalysisConfig.cs) containing the list of ruleset names.
 
-Here comes in [`RosieRulesCache`]() which provides a periodic background thread for polling the contents of this config file,
+Here comes in [`RosieRulesCache`](/src/Extension/Rosie/RosieRulesCache.cs) which provides a periodic background thread for polling the contents of this config file,
 and looking for rule changes on Codiga Hub, as well as the caches the received rules per language.
 
-The rules are retrieved via [`RosieClient`](), and this is where `RosieRulesCache` is initialized before sending the first
+The rules are retrieved via [`RosieClient`](/src/Extension/Rosie/RosieClient.cs), and this is where `RosieRulesCache` is initialized before sending the first
 request to the Rosie server. This way, it is initialized only when code analysis is actually needed.
 
 For response/request (de)serialization, you can find the model classes in the `Extension.Rosie.Model` namespace.
@@ -158,20 +158,20 @@ This information can be user-visible or not, can hold arbitrary information or c
 
 To get a proper understanding of tagging, it is necessary to know a bit about the following editor related classes:
 
-| Class                                                                                                                              | Functionality                                                                                                                                                              |
-|------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`ITextView`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.editor.itextview?view=visualstudiosdk-2022) | It is a higher level view of a document being edited. This view may be associated with the editor itself, small code peek windows, or color highlighting on the scrollbar. |
-| [`ITextBuffer`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.itextbuffer?view=visualstudiosdk-2022)    | A lower level view of a document via which you can also perform certain types of edits on the document. An `ITextView` instance holds a reference to an `ITextBuffer`.     |
+| Class                                                                                                    | Functionality                                                                                                                                                              |
+|----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`ITextView`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.editor.itextview) | It is a higher level view of a document being edited. This view may be associated with the editor itself, small code peek windows, or color highlighting on the scrollbar. |
+| [`ITextBuffer`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.itextbuffer)    | A lower level view of a document via which you can also perform certain types of edits on the document. An `ITextView` instance holds a reference to an `ITextBuffer`.     |
 
 The tagging functionality is provided by the VS platform via the following set of classes:
 
-| Class                 | Functionality                                                                                                                                                                                                                                                           |
-|-----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ITag`                | A type of marker to provide arbitrary information for a span of text.                                                                                                                                                                                                   |
-| `IErrorTag`           | An implementation of `ITag` that provides so-called squiggles for a span of text.<br/>You can configure the type of the squiggle, which can be a custom type defined by the extension developer, and the tooltip to show on mouse-hover of the associated span of text. | 
-| `ITagger`             | Provides the logic based on which `ITag` markers are created and associated with a span of text.                                                                                                                                                                        |
-| `IViewTaggerProvider` | Provides `ITagger` instances for an `ITextView`-`ITextBuffer` pair.                                                                                                                                                                                                     |
-| `ITagAggregator`      | Aggregates the list of tags of the specified `ITag` type from an editor.                                                                                                                                                                                                |
+| Class                                                                                                                         | Functionality                                                                                                                                                                                                                                                           |
+|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`ITag`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.tagging.itag)                               | A type of marker to provide arbitrary information for a span of text.                                                                                                                                                                                                   |
+| [`IErrorTag`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.tagging.ierrortag)                     | An implementation of `ITag` that provides so-called squiggles for a span of text.<br/>You can configure the type of the squiggle, which can be a custom type defined by the extension developer, and the tooltip to show on mouse-hover of the associated span of text. | 
+| [`ITagger`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.tagging.itagger-1)                       | Provides the logic based on which `ITag` markers are created and associated with a span of text.                                                                                                                                                                        |
+| [`IViewTaggerProvider`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.tagging.iviewtaggerprovider) | Provides `ITagger` instances for an `ITextView`-`ITextBuffer` pair.                                                                                                                                                                                                     |
+| [`ITagAggregator`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.text.tagging.itagaggregator-1)         | Aggregates the list of tags of the specified `ITag` type from an editor.                                                                                                                                                                                                |
 
 **External resources:**
 - MSDN: [Highlighting text](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-highlighting-text?view=vs-2022&tabs=csharp)
@@ -184,12 +184,12 @@ The tagging functionality is provided by the VS platform via the following set o
 The tagging logic is separated into two branches of classes to properly be able to provide Rosie violation and error squiggles related
 information. Their functionality is detailed in their code documentation.
 
-| Classification        | Rosie violations                                              | Squiggles                                                                       |
-|-----------------------|---------------------------------------------------------------|---------------------------------------------------------------------------------|
-|                       | Stores information about the violation returned from Rosie.   | Stores the color definition and tooltip of the violation to render it to users. |
-| `ITag`/`IErrorTag`    | [`RosieViolationTag`]()                                       | [`RosieViolationSquiggleTag`]()                                                 |
-| `ITagger`             | [`RosieViolationTagger`]()                                    | [`RosieViolationSquiggleTagger`]()                                              |
-| `IViewTaggerProvider` | [`RosieViolationTaggerProvider`]()                            | [`RosieViolationSquiggleTaggerProvider`]()                                      |
+| Classification        | Rosie violations                                                                                  | Squiggles                                                                                                         |
+|-----------------------|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+|                       | Stores information about the violation returned from Rosie.                                       | Stores the color definition and tooltip of the violation to render it to users.                                   |
+| `ITag`/`IErrorTag`    | [`RosieViolationTag`](/src/Extension/Rosie/Annotation/RosieViolationTag.cs)                       | [`RosieViolationSquiggleTag`](/src/Extension/Rosie/Annotation/RosieViolationSquiggleTag.cs)                       |
+| `ITagger`             | [`RosieViolationTagger`](/src/Extension/Rosie/Annotation/RosieViolationTagger.cs)                 | [`RosieViolationSquiggleTagger`](/src/Extension/Rosie/Annotation/RosieViolationSquiggleTagger.cs)                 |
+| `IViewTaggerProvider` | [`RosieViolationTaggerProvider`](/src/Extension/Rosie/Annotation/RosieViolationTaggerProvider.cs) | [`RosieViolationSquiggleTaggerProvider`](/src/Extension/Rosie/Annotation/RosieViolationSquiggleTaggerProvider.cs) |
 
 #### Tagging flow on file open
 
@@ -211,17 +211,17 @@ The last step will trigger a call on `RosieViolationSquiggleTagger.GetTags()` an
 
 Lightbulb actions are actions that are provided in a context of texts or language elements.
 They are available and created when there is at least one violation (a `RosieViolationTag`) available
-for a span of text in the editor. Lightbulb actions are provided by [`RosieHighlightActionsSourceProvider`]() and [`RosieHighlightActionsSource`]().
+for a span of text in the editor. Lightbulb actions are provided by [`RosieHighlightActionsSourceProvider`](/src/Extension/Rosie/Annotation/RosieHighlightActionsSourceProvider.cs) and [`RosieHighlightActionsSource`](/src/Extension/Rosie/Annotation/RosieHighlightActionsSource.cs).
 
 MSDN documentation: [Displaying lightbulb suggestions](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-displaying-light-bulb-suggestions?view=vs-2022)
 
 There are three lightbulb actions (quick fixes) available for each violation:
 
-| Action                 | Behaviour                                                                                                            | Implementation classes                     | Availability                                                          |
-|------------------------|----------------------------------------------------------------------------------------------------------------------|--------------------------------------------|-----------------------------------------------------------------------|
-| **Apply fix**          | It applies the fix, a series of code edits.                                                                          | [`ApplyRosieFixSuggestedAction`]()         | Available only when the violation returned from Rosie contains a fix. |
-| **Disable analysis**   | It adds the `codiga-disable` comment above the violation's line, thus tells Rosie to disable analysis for that line. | [`DisableRosieAnalysisSuggestedAction`]()  | Always available.                                                     |
-| **Open on Codiga Hub** | It opens the rule's page on Codiga Hub in a web browser.                                                             | [`OpenOnCodigaHubSuggestedAction`]()       | Always available.                                                     |
+| Action                 | Behaviour                                                                                                            | Implementation classes                                                                                          | Availability                                                          |
+|------------------------|----------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| **Apply fix**          | It applies the fix, a series of code edits.                                                                          | [`ApplyRosieFixSuggestedAction`](/src/Extension/Rosie/Annotation/ApplyRosieFixSuggestedAction.cs)               | Available only when the violation returned from Rosie contains a fix. |
+| **Disable analysis**   | It adds the `codiga-disable` comment above the violation's line, thus tells Rosie to disable analysis for that line. | [`DisableRosieAnalysisSuggestedAction`](/src/Extension/Rosie/Annotation/DisableRosieAnalysisSuggestedAction.cs) | Always available.                                                     |
+| **Open on Codiga Hub** | It opens the rule's page on Codiga Hub in a web browser.                                                             | [`OpenOnCodigaHubSuggestedAction`](/src/Extension/Rosie/Annotation/OpenOnCodigaHubSuggestedAction.cs)           | Always available.                                                     |
 
 <br>
 

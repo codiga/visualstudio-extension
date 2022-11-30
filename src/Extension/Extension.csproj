@@ -71,7 +71,6 @@
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />
     <Compile Include="Rosie\Model\RosieAnnotation.cs" />
-    <Compile Include="Rosie\Model\RosieAnnotationJetBrains.cs" />
     <Compile Include="Rosie\Model\RosiePosition.cs" />
     <Compile Include="Rosie\Model\RosieRequest.cs" />
     <Compile Include="Rosie\Model\RosieResponse.cs" />

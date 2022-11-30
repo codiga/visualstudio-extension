@@ -196,14 +196,14 @@ information. Their functionality is detailed in their code documentation.
 When a user opens a file, or a file is already open when a Solution is being opened, the following flow of actions are performed
 to have tagging in the editor, including the extension initialization steps:
 
-![Tagging flow initials](images\tagging-flow-initial.png)
+![Tagging flow initials](images/tagging-flow-initial.png)
 
 #### Tagging flow during document editing
 
 When a user makes a modification in a file (regardless of the file also being saved), the following event handling chain is performed,
 so that every affected component is notified that they should call an update on tagging and suggested actions:
 
-![Tagging flow during editing](images\tagging-flow-during-editing.png)
+![Tagging flow during editing](images/tagging-flow-during-editing.png)
 
 The last step will trigger a call on `RosieViolationSquiggleTagger.GetTags()` and will perform the same tag generation and collection steps as on the flow diagram above.
 

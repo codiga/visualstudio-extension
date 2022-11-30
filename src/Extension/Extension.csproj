@@ -169,9 +169,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Editor">
       <Version>17.3.198</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Imaging.Interop.14.0.DesignTime">
-      <Version>17.3.32803.143</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Language">
       <Version>17.3.198</Version>
     </PackageReference>

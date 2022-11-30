@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Extension.SnippetFormats
 {
@@ -49,10 +46,22 @@ namespace Extension.SnippetFormats
 		}
 
 		/// <summary>
-		/// Parses the given file extension to LanguageEnumeration
+		/// Parses the given file name's extension to LanguageEnumeration, or <see cref="LanguageEnumeration.Unknown"/>
+		/// if the file extension is not supported.
+		/// <br/>
+		/// This is a convenience method for <c>LanguageEnumeration.Parse(Path.GetExtension(fileName))</c>.
 		/// </summary>
-		/// <param name="extension"></param>
-		/// <returns></returns>
+		/// <param name="fileName">the file name whose extension is parsed</param>
+		public static LanguageEnumeration ParseFromFileName(string fileName)
+		{
+			return Parse(Path.GetExtension(fileName));
+		}
+
+		/// <summary>
+		/// Parses the given file extension to LanguageEnumeration, or <see cref="LanguageEnumeration.Unknown"/>
+		/// if the file extension is not supported.
+		/// </summary>
+		/// <param name="extension">the file extension</param>
 		public static LanguageEnumeration Parse(string extension)
 		{
 			return extension switch
@@ -108,8 +117,6 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Swift:
 				case LanguageEnumeration.Solidity:
 				case LanguageEnumeration.Rust:
-				
-				default:
 					return "//";
 
 				case LanguageEnumeration.Python:
@@ -127,6 +134,9 @@ namespace Extension.SnippetFormats
 
 				case LanguageEnumeration.Css:
 					return "/*";
+				
+				default:
+					return "//";
 			}
 		}
 	}

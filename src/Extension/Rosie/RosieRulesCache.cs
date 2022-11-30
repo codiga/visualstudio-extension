@@ -23,7 +23,7 @@ namespace Extension.Rosie
     /// </summary>
     public class RosieRulesCache
     {
-        private const int PollIntervalInSeconds = 10;
+        private const int PollIntervalInMillis = 10000;
         private readonly IReadOnlyList<RosieRule> NoRule = new List<RosieRule>(); 
 
         private ICodigaClientProvider _clientProvider;
@@ -57,6 +57,12 @@ namespace Extension.Rosie
         /// </summary>
         public IList<string> RulesetNames { get; set; }
 
+        /// <summary>
+        /// The cache is considered initialized with rules right after the response is received from <see cref="ICodigaClient.GetRulesetsForClientAsync"/>,
+        /// or when there is no <see cref="ICodigaClient"/> to use.
+        /// </summary>
+        public static bool IsInitializedWithRules;
+        
         public static RosieRulesCache? Instance { get; set; }
 
         private Solution? _solution;
@@ -114,19 +120,23 @@ namespace Extension.Rosie
             {
                 switch (HandleCacheUpdate())
                 {
-                    case UpdateResult.NoConfigFile:
-                        continue;
                     case UpdateResult.NoCodigaClient:
+                    {
+                        IsInitializedWithRules = true;
                         return;
+                    }
+                    
+                    //If there is no config file, or there is one, and the rule update was successful,
+                    //Wait for 'PollIntervalInSeconds' before starting a new round of polling. 
+                    case UpdateResult.NoConfigFile:
                     case UpdateResult.Success:
                     default:
                     {
-                        //Wait for 'PollIntervalInSeconds' before starting a new round of polling.
                         //The combination of 'while(true)' and 'Task.Delay()' forms the periodic polling of rulesets.
-                        var task = Task.Delay(TimeSpan.FromSeconds(PollIntervalInSeconds), cancellationToken);
+                        var delay = Task.Delay(TimeSpan.FromMilliseconds(PollIntervalInMillis), cancellationToken);
                         try
                         {
-                            await task;
+                            await delay;
                         }
                         catch (TaskCanceledException)
                         {
@@ -157,6 +167,7 @@ namespace Extension.Rosie
                 ClearCache();
                 //Since the config file no longer exists, its last write time is reset too
                 _configFileLastWriteTime = DateTime.MinValue;
+                IsInitializedWithRules = true;
                 return UpdateResult.NoConfigFile;
             }
 
@@ -191,6 +202,7 @@ namespace Extension.Rosie
                 try
                 {
                     var rulesetsForClient = await client.GetRulesetsForClientAsync(rulesetNames);
+                    IsInitializedWithRules = true;
                     if (rulesetsForClient == null)
                         return;
 
@@ -254,7 +266,7 @@ namespace Extension.Rosie
         }
 
         /// <summary>
-        /// handles the case when the codiga.yml file is unchanged, but there might be change on the server.
+        /// Handles the case when the codiga.yml file is unchanged, but there might be change on the server.
         /// </summary>
         private async void UpdateCacheFromChangesOnServer(ICodigaClient client)
         {
@@ -265,6 +277,7 @@ namespace Extension.Rosie
             {
                 //Retrieve the last updated timestamp for the rulesets
                 var timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(RulesetNames.ToImmutableList());
+                IsInitializedWithRules = true;
                 //If there was a change on the server, we can get and cache the rulesets
                 if (_lastUpdatedTimeStamp != timestampFromServer)
                 {

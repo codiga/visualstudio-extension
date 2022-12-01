@@ -7,6 +7,9 @@ namespace Extension.Rosie.Model
     /// </summary>
     public class RosiePosition
     {
+        /// <summary>
+        /// The line returned from Codiga is 1-based, while the VS ITextBuffer is 0-based.
+        /// </summary>
         public int Line { get; set; }
         public int Col { get; set; }
 
@@ -14,24 +17,22 @@ namespace Extension.Rosie.Model
         /// Returns the position offset within the Document of the argument Editor.
         /// </summary>
         /// <param name="textBuffer">the editor in which the offset is calculated</param>
-        /// <returns></returns>
         public int GetOffset(ITextBuffer textBuffer)
         {
-            return textBuffer.CurrentSnapshot.GetLineFromLineNumber(Line - 1).Start.Position + AdjustColumnOffset(Col);
+            return textBuffer.CurrentSnapshot.GetLineFromLineNumber(AdjustOffset(Line)).Start.Position + AdjustOffset(Col);
         }
 
-         /// <summary>
-         /// Adjusts the column offset by -1 since the column index returned by Codiga is 1-based, while the IDE editor is 0-based.
-         ///
-         /// It doesn't adjust the offset if it is 0, so at the beginning of a line. 
-         /// </summary>
-         /// <param name="columnOffset">the offset to adjust</param>
-         /// <returns></returns>
-        private int AdjustColumnOffset(int columnOffset)
+        /// <summary>
+        /// Adjusts the column offset by -1 since the column index returned by Codiga is 1-based, while the IDE editor is 0-based.
+        /// <br/>
+        /// It doesn't adjust the offset if it is 0, so at the beginning of a line. 
+        /// </summary>
+        /// <param name="offset">the offset to adjust</param>
+        private int AdjustOffset(int offset)
         {
-            return columnOffset != 0 ? (columnOffset - 1) : columnOffset;
+            return offset != 0 ? offset - 1 : offset;
         }
-
+        
         public override bool Equals(object obj)
         {
             return obj is RosiePosition position &&

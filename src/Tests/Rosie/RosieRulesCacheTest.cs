@@ -392,7 +392,8 @@ rulesets:
 
         private void UpdateCodigaConfig(string rawConfig)
         {
-            InitCodigaConfig(rawConfig);
+            File.Delete(_codigaConfigFile);
+            File.WriteAllText(_codigaConfigFile, rawConfig);
         }
 
         #endregion
@@ -400,8 +401,8 @@ rulesets:
         [TearDown]
         public void TearDown()
         {
-            RosieRulesCache.Dispose();
             File.Delete(_codigaConfigFile);
+            RosieRulesCache.Dispose();
         }
 
         /// <summary>

@@ -20,11 +20,11 @@ namespace Tests.Rosie
     [TestFixture]
     internal class RosieRulesCacheTest
     {
-        private Mock<Solution> _solution;
-        private string _solutionDirPath;
-        private string _codigaConfigFile;
+        private Mock<Solution>? _solution;
+        private string? _solutionDirPath;
+        private string? _codigaConfigFile;
         private ICodigaClientProvider _clientProvider;
-        private RosieRulesCache _cache;
+        private RosieRulesCache? _cache;
 
         /// <summary>
         /// Initializes the test with a Solution directory with a mock Solution,
@@ -419,7 +419,7 @@ rulesets:
             Debug.WriteLine("Deleting Codiga config file.");
             File.Delete(_codigaConfigFile);
             if (!File.Exists(_codigaConfigFile))
-                Debug.WriteLine("Codiga config file is deleted successfully!");
+                Debug.WriteLine("Codiga config file is deleted before config update!");
             InitCodigaConfig(rawConfig);
         }
 
@@ -429,7 +429,17 @@ rulesets:
         public void TearDown()
         {
             File.Delete(_codigaConfigFile);
+            if (!File.Exists(_codigaConfigFile))
+                Debug.WriteLine("Codiga config file is deleted in teardown!");
+            
             RosieRulesCache.Dispose();
+            if (RosieRulesCache.Instance == null)
+                Debug.WriteLine("Successfully disposed RosieRulesCache!");
+            
+            _solution = null;
+            _solutionDirPath = null;
+            _codigaConfigFile = null;
+            _cache = null;
         }
 
         /// <summary>

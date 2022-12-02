@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
 using EnvDTE;
 using Extension.Caching;
+using Extension.Rosie.Annotation;
 using Extension.Rosie.Model;
 using Extension.SnippetFormats;
 using GraphQLClient;
@@ -23,6 +24,7 @@ namespace Extension.Rosie
     /// </summary>
     public class RosieRulesCache
     {
+        public const string CacheLastUpdatedTimeStampProp = "CacheLastUpdatedTimeStamp";
         private const int PollIntervalInMillis = 10000;
         private readonly IReadOnlyList<RosieRule> NoRule = new List<RosieRule>(); 
 
@@ -41,16 +43,24 @@ namespace Extension.Rosie
         /// the cache key will probably have to be changed.
         /// </summary>
         private IDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue> _cachedRules;
-        
+
         /// <summary>
         /// The timestamp of the last update on the Codiga server for the rulesets cached (and configured in codiga.yml).
         /// </summary>
-        private long _lastUpdatedTimeStamp = -1L;
+        internal long RulesetslastUpdatedTimeStamp { get; set; } = -1L;
+
+        /// <summary>
+        /// The timestamp when this cache was last updated. It is not the same as <see cref="RulesetslastUpdatedTimeStamp"/>, and we need to
+        /// handle them separately, because we want to update tagging in non-active documents only when they get focus,
+        /// and they haven't been tagged for the latest changes in this cache.
+        /// </summary>
+        /// <see cref="RosieViolationTaggerProvider"/>
+        public long CacheLastUpdatedTimeStamp { get; set; } = -1L;
 
         /// <summary>
         /// DateTime.MinValue means the last write time of codiga.yml hasn't been set, or there is no codiga.yml file in the Solution root.
         /// </summary>
-        private DateTime _configFileLastWriteTime = DateTime.MinValue;
+        internal DateTime ConfigFileLastWriteTime { get; set; } = DateTime.MinValue;
 
         /// <summary>
         /// Ruleset names stored locally in the codiga.yml config file.
@@ -166,17 +176,17 @@ namespace Extension.Rosie
             {
                 ClearCache();
                 //Since the config file no longer exists, its last write time is reset too
-                _configFileLastWriteTime = DateTime.MinValue;
+                ConfigFileLastWriteTime = DateTime.MinValue;
                 IsInitializedWithRules = true;
                 return UpdateResult.NoConfigFile;
             }
 
             //If the Codiga config file has changed (its last write time doesn't match its previous write time)
-            if (_configFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
+            if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
                 UpdateCacheFromModifiedCodigaConfigFile(codigaConfigFile, client);
             else
                 UpdateCacheFromChangesOnServer(client);
-            
+
             return UpdateResult.Success;
         }
 
@@ -188,7 +198,7 @@ namespace Extension.Rosie
             if (codigaConfigFile == null)
                 return;
             
-            _configFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
+            ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
             var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.Rulesets;
             if (rulesetNames == null)
@@ -218,14 +228,19 @@ namespace Extension.Rosie
                     }
 
                     UpdateCacheFrom(rulesetsForClient);
+                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     /*
                       Updating the local timestamp only if it has changed, because it may happen that
                       codiga.yml was updated locally with a non-existent ruleset, or a ruleset that has an earlier timestamp
                       than the latest updated one, so the rulesets configured don't result in an updated timestamp from the server.
                     */
                     long timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(rulesetNames);
-                    if (timestampFromServer != _lastUpdatedTimeStamp)
-                        _lastUpdatedTimeStamp = timestampFromServer;
+                    if (timestampFromServer != RulesetslastUpdatedTimeStamp)
+                        RulesetslastUpdatedTimeStamp = timestampFromServer;
+
+                    //Only notify when not in testing mode
+                    if (_clientProvider is DefaultCodigaClientProvider)
+                        await NotifyActiveDocumentForTagUpdateAsync();
                 }
                 catch (CodigaAPIException)
                 {
@@ -246,7 +261,7 @@ namespace Extension.Rosie
         /// and wraps and stores them in <see cref="RosieRulesCacheValue"/>s.
         /// </summary>
         /// <param name="rulesetsFromCodigaApi">the rulesets information</param>
-        private void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
+        public void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
         {
             var rulesByLanguage = rulesetsFromCodigaApi
                 .Where(ruleset => ruleset.Rules != null)
@@ -279,19 +294,42 @@ namespace Extension.Rosie
                 var timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(RulesetNames.ToImmutableList());
                 IsInitializedWithRules = true;
                 //If there was a change on the server, we can get and cache the rulesets
-                if (_lastUpdatedTimeStamp != timestampFromServer)
+                if (RulesetslastUpdatedTimeStamp != timestampFromServer)
                 {
                     var rulesetsForClient = await client.GetRulesetsForClientAsync(RulesetNames.ToImmutableList());
                     if (rulesetsForClient == null)
                         return;
 
                     UpdateCacheFrom(rulesetsForClient);
-                    _lastUpdatedTimeStamp = timestampFromServer;
+                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    RulesetslastUpdatedTimeStamp = timestampFromServer;
+                    //Only notify when not in testing mode
+                    if (_clientProvider is DefaultCodigaClientProvider)
+                        await NotifyActiveDocumentForTagUpdateAsync();
                 }
             }
             catch (CodigaAPIException)
             {
                 //Do nothing
+            }
+        }
+        
+        /// <summary>
+        /// Gets the document that is currently active and focused, and if there is a <see cref="RosieViolationTagger"/>
+        /// associated with it, it notifies that tagger to send that document for code analysis, and update tagging.
+        /// </summary>
+        private async Task NotifyActiveDocumentForTagUpdateAsync()
+        {
+            var activeDocumentView = await VS.Documents.GetActiveDocumentViewAsync();
+            if (activeDocumentView?.TextView != null)
+            {
+                //If there is no tagger associated to the active view, we just don't do any update.
+                //This can be the case e.g. when the language of the active file is not supported.
+                if (activeDocumentView.TextView.Properties.ContainsProperty(typeof(RosieViolationTagger)))
+                {
+                    var tagger = activeDocumentView.TextView.Properties[typeof(RosieViolationTagger)] as RosieViolationTagger;
+                    tagger?.UpdateAnnotationsAndNotifyTagsChangedAsync(activeDocumentView.TextView);
+                }
             }
         }
 
@@ -340,7 +378,7 @@ namespace Extension.Rosie
                 _cachedRules.Clear();
             if (RulesetNames.Count > 0)
                 RulesetNames.Clear();
-            _lastUpdatedTimeStamp = -1L;
+            RulesetslastUpdatedTimeStamp = -1L;
         }
 
         /// <summary>

@@ -64,10 +64,11 @@ namespace Extension.Rosie
 
         public /*override*/ async Task<IList<RosieAnnotation>> GetAnnotations(ITextBuffer textBuffer)
         {
-            if (textBuffer.GetFileName() == null || !File.Exists(textBuffer.GetFileName()))
+            var fileName = textBuffer.GetFileName();
+            if (fileName == null || !File.Exists(fileName))
                 return NoAnnotation;
 
-            var language = LanguageUtils.ParseFromFileName(textBuffer.GetFileName());
+            var language = LanguageUtils.ParseFromFileName(fileName);
 
             if (!SupportedLanguages.Contains(language))
                 return NoAnnotation;
@@ -90,7 +91,7 @@ namespace Extension.Rosie
                 using (var httpClient = new HttpClient())
                 {
                     //Prepare the request and send it to the Rosie server
-                    var rosieRequest = new RosieRequest(Path.GetFileName(textBuffer.GetFileName()), RosieUtils.GetRosieLanguage(language),
+                    var rosieRequest = new RosieRequest(Path.GetFileName(fileName), RosieUtils.GetRosieLanguage(language),
                         "utf8",
                         codeBase64, rosieRules, true);
                     var userAgent = await GetUserAgentAsync();

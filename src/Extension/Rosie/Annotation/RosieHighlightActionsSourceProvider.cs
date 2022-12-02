@@ -4,11 +4,9 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Extension.Rosie.Model;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -74,8 +72,8 @@ namespace Extension.Rosie.Annotation
         }
 
         /// <summary>
-        /// Lightbulb actions are available only when the inspected <c>range</c> is not empty and
-        /// there is at least one <see cref="RosieViolationTag"/> present in that range.
+        /// Lightbulb actions are available only when there is at least one <see cref="RosieViolationTag"/> present
+        /// in the inspected range.
         /// </summary>
         public Task<bool> HasSuggestedActionsAsync(ISuggestedActionCategorySet requestedActionCategories,
             SnapshotSpan range, CancellationToken cancellationToken)
@@ -86,7 +84,7 @@ namespace Extension.Rosie.Annotation
         }
 
         /// <summary>
-        /// Collects the lightbulb actions for the given <c>range</c>.
+        /// Collects the lightbulb actions for the given <c>range</c>, where range can empty too.
         /// <br/>
         /// The tags for a given range are retrieved via <c>_violationTagAggregator</c>.
         /// <br/>
@@ -101,7 +99,7 @@ namespace Extension.Rosie.Annotation
             SnapshotSpan range,
             CancellationToken cancellationToken)
         {
-            if (range.IsEmpty || _isDisposed)
+            if (_isDisposed)
                 return Enumerable.Empty<SuggestedActionSet>();
 
             var violationsInRange = _violationTagAggregator.GetTags(range);
@@ -121,9 +119,8 @@ namespace Extension.Rosie.Annotation
             return new[]
             {
                 new SuggestedActionSet(null,
-                    suggestedActions.ToArray(),
-                    null,
-                    SuggestedActionSetPriority.Medium)
+                    suggestedActions,
+                    priority: SuggestedActionSetPriority.Medium)
             };
         }
 

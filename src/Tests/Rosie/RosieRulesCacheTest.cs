@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using EnvDTE;
 using Extension.Caching;
 using Extension.Rosie;
@@ -387,13 +388,15 @@ rulesets:
 
         private void InitCodigaConfig(string rawConfig)
         {
-            File.WriteAllText(_codigaConfigFile, rawConfig);
+            using var fs = File.Create(_codigaConfigFile);
+            var info = Encoding.UTF8.GetBytes(rawConfig);
+            fs.Write(info, 0, info.Length);
         }
 
         private void UpdateCodigaConfig(string rawConfig)
         {
             File.Delete(_codigaConfigFile);
-            File.WriteAllText(_codigaConfigFile, rawConfig);
+            InitCodigaConfig(rawConfig);
         }
 
         #endregion

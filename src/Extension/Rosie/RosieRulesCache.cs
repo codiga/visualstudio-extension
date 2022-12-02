@@ -128,7 +128,7 @@ namespace Extension.Rosie
         {
             while (true)
             {
-                switch (HandleCacheUpdate())
+                switch (await HandleCacheUpdate())
                 {
                     case UpdateResult.NoCodigaClient:
                     {
@@ -164,7 +164,7 @@ namespace Extension.Rosie
             NoCodigaClient, NoConfigFile, Success 
         }
 
-        public UpdateResult HandleCacheUpdate()
+        public async Task<UpdateResult> HandleCacheUpdate()
         {
             if (!_clientProvider.TryGetClient(out var client))
                 return UpdateResult.NoCodigaClient;
@@ -183,9 +183,9 @@ namespace Extension.Rosie
 
             //If the Codiga config file has changed (its last write time doesn't match its previous write time)
             if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
-                UpdateCacheFromModifiedCodigaConfigFile(codigaConfigFile, client);
+                await UpdateCacheFromModifiedCodigaConfigFile(codigaConfigFile, client);
             else
-                UpdateCacheFromChangesOnServer(client);
+                await UpdateCacheFromChangesOnServer(client);
 
             return UpdateResult.Success;
         }
@@ -193,7 +193,7 @@ namespace Extension.Rosie
         /// <summary>
         /// Handles when there was a change in the codiga.yml file.
         /// </summary>
-        private async void UpdateCacheFromModifiedCodigaConfigFile(string codigaConfigFile, ICodigaClient client)
+        private async Task UpdateCacheFromModifiedCodigaConfigFile(string codigaConfigFile, ICodigaClient client)
         {
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
@@ -257,7 +257,7 @@ namespace Extension.Rosie
         /// <summary>
         /// Handles the case when the codiga.yml file is unchanged, but there might be change on the server.
         /// </summary>
-        private async void UpdateCacheFromChangesOnServer(ICodigaClient client)
+        private async Task UpdateCacheFromChangesOnServer(ICodigaClient client)
         {
             if (RulesetNames.Count == 0)
                 return;

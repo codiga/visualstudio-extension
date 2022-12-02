@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using EnvDTE;
@@ -388,14 +389,22 @@ rulesets:
 
         private void InitCodigaConfig(string rawConfig)
         {
+            Debug.WriteLine("Initializing Codiga config file.");
             var info = Encoding.UTF8.GetBytes(rawConfig);
-            using var fs = File.Create(_codigaConfigFile, info.Length, FileOptions.RandomAccess);
-            fs.Write(info, 0, info.Length);
+            using (var fs = File.Create(_codigaConfigFile, info.Length, FileOptions.RandomAccess))
+            {
+                fs.Write(info, 0, info.Length);                
+            }
+            
+            Debug.WriteLine($"Content of Codiga config file is: {File.ReadAllText(_codigaConfigFile)}");
         }
 
         private void UpdateCodigaConfig(string rawConfig)
         {
+            Debug.WriteLine("Deleting Codiga config file.");
             File.Delete(_codigaConfigFile);
+            if (!File.Exists(_codigaConfigFile))
+                Debug.WriteLine("Codiga config file is deleted successfully!");
             InitCodigaConfig(rawConfig);
         }
 

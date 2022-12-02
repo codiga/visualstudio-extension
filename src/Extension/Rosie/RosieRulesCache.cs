@@ -26,7 +26,7 @@ namespace Extension.Rosie
     {
         public const string CacheLastUpdatedTimeStampProp = "CacheLastUpdatedTimeStamp";
         private const int PollIntervalInMillis = 10000;
-        private readonly IReadOnlyList<RosieRule> NoRule = new List<RosieRule>(); 
+        private static readonly IReadOnlyList<RosieRule> NoRule = new List<RosieRule>(); 
 
         private ICodigaClientProvider _clientProvider;
         private CancellationTokenSource _cancellationTokenSource;
@@ -85,7 +85,7 @@ namespace Extension.Rosie
         }
         
         //For testing
-        public RosieRulesCache(Solution solution, ICodigaClientProvider clientProvider)
+        private RosieRulesCache(Solution solution, ICodigaClientProvider clientProvider)
         {
             _solution = solution;
             _clientProvider = clientProvider;
@@ -172,7 +172,7 @@ namespace Extension.Rosie
             _solution ??= _dte.Solution;
             var codigaConfigFile = CodigaConfigFileUtil.FindCodigaConfigFile(_solution);
 
-            if (!File.Exists(codigaConfigFile))
+            if (codigaConfigFile == null || !File.Exists(codigaConfigFile))
             {
                 ClearCache();
                 //Since the config file no longer exists, its last write time is reset too
@@ -193,17 +193,18 @@ namespace Extension.Rosie
         /// <summary>
         /// Handles when there was a change in the codiga.yml file.
         /// </summary>
-        private async void UpdateCacheFromModifiedCodigaConfigFile(string? codigaConfigFile, ICodigaClient client)
+        private async void UpdateCacheFromModifiedCodigaConfigFile(string codigaConfigFile, ICodigaClient client)
         {
-            if (codigaConfigFile == null)
-                return;
-            
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
-            var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.Rulesets;
+            var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.GetRulesets();
+            //If the config file is not configured properly, we clear the cache
             if (rulesetNames == null)
+            {
+                ClearCache();
                 return;
-
+            }
+            
             RulesetNames = rulesetNames;
 
             //If there is at least on ruleset name, we can make a request with them
@@ -254,33 +255,6 @@ namespace Extension.Rosie
         }
 
         /// <summary>
-        /// Clears and repopulates this cache based on the argument rulesets' information returned
-        /// from the Codiga API.
-        /// <br/>
-        /// Groups the rules by their target languages, converts them to <c>RosieRule</c> objects,
-        /// and wraps and stores them in <see cref="RosieRulesCacheValue"/>s.
-        /// </summary>
-        /// <param name="rulesetsFromCodigaApi">the rulesets information</param>
-        public void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
-        {
-            var rulesByLanguage = rulesetsFromCodigaApi
-                .Where(ruleset => ruleset.Rules != null)
-                .SelectMany(ruleset => ruleset.Rules, (ruleset, rule) => new RuleWithNames(ruleset.Name, rule))
-                .GroupBy(ruleWithName => ruleWithName.RosieRule.Language)
-                .ToDictionary(entry =>
-                {
-                    Enum.TryParse<LanguageUtils.LanguageEnumeration>(entry.Key, out var language);
-                    return language;
-                }, entry => new RosieRulesCacheValue(entry.ToList()));
-
-            //Clearing and repopulating the cache is easier than picking out one by one
-            // the ones that remain, and the ones that have to be removed.
-            _cachedRules.Clear();
-            foreach (var keyValuePair in rulesByLanguage)
-                _cachedRules.Add(keyValuePair.Key, keyValuePair.Value);
-        }
-
-        /// <summary>
         /// Handles the case when the codiga.yml file is unchanged, but there might be change on the server.
         /// </summary>
         private async void UpdateCacheFromChangesOnServer(ICodigaClient client)
@@ -313,7 +287,34 @@ namespace Extension.Rosie
                 //Do nothing
             }
         }
-        
+
+        /// <summary>
+        /// Clears and repopulates this cache based on the argument rulesets' information returned
+        /// from the Codiga API.
+        /// <br/>
+        /// Groups the rules by their target languages, converts them to <c>RosieRule</c> objects,
+        /// and wraps and stores them in <see cref="RosieRulesCacheValue"/>s.
+        /// </summary>
+        /// <param name="rulesetsFromCodigaApi">the rulesets information</param>
+        public void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
+        {
+            var rulesByLanguage = rulesetsFromCodigaApi
+                .Where(ruleset => ruleset.Rules != null)
+                .SelectMany(ruleset => ruleset.Rules, (ruleset, rule) => new RuleWithNames(ruleset.Name, rule))
+                .GroupBy(ruleWithName => ruleWithName.RosieRule.Language)
+                .ToDictionary(entry =>
+                {
+                    Enum.TryParse<LanguageUtils.LanguageEnumeration>(entry.Key, out var language);
+                    return language;
+                }, entry => new RosieRulesCacheValue(entry.ToList()));
+
+            //Clearing and repopulating the cache is easier than picking out one by one
+            // the ones that remain, and the ones that have to be removed.
+            _cachedRules.Clear();
+            foreach (var keyValuePair in rulesByLanguage)
+                _cachedRules.Add(keyValuePair.Key, keyValuePair.Value);
+        }
+
         /// <summary>
         /// Gets the document that is currently active and focused, and if there is a <see cref="RosieViolationTagger"/>
         /// associated with it, it notifies that tagger to send that document for code analysis, and update tagging.
@@ -392,5 +393,10 @@ namespace Extension.Rosie
         }
 
         #endregion
+
+        public bool IsEmpty()
+        {
+            return _cachedRules.Count == 0;
+        }
     }
 }

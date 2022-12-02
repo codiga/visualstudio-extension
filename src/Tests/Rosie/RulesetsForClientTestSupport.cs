@@ -27,8 +27,19 @@ namespace Tests.Rosie
             "python_rule_3",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
             "Python");
+        
+        public static readonly Rule PythonRule4 = CreateAstRule(
+            30,
+            "python_rule_4",
+            "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==",
+        "Python");
+        public static readonly Rule PythonRule5 = CreateAstRule(
+            31,
+            "python_rule_5",
+            "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
+        "Python");
 
-        private static readonly Rule JavaRule1 = CreateAstRule(
+        public static readonly Rule JavaRule1 = CreateAstRule(
             20L,
             "java_rule_1",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGFkZEVycm9yKGJ1aWxkRXJyb3IobW9kZS5zdGFydC5saW5lLCBtb2RlLnN0YXJ0LmNvbCwgbW9kZS5lbmQubGluZSwgbW9kZS5lbmQuY29sLCAiZXJyb3IgbWVzc2FnZSIsICJDUklUSUNBTCIsICJzZWN1cml0eSIpKTsKICB9Cn0=",
@@ -48,15 +59,15 @@ namespace Tests.Rosie
             {
                 case "singleRulesetSingleLanguage":
                     return SingleRulesetSingleLanguage(); //Python
-                // case "singleRulesetMultipleLanguagesDefaultTimestamp":
+                case "singleRulesetMultipleLanguagesDefaultTimestamp":
                 case "singleRulesetMultipleLanguages":
                     return SingleRulesetMultipleLanguages(); //Python, Java
                 case "multipleRulesetsSingleLanguage":
                     return MultipleRulesetsSingleLanguage(); //Python
-                // case "multipleRulesetsMultipleLanguages":
-                //     return MultipleRulesetsMultipleLanguages(); //Python, Java
-                // case "erroredRuleset":
-                //     return null;
+                case "multipleRulesetsMultipleLanguages":
+                return MultipleRulesetsMultipleLanguages(); //Python, Java
+                    case "erroredRuleset":
+                    return null;
                 default:
                     return ImmutableList.Create<RuleSetsForClient>();
             }
@@ -72,7 +83,6 @@ namespace Tests.Rosie
                 "multipleRulesetsSingleLanguage" => 103L,
                 "multipleRulesetsMultipleLanguages" => 104L,
                 _ => -1L
-                // _ => null
             };
         }
 
@@ -106,6 +116,19 @@ namespace Tests.Rosie
 
             var ruleset = new RuleSetsForClient(1234, "python-ruleset", rules);
             var ruleset2 = new RuleSetsForClient(6789, "python-ruleset-2", rules2);
+
+            return ImmutableList.Create(ruleset, ruleset2);
+        }
+        
+        /// <summary>
+        /// Returns multiple rulesets with rules configured for different languages.
+        /// </summary>
+        public static IReadOnlyCollection<RuleSetsForClient> MultipleRulesetsMultipleLanguages() {
+            var rules = new List<Rule> { PythonRule4, JavaRule1 };
+            var rules2 = new List<Rule> { PythonRule5 };
+
+            var ruleset = new RuleSetsForClient(5678, "mixed-ruleset", rules);
+            var ruleset2 = new RuleSetsForClient(6789, "python-ruleset", rules2);
 
             return ImmutableList.Create(ruleset, ruleset2);
         }

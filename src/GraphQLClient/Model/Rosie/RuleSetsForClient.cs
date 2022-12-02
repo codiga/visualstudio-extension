@@ -10,5 +10,12 @@ namespace GraphQLClient.Model.Rosie
         public long? Id { get; set; }
         public string? Name { get; set; }
         public IReadOnlyList<Rule>? Rules { get; set; }
+
+        public RuleSetsForClient(long? id, string? name, IReadOnlyList<Rule>? rules)
+        {
+            Id = id;
+            Name = name;
+            Rules = rules;
+        }
     }
 }

@@ -306,8 +306,12 @@ namespace Extension.Rosie
         /// <returns>The rules for the given language.</returns>
         public IReadOnlyList<RosieRule> GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration language)
         {
-            var cachedRules = _cachedRules[language];
-            return cachedRules != null ? cachedRules.RosieRules : NoRule;
+            if (_cachedRules.ContainsKey(language))
+            {
+                var cachedRules = _cachedRules[language];
+                return cachedRules != null ? cachedRules.RosieRules : NoRule;                
+            }
+            return NoRule;
         }
 
         /// <summary>

@@ -388,8 +388,8 @@ rulesets:
 
         private void InitCodigaConfig(string rawConfig)
         {
-            using var fs = File.Create(_codigaConfigFile);
             var info = Encoding.UTF8.GetBytes(rawConfig);
+            using var fs = File.Create(_codigaConfigFile, info.Length, FileOptions.RandomAccess);
             fs.Write(info, 0, info.Length);
         }
 

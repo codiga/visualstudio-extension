@@ -1,4 +1,5 @@
 using System.ComponentModel.Composition;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -43,6 +44,27 @@ namespace Extension.Rosie.Annotation
                 {
                     violationTagger = new RosieViolationTagger(textView, buffer);
                     textView.Properties[typeof(RosieViolationTagger)] = violationTagger;
+                    textView.Properties[RosieRulesCache.CacheLastUpdatedTimeStampProp] = -1L;
+
+                    /*
+                     * Called when the view gets focus, and updates the tagging in that view if the rules cache has
+                     * changed since the last tagging of that text view.
+                     * This is complementary to the logic that updates the tagging in the the active view after the cache changed.
+                     * For that see RosieRulesCache.NotifyActiveDocumentForTagUpdateAsync().
+                     *
+                     * The last cache change stamp is stored in the Properties of ITextView in a property named 'CacheLastUpdatedTimeStamp'.
+                     */
+                    textView.GotAggregateFocus += (sender, args) =>
+                    {
+                        if (textView.Properties.ContainsProperty(RosieRulesCache.CacheLastUpdatedTimeStampProp) &&
+                            RosieRulesCache.Instance != null &&
+                            RosieRulesCache.Instance.CacheLastUpdatedTimeStamp !=
+                            (long)textView.Properties[RosieRulesCache.CacheLastUpdatedTimeStampProp])
+                        {
+                            ThreadHelper.JoinableTaskFactory.Run(async () =>
+                                await violationTagger.UpdateAnnotationsAndNotifyTagsChangedAsync(textView));
+                        }
+                    };
                 }
             }
 

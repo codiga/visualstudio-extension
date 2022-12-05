@@ -136,7 +136,7 @@ namespace Extension.Rosie
         {
             while (true)
             {
-                switch (await HandleCacheUpdate())
+                switch (await HandleCacheUpdateAsync())
                 {
                     case UpdateResult.NoCodigaClient:
                     {
@@ -172,7 +172,7 @@ namespace Extension.Rosie
             NoCodigaClient, NoConfigFile, Success 
         }
 
-        public async Task<UpdateResult> HandleCacheUpdate()
+        public async Task<UpdateResult> HandleCacheUpdateAsync()
         {
             Debug.WriteLine("Entered RosieRulesCache.HandleCacheUpdate()");
             if (!_clientProvider.TryGetClient(out var client))
@@ -194,9 +194,9 @@ namespace Extension.Rosie
 
             //If the Codiga config file has changed (its last write time doesn't match its previous write time)
             if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
-                await UpdateCacheFromModifiedCodigaConfigFile(codigaConfigFile, client);
+                await UpdateCacheFromModifiedCodigaConfigFileAsync(codigaConfigFile, client);
             else
-                await UpdateCacheFromChangesOnServer(client);
+                await UpdateCacheFromChangesOnServerAsync(client);
 
             return UpdateResult.Success;
         }
@@ -204,7 +204,7 @@ namespace Extension.Rosie
         /// <summary>
         /// Handles when there was a change in the codiga.yml file.
         /// </summary>
-        private async Task UpdateCacheFromModifiedCodigaConfigFile(string codigaConfigFile, ICodigaClient client)
+        private async Task UpdateCacheFromModifiedCodigaConfigFileAsync(string codigaConfigFile, ICodigaClient client)
         {
             Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromModifiedCodigaConfigFile()");
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
@@ -287,7 +287,7 @@ namespace Extension.Rosie
         /// <summary>
         /// Handles the case when the codiga.yml file is unchanged, but there might be change on the server.
         /// </summary>
-        private async Task UpdateCacheFromChangesOnServer(ICodigaClient client)
+        private async Task UpdateCacheFromChangesOnServerAsync(ICodigaClient client)
         {
             if (RulesetNames.Count == 0)
                 return;
@@ -325,7 +325,7 @@ namespace Extension.Rosie
         /// and wraps and stores them in <see cref="RosieRulesCacheValue"/>s.
         /// </summary>
         /// <param name="rulesetsFromCodigaApi">the rulesets information</param>
-        public void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
+        private void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
         {
             Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFrom()");
             var rulesByLanguage = rulesetsFromCodigaApi

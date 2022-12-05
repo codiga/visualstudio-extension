@@ -63,7 +63,8 @@ namespace Extension.Rosie
         /// <summary>
         /// DateTime.MinValue means the last write time of codiga.yml hasn't been set, or there is no codiga.yml file in the Solution root.
         /// </summary>
-        internal DateTime ConfigFileLastWriteTime { get; set; } = DateTime.MinValue;
+        // internal DateTime ConfigFileLastWriteTime { get; set; } = DateTime.MinValue;
+        internal long ConfigFileLastWriteTime { get; set; } = -1L;
 
         /// <summary>
         /// Ruleset names stored locally in the codiga.yml config file.
@@ -186,15 +187,17 @@ namespace Extension.Rosie
                 Debug.WriteLine("Didn't find config file.");
                 ClearCache();
                 //Since the config file no longer exists, its last write time is reset too
-                ConfigFileLastWriteTime = DateTime.MinValue;
+                ConfigFileLastWriteTime = -1L;
                 IsInitializedWithRules = true;
                 Debug.WriteLine("Cleared cache in HandleCacheUpdateAsync().");
                 return UpdateResult.NoConfigFile;
             }
 
-            Debug.WriteLine($"Config file last write time: cached [{ConfigFileLastWriteTime}], current: [{File.GetLastWriteTime(codigaConfigFile)}]");
+            var currentLastWriteTime = new DateTimeOffset(File.GetLastWriteTime(codigaConfigFile)).ToUnixTimeMilliseconds();
+            Debug.WriteLine($"Config file last write time: cached [{ConfigFileLastWriteTime}], current: [{currentLastWriteTime}]");
             //If the Codiga config file has changed (its last write time doesn't match its previous write time)
-            if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
+            if (ConfigFileLastWriteTime != currentLastWriteTime)
+            // if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
                 await UpdateCacheFromModifiedCodigaConfigFileAsync(codigaConfigFile, client);
             else
                 await UpdateCacheFromChangesOnServerAsync(client);
@@ -208,7 +211,9 @@ namespace Extension.Rosie
         private async Task UpdateCacheFromModifiedCodigaConfigFileAsync(string codigaConfigFile, ICodigaClient client)
         {
             Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromModifiedCodigaConfigFileAsync()");
-            ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
+            // ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
+            ConfigFileLastWriteTime =
+                new DateTimeOffset(File.GetLastWriteTime(codigaConfigFile)).ToUnixTimeMilliseconds();
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
             var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.GetRulesets();
             //If the config file is not configured properly, we clear the cache

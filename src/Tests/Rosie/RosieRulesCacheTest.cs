@@ -398,6 +398,20 @@ rulesets:
         private async Task UpdateCodigaConfig(string rawConfig)
         {
             File.Delete(_codigaConfigFile);
+            
+            //This delay ensures that the last write time of the new config file is different than the
+            // one in the rules cache. In the CI pipeline the test execution tends to be so fast
+            // that it is executed in the same millisecond, resulting in the exact same last write time. 
+            var task = Task.Delay(TimeSpan.FromMilliseconds(100));
+            try
+            {
+                await task;
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            
             InitCodigaConfig(rawConfig);
         }
 

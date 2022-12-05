@@ -108,8 +108,8 @@ namespace Extension.Rosie
         //For testing
         public static void Initialize(Solution solution, ICodigaClientProvider clientProvider, string testName)
         {
-            Debug.WriteLine($"Starting test {testName}");
             Instance = new RosieRulesCache(solution, clientProvider);
+            Debug.WriteLine($"Starting test {testName}");
             _testName = testName;
         }
 

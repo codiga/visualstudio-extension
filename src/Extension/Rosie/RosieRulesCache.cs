@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -31,6 +32,8 @@ namespace Extension.Rosie
         private ICodigaClientProvider _clientProvider;
         private CancellationTokenSource _cancellationTokenSource;
         private DTE _dte;
+        
+        private static readonly TextWriterTraceListener TextWriterTraceListener = new TextWriterTraceListener(Console.Out);
         
         /// <summary>
         /// Mapping the rules to their target languages, because this way
@@ -91,6 +94,8 @@ namespace Extension.Rosie
             _clientProvider = clientProvider;
             _cachedRules = new ConcurrentDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue>();
             RulesetNames = new SynchronizedCollection<string>();
+            Debug.Listeners.Add(TextWriterTraceListener);
+            Debug.AutoFlush = true;
         }
 
         public static void Initialize()
@@ -166,6 +171,7 @@ namespace Extension.Rosie
 
         public async Task<UpdateResult> HandleCacheUpdate()
         {
+            Debug.WriteLine("Entered RosieRulesCache.HandleCacheUpdate()");
             if (!_clientProvider.TryGetClient(out var client))
                 return UpdateResult.NoCodigaClient;
 
@@ -174,10 +180,12 @@ namespace Extension.Rosie
 
             if (codigaConfigFile == null || !File.Exists(codigaConfigFile))
             {
+                Debug.WriteLine("Didn't find config file.");
                 ClearCache();
                 //Since the config file no longer exists, its last write time is reset too
                 ConfigFileLastWriteTime = DateTime.MinValue;
                 IsInitializedWithRules = true;
+                Debug.WriteLine("Cleared cache in HandleCacheUpdate().");
                 return UpdateResult.NoConfigFile;
             }
 
@@ -195,12 +203,14 @@ namespace Extension.Rosie
         /// </summary>
         private async Task UpdateCacheFromModifiedCodigaConfigFile(string codigaConfigFile, ICodigaClient client)
         {
+            Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromModifiedCodigaConfigFile()");
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
             var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.GetRulesets();
             //If the config file is not configured properly, we clear the cache
             if (rulesetNames == null)
             {
+                Debug.WriteLine("Could nit deserialize ruleset names. Clearing the cache in UpdateCacheFromModifiedCodigaConfigFile().");
                 ClearCache();
                 return;
             }
@@ -210,12 +220,19 @@ namespace Extension.Rosie
             //If there is at least on ruleset name, we can make a request with them
             if (RulesetNames.Count > 0)
             {
+                Debug.WriteLine("Found more than 1 rulesets.");
+                foreach (var rulesetName in RulesetNames)
+                    Debug.WriteLine($"Found ruleset name: {rulesetName}");
+                
                 try
                 {
                     var rulesetsForClient = await client.GetRulesetsForClientAsync(rulesetNames);
                     IsInitializedWithRules = true;
                     if (rulesetsForClient == null)
+                    {
+                        Debug.WriteLine("Returned null rulesetsForClient from server.");
                         return;
+                    }
 
                     /*
                       If the server returns no rulesets, e.g. due to misconfiguration of codiga.yml,
@@ -224,12 +241,14 @@ namespace Extension.Rosie
                     */
                     if (rulesetsForClient.Count == 0)
                     {
+                        Debug.WriteLine("Returned empty rulesetsForClient from server. Clearing the cache.");
                         ClearCache();
                         return;
                     }
 
+                    Debug.WriteLine("Updating the cache after successful rulesetsForClient from server.");
                     UpdateCacheFrom(rulesetsForClient);
-                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    Debug.WriteLine("Updated the cache");
                     /*
                       Updating the local timestamp only if it has changed, because it may happen that
                       codiga.yml was updated locally with a non-existent ruleset, or a ruleset that has an earlier timestamp
@@ -237,7 +256,14 @@ namespace Extension.Rosie
                     */
                     long timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(rulesetNames);
                     if (timestampFromServer != RulesetslastUpdatedTimeStamp)
+                    {
+                        Debug.WriteLine("Saving the updated RulesetslastUpdatedTimeStamp.");
                         RulesetslastUpdatedTimeStamp = timestampFromServer;
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Not saving same RulesetslastUpdatedTimeStamp.");
+                    }
 
                     //Only notify when not in testing mode
                     if (_clientProvider is DefaultCodigaClientProvider)
@@ -250,6 +276,7 @@ namespace Extension.Rosie
             }
             else
             {
+                Debug.WriteLine("Found empty ruleset names. Clearing the cache in UpdateCacheFromModifiedCodigaConfigFile().");
                 ClearCache();
             }
         }
@@ -275,7 +302,6 @@ namespace Extension.Rosie
                         return;
 
                     UpdateCacheFrom(rulesetsForClient);
-                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     RulesetslastUpdatedTimeStamp = timestampFromServer;
                     //Only notify when not in testing mode
                     if (_clientProvider is DefaultCodigaClientProvider)
@@ -298,6 +324,7 @@ namespace Extension.Rosie
         /// <param name="rulesetsFromCodigaApi">the rulesets information</param>
         public void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
         {
+            Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFrom()");
             var rulesByLanguage = rulesetsFromCodigaApi
                 .Where(ruleset => ruleset.Rules != null)
                 .SelectMany(ruleset => ruleset.Rules, (ruleset, rule) => new RuleWithNames(ruleset.Name, rule))
@@ -308,11 +335,19 @@ namespace Extension.Rosie
                     return language;
                 }, entry => new RosieRulesCacheValue(entry.ToList()));
 
+            if (rulesByLanguage.Count == 0)
+            {
+                Debug.WriteLine("Grouping by language resulted in empty rules dictionary.");
+            }
             //Clearing and repopulating the cache is easier than picking out one by one
             // the ones that remain, and the ones that have to be removed.
             _cachedRules.Clear();
             foreach (var keyValuePair in rulesByLanguage)
+            {
                 _cachedRules.Add(keyValuePair.Key, keyValuePair.Value);
+                Debug.WriteLine($"Added entry for {keyValuePair.Key.GetName()}");
+            }
+            CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
         /// <summary>
@@ -390,6 +425,7 @@ namespace Extension.Rosie
             Instance?._cancellationTokenSource?.Cancel();
             Instance?.ClearCache();
             Instance = null;
+            Debug.Listeners.Remove(TextWriterTraceListener);
         }
 
         #endregion

@@ -6,16 +6,16 @@ namespace Tests.Rosie
     /// <summary>
     /// See https://docs.nunit.org/articles/vs-test-adapter/Trace-and-Debug.html.
     /// </summary>
-    [SetUpFixture]
+    // [SetUpFixture]
     public class SetupTrace
     {
-        [OneTimeSetUp]
+        // [OneTimeSetUp]
         public void StartTest()
         {
             Trace.Listeners.Add(new ConsoleTraceListener());
         }
 
-        [OneTimeTearDown]
+        // [OneTimeTearDown]
         public void EndTest()
         {
             Trace.Flush();

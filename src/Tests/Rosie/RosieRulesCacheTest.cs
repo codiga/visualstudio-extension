@@ -123,7 +123,6 @@ rulesets:
         [Test]
         public async Task HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file()
         {
-            Debug.WriteLine("Starting test: HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file");
@@ -184,7 +183,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result");
@@ -203,7 +201,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file");
@@ -224,7 +221,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server");
@@ -254,7 +250,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server");
@@ -275,7 +270,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp");
@@ -297,7 +291,6 @@ rulesets:
         [Test]
         public async Task UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp()
         {
-            Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp");
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp");

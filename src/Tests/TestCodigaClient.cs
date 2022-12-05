@@ -20,49 +20,49 @@ namespace Tests
 
         public async Task<GraphQLResponse<GetUserResult>> GetUserAsync()
         {
-            return null;
+            return await Task.FromResult(new GraphQLResponse<GetUserResult>());
         }
 
         public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
         {
-            return null;
+            return await Task.FromResult<>(null);
         }
 
         public async Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language)
         {
-            return -1L;
+            return await Task.FromResult(-1L);
         }
 
         public async Task<string> RecordRecipeUseAsync(long recipeId)
         {
-            return null;
+            return await Task.FromResult<string>("");
         }
 
         public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
             IReadOnlyCollection<string> languages, bool onlyPublic, int howMany,
             int skip)
         {
-            return null;
+            return await Task.FromResult<>(null);
         }
 
         public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
             IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate,
             bool onlySubscribed, int howMany, int skip)
         {
-            return null;
+            return await Task.FromResult<>(null);
         }
 
         public async Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(
             IReadOnlyCollection<string> names)
         {
-            return RulesetsForClientTestSupport.GetRulesetsForClient(names);
+            return await Task.FromResult(RulesetsForClientTestSupport.GetRulesetsForClient(names));
         }
 
         public async Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names)
         {
-            return RulesetsForClientTestSupport.GetRulesetsLastTimestamp(names);
+            return await Task.FromResult(RulesetsForClientTestSupport.GetRulesetsLastTimestamp(names));
         }
-        
+
         public void Dispose()
         {
         }

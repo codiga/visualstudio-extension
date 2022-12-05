@@ -229,7 +229,6 @@ namespace Extension.Rosie
                     }
 
                     UpdateCacheFrom(rulesetsForClient);
-                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     /*
                       Updating the local timestamp only if it has changed, because it may happen that
                       codiga.yml was updated locally with a non-existent ruleset, or a ruleset that has an earlier timestamp
@@ -275,7 +274,6 @@ namespace Extension.Rosie
                         return;
 
                     UpdateCacheFrom(rulesetsForClient);
-                    CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     RulesetslastUpdatedTimeStamp = timestampFromServer;
                     //Only notify when not in testing mode
                     if (_clientProvider is DefaultCodigaClientProvider)
@@ -313,6 +311,8 @@ namespace Extension.Rosie
             _cachedRules.Clear();
             foreach (var keyValuePair in rulesByLanguage)
                 _cachedRules.Add(keyValuePair.Key, keyValuePair.Value);
+            
+            CacheLastUpdatedTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
         }
 
         /// <summary>

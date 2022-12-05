@@ -102,25 +102,6 @@ namespace Tests.Rosie
 
         //Handles the UpdateCacheFromModifiedCodigaConfigFile branch
         [Test]
-        public async Task HandleCacheUpdate_should_populate_empty_cache_from_codiga_config_file()
-        {
-            Debug.WriteLine("Starting test: HandleCacheUpdate_should_populate_empty_cache_from_codiga_config_file");
-            InitConfigAndCache(@"
-rulesets:
-  - singleRulesetSingleLanguage");
-
-            var updateResult = await _cache.HandleCacheUpdate();
-
-            Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.Success);
-
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
-            Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
-            Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
-            Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
-        }
-
-        //Handles the UpdateCacheFromModifiedCodigaConfigFile branch
-        [Test]
         public async Task HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file()
         {
             InitConfigAndCache("HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file",

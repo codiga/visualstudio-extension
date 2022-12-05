@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using EnvDTE;
 using Extension.Caching;
 using Extension.Rosie;
@@ -19,11 +21,11 @@ namespace Tests.Rosie
     [TestFixture]
     internal class RosieRulesCacheTest
     {
-        private Mock<Solution> _solution;
-        private string _solutionDirPath;
-        private string _codigaConfigFile;
+        private Mock<Solution>? _solution;
+        private string? _solutionDirPath;
+        private string? _codigaConfigFile;
         private ICodigaClientProvider _clientProvider;
-        private RosieRulesCache _cache;
+        private RosieRulesCache? _cache;
 
         /// <summary>
         /// Initializes the test with a Solution directory with a mock Solution,
@@ -40,19 +42,19 @@ namespace Tests.Rosie
             _solution.Setup(s => s.FullName).Returns(_solutionDirPath);
         }
 
-        #region HandleCacheUpdate
+        #region HandleCacheUpdateAsync
 
         [Test]
-        public void HandleCacheUpdate_should_return_no_codiga_client_for_missing_codiga_client()
+        public async Task HandleCacheUpdateAsync_should_return_no_codiga_client_for_missing_codiga_client()
         {
             RosieRulesCache.Initialize(_solution.Object, new NoCodigaClientProvider());
-            var updateResult = RosieRulesCache.Instance.HandleCacheUpdate();
+            var updateResult = await RosieRulesCache.Instance.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.NoCodigaClient);
         }
 
         [Test]
-        public void HandleCacheUpdate_should_clear_cache_and_return_no_config_file_for_missing_config_file()
+        public async Task HandleCacheUpdateAsync_should_clear_cache_and_return_no_config_file_for_missing_config_file()
         {
             //Configure a Codiga config file, and initialize the cache with some rules
 
@@ -62,13 +64,13 @@ rulesets:
 
             Assert.That(RosieRulesCache.IsInitializedWithRules, Is.False);
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             //Delete the Codiga config file and try to update the cache
 
             File.Delete(_codigaConfigFile);
 
-            var updateResult = _cache.HandleCacheUpdate();
+            var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.NoConfigFile);
             Assert.That(_cache.RulesetNames, Is.Empty);
@@ -79,13 +81,13 @@ rulesets:
 
         //Handles the UpdateCacheFromModifiedCodigaConfigFile branch
         [Test]
-        public void HandleCacheUpdate_should_populate_empty_cache_from_codiga_config_file()
+        public async Task HandleCacheUpdateAsync_should_populate_empty_cache_from_codiga_config_file()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
 
-            var updateResult = _cache.HandleCacheUpdate();
+            var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.Success);
 
@@ -97,24 +99,24 @@ rulesets:
 
         //Handles the UpdateCacheFromModifiedCodigaConfigFile branch
         [Test]
-        public void HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file()
+        public async Task HandleCacheUpdateAsync_should_update_non_empty_cache_from_codiga_config_file()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
             Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
             Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - multipleRulesetsSingleLanguage");
 
-            var updateResult = _cache.HandleCacheUpdate();
+            var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.Success);
 
@@ -129,7 +131,7 @@ rulesets:
 
         //Handles the UpdateCacheFromChangesOnServer branch
         [Test]
-        public void HandleCacheUpdate_should_update_non_empty_cache_from_server()
+        public async Task HandleCacheUpdateAsync_should_update_non_empty_cache_from_server()
         {
             InitConfigAndCache(@"
 rulesets:
@@ -144,7 +146,7 @@ rulesets:
             Assert.That(rules.Count, Is.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(102L));
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules.Count, Is.EqualTo(3));
@@ -153,65 +155,65 @@ rulesets:
 
         #endregion
 
-        #region UpdateCacheFromModifiedCodigaConfigFile
+        #region UpdateCacheFromModifiedCodigaConfigFileAsync
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_clear_cache_for_null_deserialization_result()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"rulesets:");
+            await UpdateCodigaConfig(@"rulesets:");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsTrue(_cache.IsEmpty());
         }
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_clear_cache_for_no_rulesets_in_config_file()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - ");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsTrue(_cache.IsEmpty());
         }
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_not_update_for_null_rulesets_returned_from_server()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
             Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
             Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - erroredRuleset");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules[0].Id,
@@ -223,40 +225,40 @@ rulesets:
         }
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_clear_cache_for_no_rulesets_returned_from_server()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - nonExistentRuleset");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsTrue(_cache.IsEmpty());
         }
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_update_cache_for_same_last_updated_timestamp()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - singleRulesetMultipleLanguagesDefaultTimestamp");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
@@ -264,20 +266,20 @@ rulesets:
         }
 
         [Test]
-        public void UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp()
+        public async Task UpdateCacheFromModifiedCodigaConfigFileAsync_should_update_cache_for_different_last_updated_timestamp()
         {
             InitConfigAndCache(@"
 rulesets:
   - singleRulesetSingleLanguage");
             
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - singleRulesetMultipleLanguages");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
@@ -286,28 +288,28 @@ rulesets:
 
         #endregion
 
-        #region UpdateCacheFromChangesOnServer
+        #region UpdateCacheFromChangesOnServerAsync
 
         [Test]
-        public void UpdateCacheFromChangesOnServer_should_not_update_cache_for_no_ruleset_name()
+        public async Task UpdateCacheFromChangesOnServerAsync_should_not_update_cache_for_no_ruleset_name()
         {
             InitConfigAndCache(@"
 rulesets:
   - ");
 
             //Updates for "change" in the config file
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsTrue(_cache.IsEmpty());
 
             //Updates from the server
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             Assert.IsTrue(_cache.IsEmpty());
         }
 
         [Test]
-        public void UpdateCacheFromChangesOnServer_should_not_update_cache_for_same_last_updated_timestamp_from_server()
+        public async Task UpdateCacheFromChangesOnServerAsync_should_not_update_cache_for_same_last_updated_timestamp_from_server()
         {
             InitConfigAndCache(@"
 rulesets:
@@ -321,7 +323,7 @@ rulesets:
             Assert.That(rules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(101L));
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
@@ -329,7 +331,7 @@ rulesets:
         }
 
         [Test]
-        public void UpdateCacheFromChangesOnServer_should_update_cache()
+        public async Task UpdateCacheFromChangesOnServerAsync_should_update_cache()
         {
             InitConfigAndCache(@"
 rulesets:
@@ -343,7 +345,7 @@ rulesets:
             Assert.That(rules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(102L));
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(updatedRules, Has.Count.EqualTo(3));
@@ -355,13 +357,13 @@ rulesets:
         #region Stores multiple rules for multiple rulesets for mulitple languages
 
         [Test]
-        public void should_store_rules_from_multiple_rulesets_for_multiple_languages_grouped_by_language()
+        public async Task should_store_rules_from_multiple_rulesets_for_multiple_languages_grouped_by_language()
         {
             InitConfigAndCache(@"
 rulesets:
   - multipleRulesetsMultipleLanguages");
 
-            _cache.HandleCacheUpdate();
+            await _cache.HandleCacheUpdateAsync();
 
             var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
             Assert.That(rules, Has.Count.EqualTo(2));
@@ -393,7 +395,7 @@ rulesets:
             fs.Write(info, 0, info.Length);
         }
 
-        private void UpdateCodigaConfig(string rawConfig)
+        private async Task UpdateCodigaConfig(string rawConfig)
         {
             File.Delete(_codigaConfigFile);
             InitCodigaConfig(rawConfig);
@@ -406,6 +408,10 @@ rulesets:
         {
             File.Delete(_codigaConfigFile);
             RosieRulesCache.Dispose();
+            _solution = null;
+            _solutionDirPath = null;
+            _codigaConfigFile = null;
+            _cache = null;
         }
 
         /// <summary>

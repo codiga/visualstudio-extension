@@ -29,6 +29,10 @@ namespace Extension.Rosie.Model
         }
 
         private string? ElementCheckedToRosieEntityChecked(string? elementChecked) {
+            if (elementChecked == null) {
+                return null;
+            }
+            
             return elementChecked switch
             {
                 "ForLoop" => EntityCheckedForLoop,

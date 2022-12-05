@@ -27,17 +27,18 @@ namespace Tests.Rosie
             "python_rule_3",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
             "Python");
-        
+
         public static readonly Rule PythonRule4 = CreateAstRule(
             30,
             "python_rule_4",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==",
-        "Python");
+            "Python");
+
         public static readonly Rule PythonRule5 = CreateAstRule(
             31,
             "python_rule_5",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
-        "Python");
+            "Python");
 
         public static readonly Rule JavaRule1 = CreateAstRule(
             20L,
@@ -65,8 +66,8 @@ namespace Tests.Rosie
                 case "multipleRulesetsSingleLanguage":
                     return MultipleRulesetsSingleLanguage(); //Python
                 case "multipleRulesetsMultipleLanguages":
-                return MultipleRulesetsMultipleLanguages(); //Python, Java
-                    case "erroredRuleset":
+                    return MultipleRulesetsMultipleLanguages(); //Python, Java
+                case "erroredRuleset":
                     return null;
                 default:
                     return ImmutableList.Create<RuleSetsForClient>();
@@ -92,7 +93,7 @@ namespace Tests.Rosie
         private static IReadOnlyCollection<RuleSetsForClient> SingleRulesetSingleLanguage()
         {
             var rules = new List<Rule> { PythonRule1, PythonRule2, PythonRule3 };
-            var ruleset = new RuleSetsForClient(1234, "python-ruleset", rules);
+            var ruleset = new RuleSetsForClient { Id = 1234, Name = "python-ruleset", Rules = rules };
             return ImmutableList.Create(ruleset);
         }
 
@@ -102,7 +103,10 @@ namespace Tests.Rosie
         public static IReadOnlyCollection<RuleSetsForClient> SingleRulesetMultipleLanguages()
         {
             var rules = new List<Rule> { PythonRule1, JavaRule1, PythonRule3 };
-            var ruleset = new RuleSetsForClient(2345, "mixed-ruleset", rules);
+            var ruleset = new RuleSetsForClient
+            {
+                Id = 2345, Name = "mixed-ruleset", Rules = rules
+            };
             return ImmutableList.Create(ruleset);
         }
 
@@ -114,21 +118,22 @@ namespace Tests.Rosie
             var rules = new List<Rule> { PythonRule1, PythonRule2 };
             var rules2 = new List<Rule> { PythonRule3 };
 
-            var ruleset = new RuleSetsForClient(1234, "python-ruleset", rules);
-            var ruleset2 = new RuleSetsForClient(6789, "python-ruleset-2", rules2);
+            var ruleset = new RuleSetsForClient { Id = 1234, Name = "python-ruleset", Rules = rules };
+            var ruleset2 = new RuleSetsForClient { Id = 6789, Name = "python-ruleset-2", Rules = rules2 };
 
             return ImmutableList.Create(ruleset, ruleset2);
         }
-        
+
         /// <summary>
         /// Returns multiple rulesets with rules configured for different languages.
         /// </summary>
-        public static IReadOnlyCollection<RuleSetsForClient> MultipleRulesetsMultipleLanguages() {
+        private static IReadOnlyCollection<RuleSetsForClient> MultipleRulesetsMultipleLanguages()
+        {
             var rules = new List<Rule> { PythonRule4, JavaRule1 };
             var rules2 = new List<Rule> { PythonRule5 };
 
-            var ruleset = new RuleSetsForClient(5678, "mixed-ruleset", rules);
-            var ruleset2 = new RuleSetsForClient(6789, "python-ruleset", rules2);
+            var ruleset = new RuleSetsForClient { Id = 5678, Name = "mixed-ruleset", Rules = rules };
+            var ruleset2 = new RuleSetsForClient { Id = 6789, Name = "python-ruleset", Rules = rules2 };
 
             return ImmutableList.Create(ruleset, ruleset2);
         }

@@ -192,6 +192,7 @@ namespace Extension.Rosie
                 return UpdateResult.NoConfigFile;
             }
 
+            Debug.WriteLine($"Config file last write time: cached [{ConfigFileLastWriteTime}], current: [{File.GetLastWriteTime(codigaConfigFile)}]");
             //If the Codiga config file has changed (its last write time doesn't match its previous write time)
             if (ConfigFileLastWriteTime.CompareTo(File.GetLastWriteTime(codigaConfigFile)) != 0)
                 await UpdateCacheFromModifiedCodigaConfigFileAsync(codigaConfigFile, client);
@@ -206,14 +207,14 @@ namespace Extension.Rosie
         /// </summary>
         private async Task UpdateCacheFromModifiedCodigaConfigFileAsync(string codigaConfigFile, ICodigaClient client)
         {
-            Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromModifiedCodigaConfigFile()");
+            Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromModifiedCodigaConfigFileAsync()");
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
             var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.GetRulesets();
             //If the config file is not configured properly, we clear the cache
             if (rulesetNames == null)
             {
-                Debug.WriteLine("Could nit deserialize ruleset names. Clearing the cache in UpdateCacheFromModifiedCodigaConfigFile().");
+                Debug.WriteLine("Could not deserialize ruleset names. Clearing the cache in UpdateCacheFromModifiedCodigaConfigFile().");
                 ClearCache();
                 return;
             }
@@ -289,9 +290,13 @@ namespace Extension.Rosie
         /// </summary>
         private async Task UpdateCacheFromChangesOnServerAsync(ICodigaClient client)
         {
+            Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFromChangesOnServerAsync()");
             if (RulesetNames.Count == 0)
+            {
+                Debug.WriteLine("There was no ruleset name.");
                 return;
-
+            }
+            
             try
             {
                 //Retrieve the last updated timestamp for the rulesets
@@ -300,15 +305,22 @@ namespace Extension.Rosie
                 //If there was a change on the server, we can get and cache the rulesets
                 if (RulesetslastUpdatedTimeStamp != timestampFromServer)
                 {
+                    Debug.WriteLine("Timestamp was different on the server than locally.");
                     var rulesetsForClient = await client.GetRulesetsForClientAsync(RulesetNames.ToImmutableList());
                     if (rulesetsForClient == null)
                         return;
 
+                    Debug.WriteLine("Updating the cache after successful rulesetsForClient from server (UpdateCacheFromChangesOnServerAsync).");
                     UpdateCacheFrom(rulesetsForClient);
+                    Debug.WriteLine("Updated the cache (UpdateCacheFromChangesOnServerAsync)");
                     RulesetslastUpdatedTimeStamp = timestampFromServer;
                     //Only notify when not in testing mode
                     if (_clientProvider is DefaultCodigaClientProvider)
                         await NotifyActiveDocumentForTagUpdateAsync();
+                }
+                else
+                {
+                    Debug.WriteLine("Timestamp on server was the same the local value.");
                 }
             }
             catch (CodigaAPIException)
@@ -328,9 +340,14 @@ namespace Extension.Rosie
         private void UpdateCacheFrom(IReadOnlyCollection<RuleSetsForClient> rulesetsFromCodigaApi)
         {
             Debug.WriteLine("Entered RosieRulesCache.UpdateCacheFrom()");
+            
             var rulesByLanguage = rulesetsFromCodigaApi
                 .Where(ruleset => ruleset.Rules != null)
-                .SelectMany(ruleset => ruleset.Rules, (ruleset, rule) => new RuleWithNames(ruleset.Name, rule))
+                .SelectMany(ruleset => ruleset.Rules, (ruleset, rule) =>
+                {
+                    Debug.WriteLine($"Converting {ruleset.Name}/{rule.Name} to RuleWithNames.");
+                    return new RuleWithNames(ruleset.Name, rule);
+                })
                 .GroupBy(ruleWithName => ruleWithName.RosieRule.Language)
                 .ToDictionary(entry =>
                 {

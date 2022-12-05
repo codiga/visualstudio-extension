@@ -174,7 +174,7 @@ namespace Extension.Rosie
 
         public async Task<UpdateResult> HandleCacheUpdateAsync()
         {
-            Debug.WriteLine("Entered RosieRulesCache.HandleCacheUpdate()");
+            Debug.WriteLine("Entered RosieRulesCache.HandleCacheUpdateAsync()");
             if (!_clientProvider.TryGetClient(out var client))
                 return UpdateResult.NoCodigaClient;
 
@@ -188,7 +188,7 @@ namespace Extension.Rosie
                 //Since the config file no longer exists, its last write time is reset too
                 ConfigFileLastWriteTime = DateTime.MinValue;
                 IsInitializedWithRules = true;
-                Debug.WriteLine("Cleared cache in HandleCacheUpdate().");
+                Debug.WriteLine("Cleared cache in HandleCacheUpdateAsync().");
                 return UpdateResult.NoConfigFile;
             }
 

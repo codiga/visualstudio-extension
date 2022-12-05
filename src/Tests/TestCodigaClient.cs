@@ -25,7 +25,7 @@ namespace Tests
 
         public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
         {
-            return await Task.FromResult<>(null);
+            return await Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
         }
 
         public async Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language)
@@ -42,14 +42,14 @@ namespace Tests
             IReadOnlyCollection<string> languages, bool onlyPublic, int howMany,
             int skip)
         {
-            return await Task.FromResult<>(null);
+            return await Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
         }
 
         public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
             IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate,
             bool onlySubscribed, int howMany, int skip)
         {
-            return await Task.FromResult<>(null);
+            return await Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
         }
 
         public async Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(

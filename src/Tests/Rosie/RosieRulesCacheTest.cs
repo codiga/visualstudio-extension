@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -116,7 +117,7 @@ rulesets:
             Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
             Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - multipleRulesetsSingleLanguage");
 
@@ -175,7 +176,7 @@ rulesets:
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"rulesets:");
+            await UpdateCodigaConfig(@"rulesets:");
 
             await _cache.HandleCacheUpdateAsync();
 
@@ -195,7 +196,7 @@ rulesets:
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - ");
 
@@ -221,7 +222,7 @@ rulesets:
             Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
             Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - erroredRuleset");
 
@@ -250,7 +251,7 @@ rulesets:
 
             Assert.IsFalse(_cache.IsEmpty());
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - nonExistentRuleset");
 
@@ -271,7 +272,7 @@ rulesets:
             await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - singleRulesetMultipleLanguagesDefaultTimestamp");
 
@@ -295,7 +296,7 @@ rulesets:
             await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
-            UpdateCodigaConfig(@"
+            await UpdateCodigaConfig(@"
 rulesets:
   - singleRulesetMultipleLanguages");
 
@@ -424,12 +425,23 @@ rulesets:
             Debug.WriteLine($"Content of Codiga config file is: {File.ReadAllText(_codigaConfigFile)}");
         }
 
-        private void UpdateCodigaConfig(string rawConfig)
+        private async Task UpdateCodigaConfig(string rawConfig)
         {
             Debug.WriteLine("Deleting Codiga config file.");
             File.Delete(_codigaConfigFile);
             if (!File.Exists(_codigaConfigFile))
                 Debug.WriteLine("Codiga config file is deleted before config update!");
+            
+            var task = Task.Delay(TimeSpan.FromMilliseconds(100));
+            try
+            {
+                await task;
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            
             InitCodigaConfig(rawConfig);
         }
 

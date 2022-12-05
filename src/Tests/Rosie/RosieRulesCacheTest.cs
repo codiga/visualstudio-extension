@@ -126,7 +126,7 @@ rulesets:
             Debug.WriteLine("Starting test: HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "HandleCacheUpdate_should_update_non_empty_cache_from_codiga_config_file");
 
             await _cache.HandleCacheUpdate();
 
@@ -187,7 +187,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_null_deserialization_result");
 
             await _cache.HandleCacheUpdate();
 
@@ -206,7 +206,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_in_config_file");
             
             await _cache.HandleCacheUpdate();
 
@@ -227,7 +227,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_not_update_for_null_rulesets_returned_from_server");
             
             await _cache.HandleCacheUpdate();
 
@@ -257,7 +257,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_clear_cache_for_no_rulesets_returned_from_server");
             
             await _cache.HandleCacheUpdate();
 
@@ -278,7 +278,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_same_last_updated_timestamp");
             
             await _cache.HandleCacheUpdate();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
@@ -300,7 +300,7 @@ rulesets:
             Debug.WriteLine("Starting test: UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp");
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - singleRulesetSingleLanguage", "UpdateCacheFromModifiedCodigaConfigFile_should_update_cache_for_different_last_updated_timestamp");
             
             await _cache.HandleCacheUpdate();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
@@ -414,11 +414,11 @@ rulesets:
 
         #region Helpers
 
-        private void InitConfigAndCache(string rawConfig)
+        private void InitConfigAndCache(string rawConfig, string testName)
         {
             InitCodigaConfig(rawConfig);
             _clientProvider = new TestCodigaClientProvider();
-            RosieRulesCache.Initialize(_solution.Object, _clientProvider);
+            RosieRulesCache.Initialize(_solution.Object, _clientProvider, testName);
             _cache = RosieRulesCache.Instance;
         }
 

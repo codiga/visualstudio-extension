@@ -79,6 +79,7 @@ namespace Extension.Rosie
         public static RosieRulesCache? Instance { get; set; }
 
         private Solution? _solution;
+        private static string _testName;
 
         private RosieRulesCache()
         {
@@ -105,9 +106,11 @@ namespace Extension.Rosie
         }
         
         //For testing
-        public static void Initialize(Solution solution, ICodigaClientProvider clientProvider)
+        public static void Initialize(Solution solution, ICodigaClientProvider clientProvider, string testName)
         {
+            Debug.WriteLine($"Starting test {testName}");
             Instance = new RosieRulesCache(solution, clientProvider);
+            _testName = testName;
         }
 
         #region Polling and update
@@ -425,6 +428,8 @@ namespace Extension.Rosie
             Instance?._cancellationTokenSource?.Cancel();
             Instance?.ClearCache();
             Instance = null;
+            Debug.WriteLine($"Finishes test {_testName}");
+            Debug.WriteLine("");
             Debug.Listeners.Remove(TextWriterTraceListener);
         }
 

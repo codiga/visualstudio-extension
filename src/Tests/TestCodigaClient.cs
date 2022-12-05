@@ -18,49 +18,49 @@ namespace Tests
         {
         }
 
-        public Task<GraphQLResponse<GetUserResult>> GetUserAsync()
+        public async Task<GraphQLResponse<GetUserResult>> GetUserAsync()
         {
-            return Task.FromResult<GraphQLResponse<GetUserResult>>(null);
+            return null;
         }
 
-        public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
+        public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientByShortcutAsync(string language)
         {
-            return Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
+            return null;
         }
 
-        public Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language)
+        public async Task<long> GetRecipesForClientByShortcutLastTimestampAsync(string language)
         {
-            return Task.FromResult(-1L);
+            return -1L;
         }
 
-        public Task<string> RecordRecipeUseAsync(long recipeId)
+        public async Task<string> RecordRecipeUseAsync(long recipeId)
         {
-            return Task.FromResult<string>(null);
+            return null;
         }
 
-        public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
+        public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
             IReadOnlyCollection<string> languages, bool onlyPublic, int howMany,
             int skip)
         {
-            return Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
+            return null;
         }
 
-        public Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
+        public async Task<IReadOnlyCollection<CodigaSnippet>?> GetRecipesForClientSemanticAsync(string keywords,
             IReadOnlyCollection<string> languages, bool onlyPublic, bool onlyPrivate,
             bool onlySubscribed, int howMany, int skip)
         {
-            return Task.FromResult<IReadOnlyCollection<CodigaSnippet>?>(null);
+            return null;
         }
 
-        public Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(
+        public async Task<IReadOnlyCollection<RuleSetsForClient>?> GetRulesetsForClientAsync(
             IReadOnlyCollection<string> names)
         {
-            return Task.FromResult(RulesetsForClientTestSupport.GetRulesetsForClient(names));
+            return RulesetsForClientTestSupport.GetRulesetsForClient(names);
         }
 
-        public Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names)
+        public async Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names)
         {
-            return Task.FromResult(RulesetsForClientTestSupport.GetRulesetsLastTimestamp(names));
+            return RulesetsForClientTestSupport.GetRulesetsLastTimestamp(names);
         }
         
         public void Dispose()

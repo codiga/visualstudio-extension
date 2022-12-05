@@ -31,27 +31,29 @@ namespace Extension.Logging
 #endif
 
 			config.RollbarLoggerConfig.RollbarPayloadAdditionOptions.CodeVersion = GetExtensionVersion().ToString();
-			RollbarInfrastructure.Instance.Init(config);
+			// RollbarInfrastructure.Instance.Init(config);
 		}
 
 		public static ILogger LogException(Exception exception)
 		{
-			var parameters = new Dictionary<string, object>()
-			{
-				{"Source", exception.Source }
-			};
-
-			var logger = RollbarLocator.RollbarInstance.Error(exception, parameters);
-
-			LogActivityError(exception);
-
-			return logger;
+			// var parameters = new Dictionary<string, object>()
+			// {
+			// 	{"Source", exception.Source }
+			// };
+			//
+			// var logger = RollbarLocator.RollbarInstance.Error(exception, parameters);
+			//
+			// LogActivityError(exception);
+			//
+			// return logger;
+			return null;
 		}
 
 		public static ILogger LogWarning(string message)
 		{
-			var logger = RollbarLocator.RollbarInstance.Warning(message);
-			return logger;
+			// var logger = RollbarLocator.RollbarInstance.Warning(message);
+			// return logger;
+			return null;
 		}
 
 		/// <summary>
@@ -60,25 +62,25 @@ namespace Extension.Logging
 		/// <param name="exception"></param>
 		private static void LogActivityError(Exception exception)
 		{
-			_activityLog = ThreadHelper.JoinableTaskFactory.Run(async () =>
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				return await VS.GetServiceAsync<SVsActivityLog, IVsActivityLog>();
-			});
-
-			try
-			{
-				ThreadHelper.ThrowIfNotOnUIThread();
-				_activityLog.LogEntry((uint)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, exception.Source, exception.Message);
-			}
-			catch(ArgumentException e)
-			{
-				var parameters = new Dictionary<string, object>()
-				{
-					{"InitialException", exception }
-				};
-				RollbarLocator.RollbarInstance.Error(e, parameters);
-			}
+			// _activityLog = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			// {
+			// 	await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			// 	return await VS.GetServiceAsync<SVsActivityLog, IVsActivityLog>();
+			// });
+			//
+			// try
+			// {
+			// 	ThreadHelper.ThrowIfNotOnUIThread();
+			// 	_activityLog.LogEntry((uint)__ACTIVITYLOG_ENTRYTYPE.ALE_ERROR, exception.Source, exception.Message);
+			// }
+			// catch(ArgumentException e)
+			// {
+			// 	var parameters = new Dictionary<string, object>()
+			// 	{
+			// 		{"InitialException", exception }
+			// 	};
+			// 	RollbarLocator.RollbarInstance.Error(e, parameters);
+			// }
 		}
 
 		private static Version GetExtensionVersion()

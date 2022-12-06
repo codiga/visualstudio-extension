@@ -11,6 +11,7 @@ namespace Extension.SnippetFormats
 			Coldfusion,
 			Docker,
 			Objectivec,
+			Twig,
 			Terraform,
 			Json,
 			Yaml,
@@ -20,11 +21,14 @@ namespace Extension.SnippetFormats
 			Sql,
 			Shell,
 			Scala,
+			Scss,
+			Sass,
 			Rust,
 			Ruby,
 			Php,
 			Python,
 			Perl,
+			Markdown,
 			Kotlin,
 			Javascript,
 			Java,
@@ -54,7 +58,7 @@ namespace Extension.SnippetFormats
 		/// <param name="fileName">the file name whose extension is parsed</param>
 		public static LanguageEnumeration ParseFromFileName(string fileName)
 		{
-			return Parse(Path.GetExtension(fileName));
+			return fileName.ToLower().StartsWith("docker") ? LanguageEnumeration.Docker : Parse(Path.GetExtension(fileName));
 		}
 
 		/// <summary>
@@ -66,34 +70,54 @@ namespace Extension.SnippetFormats
 		{
 			return extension switch
 			{
+				".bash" => LanguageEnumeration.Shell,
+				".c" => LanguageEnumeration.C,
+				".cfc" => LanguageEnumeration.Coldfusion,
+				".cfm" => LanguageEnumeration.Coldfusion,
+				".cls" => LanguageEnumeration.Apex,
+				".cpp" => LanguageEnumeration.Cpp,
 				".cs" => LanguageEnumeration.Csharp,
 				".css" => LanguageEnumeration.Css,
-				".html" => LanguageEnumeration.Html,
-				".json" => LanguageEnumeration.Json,
-				".py" => LanguageEnumeration.Python,
-				".ts" => LanguageEnumeration.Typescript,
-				".js" => LanguageEnumeration.Javascript,
-				".c" => LanguageEnumeration.C,
-				".cpp" => LanguageEnumeration.Cpp,
-				".java" => LanguageEnumeration.Java,
-				".rb" => LanguageEnumeration.Ruby,
-				".rs" => LanguageEnumeration.Rust,
-				".go" => LanguageEnumeration.Go,
-				".php" => LanguageEnumeration.Php,
-				".yml" => LanguageEnumeration.Yaml,
-				".cfm" => LanguageEnumeration.Coldfusion,
+				".dart" => LanguageEnumeration.Dart,
 				".dockerfile" => LanguageEnumeration.Docker,
+				".go" => LanguageEnumeration.Go,
+				".hs" => LanguageEnumeration.Haskell,
+				".htm" => LanguageEnumeration.Html,
+				".html" => LanguageEnumeration.Html,
+				".html5" => LanguageEnumeration.Html,
+				".ipynb" => LanguageEnumeration.Python,
+				".java" => LanguageEnumeration.Java,
+				".js" => LanguageEnumeration.Javascript,
+				".json" => LanguageEnumeration.Json,
+				".jsx" => LanguageEnumeration.Javascript,
+				".kt" => LanguageEnumeration.Kotlin,
 				".m" => LanguageEnumeration.Objectivec,
-				".tf" => LanguageEnumeration.Terraform,
-				".swift" => LanguageEnumeration.Swift,
+				".mm" => LanguageEnumeration.Objectivec,
+				".M" => LanguageEnumeration.Objectivec,
+				".md" => LanguageEnumeration.Markdown,
+				".php" => LanguageEnumeration.Php,
+				".php4" => LanguageEnumeration.Php,
+				".php5" => LanguageEnumeration.Php,
+				".pm" => LanguageEnumeration.Perl,
+				".pl" => LanguageEnumeration.Perl,
+				".py" => LanguageEnumeration.Python,
+				".py3" => LanguageEnumeration.Python,
+				".rb" => LanguageEnumeration.Ruby,
+				".rhtml" => LanguageEnumeration.Ruby,
+				".rs" => LanguageEnumeration.Rust,
+				".sass" => LanguageEnumeration.Sass,
+				".scala" => LanguageEnumeration.Scala,
+				".scss" => LanguageEnumeration.Scss,
+				".sh" => LanguageEnumeration.Shell,
 				".sol" => LanguageEnumeration.Solidity,
 				".sql" => LanguageEnumeration.Sql,
-				".sh" => LanguageEnumeration.Shell,
-				".scala" => LanguageEnumeration.Scala,
-				".pl" => LanguageEnumeration.Perl,
-				".hs" => LanguageEnumeration.Haskell,
-				".dart" => LanguageEnumeration.Dart,
-
+				".swift" => LanguageEnumeration.Swift,
+				".tf" => LanguageEnumeration.Terraform,
+				".ts" => LanguageEnumeration.Typescript,
+				".tsx" => LanguageEnumeration.Typescript,
+				".twig" => LanguageEnumeration.Twig,
+				".yml" => LanguageEnumeration.Yaml,
+				".yaml" => LanguageEnumeration.Yaml,
 				_ => LanguageEnumeration.Unknown
 			};
 		}
@@ -101,7 +125,6 @@ namespace Extension.SnippetFormats
 		public static string GetCommentSign(LanguageEnumeration language)
 		{
 			switch (language){
-
 				case LanguageEnumeration.Javascript:
 				case LanguageEnumeration.Typescript:
 				case LanguageEnumeration.C:
@@ -117,12 +140,15 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Swift:
 				case LanguageEnumeration.Solidity:
 				case LanguageEnumeration.Rust:
+				case LanguageEnumeration.Sass:
+				case LanguageEnumeration.Scss:
 					return "//";
 
 				case LanguageEnumeration.Python:
 				case LanguageEnumeration.Shell:
 				case LanguageEnumeration.Perl:
 				case LanguageEnumeration.Yaml:
+				case LanguageEnumeration.Terraform:
 					return "#";
 
 				case LanguageEnumeration.Coldfusion:
@@ -134,6 +160,9 @@ namespace Extension.SnippetFormats
 
 				case LanguageEnumeration.Css:
 					return "/*";
+				
+				case LanguageEnumeration.Twig:
+					return "{#";
 				
 				default:
 					return "//";

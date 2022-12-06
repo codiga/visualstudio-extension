@@ -1,13 +1,11 @@
 ﻿using Extension.SnippetFormats;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tests
 {
+	/// <summary>
+	/// Unit test for <see cref="LanguageUtils"/>.
+	/// </summary>
 	[TestFixture]
 	internal class LanguageUtilsTest
 	{
@@ -22,6 +20,19 @@ namespace Tests
 		{
 			//act & assert
 			return LanguageUtils.Parse(ext);
+		}
+
+		[Test]
+		[TestCase("dockerfile.myfile", ExpectedResult = LanguageUtils.LanguageEnumeration.Docker)]
+		[TestCase("myfile.dockerfile", ExpectedResult = LanguageUtils.LanguageEnumeration.Docker)]
+		[TestCase("Dockerfile", ExpectedResult = LanguageUtils.LanguageEnumeration.Docker)]
+		[TestCase("dockerfile", ExpectedResult = LanguageUtils.LanguageEnumeration.Docker)]
+		[TestCase("dock", ExpectedResult = LanguageUtils.LanguageEnumeration.Unknown)]
+		[TestCase("myfile.cpp", ExpectedResult = LanguageUtils.LanguageEnumeration.Cpp)]
+		public LanguageUtils.LanguageEnumeration ParseFromFileName_should_return_language_based_on_filename(
+			string fileName)
+		{
+			return LanguageUtils.ParseFromFileName(fileName);
 		}
 	}
 }

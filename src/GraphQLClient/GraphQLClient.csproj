@@ -7,9 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Community.VisualStudio.Toolkit.17" Version="17.0.475" />
     <PackageReference Include="GraphQL.Client" Version="5.1.0" />
     <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="5.1.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Interop" Version="17.3.32804.24" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop" Version="17.3.32804.24" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,8 +4,12 @@ using GraphQL.Client.Serializer.SystemTextJson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GraphQLClient.Model.Rosie;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace GraphQLClient
 {
@@ -93,6 +97,10 @@ namespace GraphQLClient
 
 	public class CodigaClient : ICodigaClient, IDisposable
 	{
+		/// <summary>
+		/// Matches for example '17.4.33103.184 D17.4' where the version group is 17.4.33103.184.
+		/// </summary>
+		private static readonly Regex AppVersionRegex = new Regex(@"(?<version>(\d+)\.(\d+)(\.\d+)*) .*");
 		private GraphQLHttpClient _client;
 		private const string CodigaEndpoint = "https://api.codiga.io/graphql";
 		private const string AuthHeaderScheme = "X-Api-Token";
@@ -102,6 +110,7 @@ namespace GraphQLClient
 		public CodigaClient(string fingerprint)
 		{
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+			_client.HttpClient.DefaultRequestHeaders.Add("User-Agent", GetUserAgent());
 			Fingerprint = fingerprint;
 		}
 
@@ -109,9 +118,39 @@ namespace GraphQLClient
 		{
 			Fingerprint = fingerprint;
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+			_client.HttpClient.DefaultRequestHeaders.Add("User-Agent", GetUserAgent());
 
 			if (!string.IsNullOrEmpty(apiToken))
 				_client.HttpClient.DefaultRequestHeaders.Add(AuthHeaderScheme, apiToken);
+		}
+
+		/// <summary>
+		/// Builds a user agent string from the current Visual Studio version number.
+		/// </summary>
+		/// <returns>"VisualStudio/&lt;version number>", or "VisualStudio" if there is no IVsShell or version number available.</returns>
+		private static string GetUserAgent()
+		{
+			var shell = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				
+				// Workaround for Community.VisualStudio.Toolkit.VS.GetMefService<SVsServiceProvider>();
+				var compService = (IComponentModel2)ServiceProvider.GlobalProvider.GetService(typeof(SComponentModel));
+				var vssp = compService.GetService<SVsServiceProvider>();
+				
+				return vssp.GetService(typeof(SVsShell)) as IVsShell;
+			});
+			
+			//e.g. 17.4.33103.184 D17.4
+			object? version = null;
+			shell?.GetProperty((int)__VSSPROPID5.VSSPROPID_ReleaseVersion, out version);
+			
+			if (version == null)
+				return "VisualStudio";
+			
+			var match = AppVersionRegex.Match((string)version);
+			var versionString = match.Groups["version"].Value;
+			return versionString != null ? $"VisualStudio/{versionString}" : "VisualStudio";
 		}
 
 		public void SetApiToken(string apiToken)

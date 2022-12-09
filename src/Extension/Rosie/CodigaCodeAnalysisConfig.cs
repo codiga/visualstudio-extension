@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Extension.Rosie
 {
@@ -9,5 +10,19 @@ namespace Extension.Rosie
     public class CodigaCodeAnalysisConfig
     {
         public List<string>? Rulesets { get; set; }
+
+        /// <summary>
+        /// Returns the ruleset names having filtered out null values from them.
+        /// <br/>
+        /// This is for covering the case where the config file is configured like this:
+        /// <code>
+        /// rulesets:
+        ///   - 
+        /// </code>
+        /// </summary>
+        public List<string>? GetRulesets()
+        {
+            return Rulesets?.Where(ruleset => ruleset != null).ToList();
+        }
     }
 }

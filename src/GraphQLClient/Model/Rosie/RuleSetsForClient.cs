@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace GraphQLClient.Model.Rosie
 {
     /// <summary>
-    /// Represents the structure of a Codiga Ruleset
+    /// Represents the structure of a Codiga Ruleset.
     /// </summary>
     public class RuleSetsForClient
     {

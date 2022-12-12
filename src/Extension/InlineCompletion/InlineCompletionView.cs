@@ -165,11 +165,14 @@ namespace Extension.InlineCompletion
 		{
 			var triggeringLine = GetTriggeringLine();
 			var geometry = _view.TextViewLines.GetMarkerGeometry(triggeringLine.Extent);
-			var caretPos = _view.Caret.Position.BufferPosition;
 
 			var wholeLineSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start, triggeringLine.Length));
 			var lineText = wholeLineSpan.GetText();
-			var firstChar = wholeLineSpan.GetText().Trim().First();
+			var lineTextTrimmed = lineText.Trim();
+			if (string.IsNullOrEmpty(lineTextTrimmed))
+				return;
+
+			var firstChar = lineTextTrimmed.First();
 			var position = lineText.IndexOf(firstChar);
 			var firstCharacterSpan = new SnapshotSpan(triggeringLine.Snapshot, new Span(triggeringLine.Start + position, 1));
 			var onlyTextG = _view.TextViewLines.GetMarkerGeometry(firstCharacterSpan);

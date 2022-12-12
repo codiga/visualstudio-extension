@@ -96,10 +96,11 @@ namespace Extension.Rosie
             RulesetNames = new SynchronizedCollection<string>();
         }
 
-        public static void Initialize()
+        public static void Initialize(bool startPolling = true)
         {
             Instance = new RosieRulesCache();
-            Instance.StartPolling();
+            if (startPolling)
+                Instance.StartPolling();
         }
         
         //For testing
@@ -164,7 +165,9 @@ namespace Extension.Rosie
 
         public enum UpdateResult
         {
-            NoCodigaClient, NoConfigFile, Success 
+            NoCodigaClient,
+            NoConfigFile,
+            Success
         }
 
         public async Task<UpdateResult> HandleCacheUpdateAsync()
@@ -391,6 +394,7 @@ namespace Extension.Rosie
         {
             Instance?._cancellationTokenSource?.Cancel();
             Instance?.ClearCache();
+            IsInitializedWithRules = false;
             Instance = null;
         }
 

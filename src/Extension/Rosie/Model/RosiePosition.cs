@@ -28,7 +28,7 @@ namespace Extension.Rosie.Model
         /// It doesn't adjust the offset if it is 0, so at the beginning of a line. 
         /// </summary>
         /// <param name="offset">the offset to adjust</param>
-        private int AdjustOffset(int offset)
+        private static int AdjustOffset(int offset)
         {
             return offset != 0 ? offset - 1 : offset;
         }

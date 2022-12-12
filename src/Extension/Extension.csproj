@@ -97,6 +97,7 @@
     <Compile Include="Rosie\RosieRulesCacheValue.cs" />
     <Compile Include="Rosie\RosieSeverities.cs" />
     <Compile Include="Rosie\RosieUtils.cs" />
+    <Compile Include="Rosie\TextBufferDataProvider.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifier.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifierFormat.cs" />
     <Compile Include="SnippetSearch\Preview\PreviewClassifierProvider.cs" />

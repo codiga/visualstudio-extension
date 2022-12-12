@@ -15,7 +15,6 @@ using Extension.SnippetFormats;
 using GraphQLClient;
 using GraphQLClient.Model.Rosie;
 using Microsoft.VisualStudio.Shell;
-using Solution = EnvDTE.Solution;
 
 namespace Extension.Rosie
 {
@@ -75,7 +74,12 @@ namespace Extension.Rosie
         
         public static RosieRulesCache? Instance { get; set; }
 
-        private Solution? _solution;
+        /// <summary>
+        /// Used to retrieve information about the solution, or the open directory,
+        /// in <see cref="CodigaConfigFileUtil"/>.
+        /// Null only in case of testing.
+        /// </summary>
+        private SVsServiceProvider? _serviceProvider;
 
         private RosieRulesCache()
         {
@@ -85,24 +89,24 @@ namespace Extension.Rosie
         }
         
         //For testing
-        private RosieRulesCache(Solution solution, ICodigaClientProvider clientProvider)
+        private RosieRulesCache(ICodigaClientProvider clientProvider)
         {
-            _solution = solution;
             _clientProvider = clientProvider;
             _cachedRules = new ConcurrentDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue>();
             RulesetNames = new SynchronizedCollection<string>();
         }
 
-        public static void Initialize()
+        public static void Initialize(bool startPolling = true)
         {
             Instance = new RosieRulesCache();
-            Instance.StartPolling();
+            if (startPolling)
+                Instance.StartPolling();
         }
         
         //For testing
-        public static void Initialize(Solution solution, ICodigaClientProvider clientProvider)
+        public static void Initialize(SVsServiceProvider? serviceProvider, ICodigaClientProvider clientProvider)
         {
-            Instance = new RosieRulesCache(solution, clientProvider);
+            Instance = new RosieRulesCache(clientProvider) { _serviceProvider = serviceProvider };
         }
 
         #region Polling and update
@@ -118,9 +122,9 @@ namespace Extension.Rosie
 
             //Retrieve the DTE object from which the Solution can be accessed
             ThreadHelper.ThrowIfNotOnUIThread();
-            var vssp = VS.GetMefService<SVsServiceProvider>();
-            _dte = (_DTE)vssp.GetService(typeof(_DTE));
-            
+            _serviceProvider = VS.GetMefService<SVsServiceProvider>();
+            _dte = (_DTE)_serviceProvider.GetService(typeof(_DTE));
+
             PollRulesetsAsync(_cancellationTokenSource.Token);
         }
 
@@ -161,7 +165,9 @@ namespace Extension.Rosie
 
         public enum UpdateResult
         {
-            NoCodigaClient, NoConfigFile, Success 
+            NoCodigaClient,
+            NoConfigFile,
+            Success
         }
 
         public async Task<UpdateResult> HandleCacheUpdateAsync()
@@ -169,8 +175,7 @@ namespace Extension.Rosie
             if (!_clientProvider.TryGetClient(out var client))
                 return UpdateResult.NoCodigaClient;
 
-            _solution ??= _dte.Solution;
-            var codigaConfigFile = CodigaConfigFileUtil.FindCodigaConfigFile(_solution);
+            var codigaConfigFile = CodigaConfigFileUtil.FindCodigaConfigFile(_serviceProvider);
 
             if (codigaConfigFile == null || !File.Exists(codigaConfigFile))
             {
@@ -389,6 +394,7 @@ namespace Extension.Rosie
         {
             Instance?._cancellationTokenSource?.Cancel();
             Instance?.ClearCache();
+            IsInitializedWithRules = false;
             Instance = null;
         }
 

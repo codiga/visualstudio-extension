@@ -62,9 +62,27 @@ namespace Extension.Rosie
 
         private const string RosiePostUrl = "https://analysis.codiga.io/analyze";
 
+        private readonly TextBufferDataProvider _dataProvider;
+
+        public RosieClient()
+        {
+            _dataProvider = new TextBufferDataProvider();
+        }
+
+        //For testing
+        public RosieClient(Func<ITextBuffer, string?> fileNameProvider, Func<ITextBuffer, string> fileTextProvider)
+        {
+            _dataProvider = new TextBufferDataProvider
+            {
+                FileName = fileNameProvider,
+                FileText = fileTextProvider,
+                IsTestMode = true
+            };
+        }
+
         public /*override*/ async Task<IList<RosieAnnotation>> GetAnnotations(ITextBuffer textBuffer)
         {
-            var fileName = textBuffer.GetFileName();
+            var fileName = _dataProvider.FileName(textBuffer);
             if (fileName == null || !File.Exists(fileName))
                 return NoAnnotation;
 
@@ -77,7 +95,7 @@ namespace Extension.Rosie
             {
                 //The ITextBuffer's text contains \r\n new line symbols, but sending the file content having the \r characters
                 // included, can result in incorrect start/end line/column offsets to be returned from Rosie.
-                var fileText = Encoding.UTF8.GetBytes(textBuffer.CurrentSnapshot.GetText().Replace("\r", ""));
+                var fileText = Encoding.UTF8.GetBytes(_dataProvider.FileText(textBuffer).Replace("\r", ""));
                 var codeBase64 = Convert.ToBase64String(fileText);
 
                 await InitializeRulesCacheIfNeeded();
@@ -91,7 +109,8 @@ namespace Extension.Rosie
                 using (var httpClient = new HttpClient())
                 {
                     //Prepare the request and send it to the Rosie server
-                    var rosieRequest = new RosieRequest(Path.GetFileName(fileName), RosieUtils.GetRosieLanguage(language),
+                    var rosieRequest = new RosieRequest(Path.GetFileName(fileName),
+                        RosieUtils.GetRosieLanguage(language),
                         "utf8",
                         codeBase64, rosieRules, true);
                     var userAgent = await GetUserAgentAsync();
@@ -144,38 +163,46 @@ namespace Extension.Rosie
         /// since a document might be open (thus has an <c>ITextView</c> and <c>ITextBuffer</c>, and a <see cref="RosieViolationTagger"/> is created)
         /// before the Solution would open or complete opening. 
         /// </summary>
-        private static async Task InitializeRulesCacheIfNeeded()
+        private async Task InitializeRulesCacheIfNeeded()
         {
             if (RosieRulesCache.Instance == null)
             {
-                //Temporarily switching back to main thread due to RosieRulesCache.StartPolling()
-                await Task.Run(async () =>
+                if (!_dataProvider.IsTestMode)
                 {
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    RosieRulesCache.Initialize();
-                });
-
-                //Wait a little for the RosieRulesCache to be initialized with rules.
-                await Task.Run(async () =>
-                {
-                    while (true)
+                    //Temporarily switching back to main thread due to RosieRulesCache.StartPolling()
+                    await Task.Run(async () =>
                     {
-                        if (!RosieRulesCache.IsInitializedWithRules)
+                        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                        RosieRulesCache.Initialize();
+                    });
+
+                    //Wait a little for the RosieRulesCache to be initialized with rules.
+                    await Task.Run(async () =>
+                    {
+                        while (true)
                         {
-                            var delay = Task.Delay(TimeSpan.FromMilliseconds(100), new CancellationToken());
-                            try
+                            if (!RosieRulesCache.IsInitializedWithRules)
                             {
-                                await delay;
+                                var delay = Task.Delay(TimeSpan.FromMilliseconds(100), new CancellationToken());
+                                try
+                                {
+                                    await delay;
+                                }
+                                catch (TaskCanceledException)
+                                {
+                                    return;
+                                }
                             }
-                            catch (TaskCanceledException)
-                            {
+                            else
                                 return;
-                            }
                         }
-                        else
-                            return;
-                    }
-                }).WithTimeout(TimeSpan.FromSeconds(2));
+                    }).WithTimeout(TimeSpan.FromSeconds(2));
+                }
+                else
+                {
+                    RosieRulesCache.Initialize(false);
+                    RosieRulesCache.IsInitializedWithRules = true;
+                }
             }
         }
 

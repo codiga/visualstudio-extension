@@ -10,12 +10,12 @@ namespace Extension.Rosie.Model
         /// <summary>
         /// The position of the edit from where the fix will begin.
         /// </summary>
-        public RosiePosition Start { get; set; }
+        public RosiePosition? Start { get; set; }
 
         /// <summary>
         /// The position of the edit at where the fix will end.
         /// </summary>
-        public RosiePosition End { get; set; }
+        public RosiePosition? End { get; set; }
 
         /// <summary>
         /// Content for string insertion and replacement in the editor. Not used for removal edits.

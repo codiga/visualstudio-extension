@@ -19,14 +19,16 @@ namespace Extension.Rosie.Annotation
     public class DisableRosieAnalysisSuggestedAction : ISuggestedAction
     {
         private const string CodigaDisable = "codiga-disable";
-        private readonly ITextBuffer _textBuffer;
         private readonly RosieAnnotation _annotation;
+        private readonly ITextBuffer _textBuffer;
+        private readonly TextBufferDataProvider _dataProvider;
         private readonly string _displayText;
 
-        public DisableRosieAnalysisSuggestedAction(ITextBuffer textBuffer, RosieAnnotation annotation)
+        public DisableRosieAnalysisSuggestedAction(RosieAnnotation annotation, ITextBuffer textBuffer, TextBufferDataProvider? dataProvider = null)
         {
-            _textBuffer = textBuffer;
             _annotation = annotation;
+            _textBuffer = textBuffer;
+            _dataProvider = dataProvider ?? new TextBufferDataProvider();
             _displayText = $"Remove error '{annotation.RuleName}'";
         }
 
@@ -54,7 +56,9 @@ namespace Extension.Rosie.Annotation
             {
                 //Find the previous line's end position
                 var previousLineEndPosition =
-                    _textBuffer.CurrentSnapshot.GetLineFromLineNumber(lineAtViolationStart.LineNumber - 1).End.Position;
+                    _textBuffer.CurrentSnapshot
+                        .GetLineFromLineNumber(lineAtViolationStart.LineNumber == 0 ? 0 : lineAtViolationStart.LineNumber - 1)
+                        .End.Position;
                 
                 //Insert the previous line's new line text at the end of the previous line, to add a new line
                 _textBuffer.Insert(previousLineEndPosition,
@@ -62,7 +66,7 @@ namespace Extension.Rosie.Annotation
             }
             
             //Get the comment sign for the current file
-            var language = LanguageUtils.ParseFromFileName(_textBuffer.GetFileName());
+            var language = LanguageUtils.ParseFromFileName(_dataProvider.FileName(_textBuffer));
             var commentSign = LanguageUtils.GetCommentSign(language);
 
             //Insert the "codiga-disable" comment at the new line's start position.
@@ -78,10 +82,15 @@ namespace Extension.Rosie.Annotation
         /// This is based on https://blog.paranoidcoding.com/2014/09/02/vsix-insert-newline.html, it is a modified version of it,
         /// because we are adding a new line before the current one, and not after it, and we do the line number check
         /// in <c>Invoke()</c>.
+        /// <br/>
+        /// In test mode, returning a fixed new line value prevents the need to mock a couple of methods.
         /// </summary>
         /// <param name="point">the position whose line's new line text we want to use</param>
-        private static string GetNewLineText(SnapshotPoint point)
+        private string GetNewLineText(SnapshotPoint point)
         {
+            if (_dataProvider.IsTestMode)
+                return "\r\n";
+            
             var line = point.GetContainingLine();
             return line.LineBreakLength > 0 ? line.GetLineBreakText() : Environment.NewLine;
         }

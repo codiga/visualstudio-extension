@@ -52,7 +52,7 @@ namespace Extension.Rosie.Annotation
         /// Collects the <c>RosieViolationTags</c> in a given range of the <see cref="ITextView"/> it is created for.
         /// See its creation in the constructor of <see cref="RosieHighlightActionsSourceProvider"/>.
         /// </summary>
-        private ITagAggregator<RosieViolationTag> _violationTagAggregator;
+        private readonly ITagAggregator<RosieViolationTag> _violationTagAggregator;
 
         private bool _isDisposed;
 
@@ -102,26 +102,22 @@ namespace Extension.Rosie.Annotation
             if (_isDisposed)
                 return Enumerable.Empty<SuggestedActionSet>();
 
-            var violationsInRange = _violationTagAggregator.GetTags(range);
-
-            var suggestedActions = new List<ISuggestedAction>();
-            foreach (var violation in violationsInRange)
+            var actions = new List<ISuggestedAction>();
+            foreach (var violation in _violationTagAggregator.GetTags(range))
             {
                 var rosieAnnotation = violation.Tag.Annotation;
                 foreach (var fix in rosieAnnotation.Fixes)
-                    suggestedActions.Add(new ApplyRosieFixSuggestedAction(range.Snapshot.TextBuffer, fix));
+                    actions.Add(new ApplyRosieFixSuggestedAction(range.Snapshot.TextBuffer, fix));
 
-                suggestedActions.Add(new DisableRosieAnalysisSuggestedAction(range.Snapshot.TextBuffer,
-                    rosieAnnotation));
-                suggestedActions.Add(new OpenOnCodigaHubSuggestedAction(rosieAnnotation));
+                actions.Add(new DisableRosieAnalysisSuggestedAction(
+                    rosieAnnotation,
+                    range.Snapshot.TextBuffer));
+                actions.Add(new OpenOnCodigaHubSuggestedAction(rosieAnnotation));
             }
 
-            return new[]
-            {
-                new SuggestedActionSet(null,
-                    suggestedActions,
-                    priority: SuggestedActionSetPriority.Medium)
-            };
+            return actions.Count != 0
+                ? new[] { new SuggestedActionSet(null, actions, priority: SuggestedActionSetPriority.Medium) }
+                : Enumerable.Empty<SuggestedActionSet>();
         }
 
         public bool TryGetTelemetryId(out Guid telemetryId)
@@ -132,20 +128,10 @@ namespace Extension.Rosie.Annotation
 
         public void Dispose()
         {
-            Dispose(true);
-        }
-
-        private void Dispose(bool disposing)
-        {
             if (!_isDisposed)
             {
-                if (disposing)
-                {
-                    _violationTagAggregator.BatchedTagsChanged -= OnTagsChanged;
-                    _violationTagAggregator.Dispose();
-                    _violationTagAggregator = null;
-                }
-
+                _violationTagAggregator.BatchedTagsChanged -= OnTagsChanged;
+                _violationTagAggregator.Dispose();
                 _isDisposed = true;
             }
         }

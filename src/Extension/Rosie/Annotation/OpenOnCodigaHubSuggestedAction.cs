@@ -32,12 +32,17 @@ namespace Extension.Rosie.Annotation
         {
             try
             {
-                Process.Start($"https://app.codiga.io/hub/ruleset/{_annotation.RulesetName}/{_annotation.RuleName}");
+                Process.Start(GetUrlString());
             }
             catch
             {
                 // ignored
             }
+        }
+
+        internal string GetUrlString()
+        {
+            return $"https://app.codiga.io/hub/ruleset/{_annotation.RulesetName}/{_annotation.RuleName}";
         }
 
         #region Action sets and preview

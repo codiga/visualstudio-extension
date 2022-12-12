@@ -62,12 +62,15 @@ namespace Extension.Rosie.Annotation
         /// If the start offset for additions, or the start/end offset for removals and updates, received from the rule configuration,
         /// is either null or is outside the current file's range, we don't apply the fix.
         /// </summary>
-        internal bool HasInvalidEditOffset()
+        private bool HasInvalidEditOffset()
         {
             var hasInvalidOffset = true;
             try
             {
-                var documentLastPosition = _textBuffer.CurrentSnapshot.Length - 1;
+                var documentLastPosition =
+                    _textBuffer.CurrentSnapshot.Length == 0
+                        ? 0
+                        : _textBuffer.CurrentSnapshot.Length - 1;
                 hasInvalidOffset = _edits
                     .Any(edit =>
                     {

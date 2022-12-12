@@ -135,6 +135,7 @@ at [Implementing an IDE plugin for analyzing custom rules](https://doc.codiga.io
 In order to perform code analysis, users must have a `codiga.yml` file in their Solution's root directory,
 with at least one valid ruleset name. If there is no ruleset name, or no valid ruleset name defined, then code analysis
 will not be performed.
+If what is opened is simply a folder, and not an actual solution, the `codiga.yml` file is still recognized in there.
 
 [`CodigaConfigFileUtil`](/src/Extension/Rosie/CodigaConfigFileUtil.cs) is responsible for finding this config file in the Solution root, and for parsing this config file into a
 [`CodigaCodeAnalysisConfig`](/src/Extension/Rosie/CodigaCodeAnalysisConfig.cs) containing the list of ruleset names.

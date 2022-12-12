@@ -1,8 +1,7 @@
 using System.IO;
-using EnvDTE;
 using Extension.Rosie;
-using Moq;
 using NUnit.Framework;
+using static Tests.ServiceProviderMockSupport;
 
 namespace Tests.Rosie
 {
@@ -12,7 +11,6 @@ namespace Tests.Rosie
     [TestFixture]
     internal class CodigaConfigFileUtilTest
     {
-        private string _solutionDir;
         private string _codigaConfigFile;
 
         #region DeserializeConfig negative cases
@@ -160,9 +158,9 @@ rulesets:
         [Test]
         public void FindCodigaConfigFile_should_return_null_for_missing_solution_root()
         {
-            var solution = new Mock<Solution>();
+            var serviceProvider = MockServiceProvider("/");
 
-            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(solution.Object);
+            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(serviceProvider);
 
             Assert.That(configFile, Is.Null);
         }
@@ -170,11 +168,9 @@ rulesets:
         [Test]
         public void FindCodigaConfigFile_should_return_null_for_missing_codiga_config_file()
         {
-            var solution = new Mock<Solution>();
-            _solutionDir = Path.GetTempPath();
-            solution.Setup(s => s.FullName).Returns(_solutionDir);
+            var serviceProvider = MockServiceProvider(Path.GetTempPath());
 
-            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(solution.Object);
+            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(serviceProvider);
 
             Assert.That(configFile, Is.Null);
         }
@@ -182,18 +178,16 @@ rulesets:
         [Test]
         public void FindCodigaConfigFile_should_return_path_of_codiga_config_file()
         {
-            _solutionDir = Path.GetTempPath();
-            _codigaConfigFile = $"{_solutionDir}codiga.yml";
+            var serviceProvider = MockServiceProvider(Path.GetTempPath());
+            _codigaConfigFile = $"{Path.GetTempPath()}codiga.yml";
 
-            var solution = new Mock<Solution>();
-            solution.Setup(s => s.FullName).Returns(_solutionDir);
             using var fs = File.Create(_codigaConfigFile);
 
-            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(solution.Object);
+            var configFile = CodigaConfigFileUtil.FindCodigaConfigFile(serviceProvider);
 
             Assert.That(configFile, Is.EqualTo(_codigaConfigFile));
         }
-
+        
         #endregion
 
         #region Invalid ruleset names
@@ -232,8 +226,6 @@ rulesets:
         [TearDown]
         public void TearDown()
         {
-            if (File.Exists(_solutionDir))
-                File.Delete(_solutionDir);
             if (File.Exists(_codigaConfigFile))
                 File.Delete(_codigaConfigFile);
         }

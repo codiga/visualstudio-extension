@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Solution = EnvDTE.Solution;
 
 namespace Extension.Rosie
 {
@@ -34,13 +35,21 @@ namespace Extension.Rosie
         private const string CodigaConfigFileName = "codiga.yml";
 
         /// <summary>
-        /// Looks up the Codiga config file in the provided Solution's root directory.
+        /// Looks up the Codiga config file in the provided Solution's root directory,
+        /// or in the currently open folder.
+        /// <br/>
+        /// See https://stackoverflow.com/questions/49278306/how-do-i-find-the-open-folder-in-a-vsix-extension
         /// </summary>
-        /// <param name="solution">The current solution to find the config file in</param>
+        /// <param name="serviceProvider">The service provider to retrieve information about the solution from.</param>
         /// <returns>The path of the config file, or null if it doesn't exist.</returns>
-        public static string? FindCodigaConfigFile(Solution solution)
+        public static string? FindCodigaConfigFile(SVsServiceProvider serviceProvider)
         {
-            var solutionRoot = Path.GetDirectoryName(solution.FullName);
+            var sol = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
+
+            // 'dir' contains the solution's directory path, or the open folder's path when it is a folder that's open, and not a solution
+            sol.GetSolutionInfo(out var dir, out var file, out var ops);
+
+            var solutionRoot = Path.GetDirectoryName(dir);
             if (solutionRoot == null)
                 return null;
 

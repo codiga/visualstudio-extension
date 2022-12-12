@@ -40,7 +40,7 @@ namespace Extension.Rosie.Annotation
         /// <summary>
         /// The text buffer on whose changes requests to Rosie, and the persistence of Rosie annotations are performed.
         /// </summary>
-        private readonly ITextBuffer _sourceBuffer;
+        private readonly ITextBuffer? _sourceBuffer;
 
         /// <summary>
         /// Stores the timestamp (in milliseconds) of the text buffer's last modification.
@@ -61,12 +61,20 @@ namespace Extension.Rosie.Annotation
         /// at least 500ms), we send a Rosie request for the whole file, cache it in this field, and if there is no reason to re-analyze
         /// the file, we provide the information for tags from this field.
         /// </summary>
-        private IList<RosieAnnotation> _annotations = RosieClient.NoAnnotation;
+        public IList<RosieAnnotation> Annotations { get; set; } = RosieClient.NoAnnotation;
 
         private bool _isDisposed;
+        private readonly TextBufferDataProvider? _dataProvider;
+
+        //For testing
+        public RosieViolationTagger(TextBufferDataProvider? dataProvider = null)
+        {
+            _dataProvider = dataProvider;
+        }
 
         public RosieViolationTagger(ITextView sourceView, ITextBuffer sourceBuffer)
         {
+            _dataProvider = new TextBufferDataProvider();
             _sourceView = sourceView;
             _sourceBuffer = sourceBuffer;
 
@@ -81,12 +89,12 @@ namespace Extension.Rosie.Annotation
             ThreadHelper.JoinableTaskFactory.Run(async () =>
             {
                 if (RosieClientProvider.TryGetClient(out var client))
-                    _annotations = await client.GetAnnotations(_sourceBuffer);
+                    Annotations = await client.GetAnnotations(_sourceBuffer);
             });
         }
 
         /// <summary>
-        /// It requests a code analysis, sends a request to Rosie for the current file, and caches its results in <see cref="_annotations"/>
+        /// It requests a code analysis, sends a request to Rosie for the current file, and caches its results in <see cref="Annotations"/>
         /// if the user hasn't typed anything in the last <see cref="DocumentModificationWaitIntervalInMillis"/>.
         /// <br/>
         /// When the violations are received from the server, it signals this tagger, thus all associated <see cref="ITagAggregator{T}"/>s
@@ -132,12 +140,12 @@ namespace Extension.Rosie.Annotation
         /// Sends the argument buffer's contents for code analysis,
         /// then signals a tag update for the whole file's range in the argument text buffer.
         /// </summary>
-        /// <param name="textBuffer">The text buffer in which the tagging needs to be updated.</param>
+        /// <param name="textView">The text view in which the tagging needs to be updated.</param>
         public async Task UpdateAnnotationsAndNotifyTagsChangedAsync(ITextView textView)
         {
             if (RosieClientProvider.TryGetClient(out var client))
             {
-                _annotations = await client.GetAnnotations(textView.TextBuffer);
+                Annotations = await client.GetAnnotations(textView.TextBuffer);
                 TagsChanged.Invoke(this,
                     new SnapshotSpanEventArgs(new SnapshotSpan(textView.TextBuffer.CurrentSnapshot,
                         new Span(0, textView.TextBuffer.CurrentSnapshot.Length - 1))));
@@ -157,8 +165,10 @@ namespace Extension.Rosie.Annotation
         /// <br/>
         /// It calculates the positions in the text buffer, based on the line and column coordinates in each Rosie violation,
         /// so that later, the error squiggles can be display in their correct positions and ranges.
+        /// <br/>
+        /// NOTE: this is visible only for testing.
         /// </summary>
-        private async Task<IEnumerable<ITagSpan<RosieViolationTag>>> GetTagsAsync(
+        public async Task<IEnumerable<ITagSpan<RosieViolationTag>>> GetTagsAsync(
             NormalizedSnapshotSpanCollection spans)
         {
             if (spans.Count == 0 || _isDisposed)
@@ -167,21 +177,14 @@ namespace Extension.Rosie.Annotation
             var span = spans[0];
             var snapshot = span.Snapshot;
 
-            //Temporarily switching back to main thread due to RosieRulesCache.StartPolling()
-            var fileName = await Task.Run(async () =>
-            {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                return snapshot.TextBuffer.GetFileName();
-            });
-
             //If there is no file to create tags in, return no tags
-            if (fileName == null)
+            if (await GetFileNameAsync(snapshot) == null)
                 return Enumerable.Empty<ITagSpan<RosieViolationTag>>();
 
             var tagSpans = new List<ITagSpan<RosieViolationTag>>();
 
             //Iterate over all Rosie annotations/violations and create the proper tags for each of them.
-            foreach (var annotation in _annotations)
+            foreach (var annotation in Annotations)
             {
                 int annotationStart;
                 int annotationEnd;
@@ -197,7 +200,7 @@ namespace Extension.Rosie.Annotation
                     continue;
                 }
 
-                //If the spans don't intersect, don't create a tag
+                //If the spans don't intersect, or the annotation starts later than it ends, don't create a tag
                 //span:             |--------|
                 //anno:                          |--------|
                 //anno: |--------|
@@ -244,11 +247,27 @@ namespace Extension.Rosie.Annotation
             return tagSpans;
         }
 
+        private async Task<string?> GetFileNameAsync(ITextSnapshot snapshot)
+        {
+            if (!_dataProvider.IsTestMode)
+            {
+                //Temporarily switching back to main thread due to RosieRulesCache.StartPolling()
+                return await Task.Run(async () =>
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    return snapshot.TextBuffer.GetFileName();
+                });
+            }
+
+            return _dataProvider.FileName(snapshot.TextBuffer);
+        }
+
         public void Dispose()
         {
             if (!_isDisposed)
             {
-                _sourceBuffer.PostChanged -= RequestCodeAnalysis;
+                if (_sourceBuffer != null)
+                    _sourceBuffer.PostChanged -= RequestCodeAnalysis;
                 _isDisposed = true;
             }
         }

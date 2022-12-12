@@ -129,6 +129,12 @@ namespace Extension.Rosie.Annotation
 
         private bool _isDisposed;
 
+        //For testing
+        public RosieViolationSquiggleTagger(ITagAggregator<RosieViolationTag> rosieViolationAggregator)
+        {
+            _rosieViolationAggregator = rosieViolationAggregator;
+        }
+        
         public RosieViolationSquiggleTagger(ITextBuffer sourceBuffer,
             ITagAggregator<RosieViolationTag> rosieViolationAggregator)
         {
@@ -166,14 +172,11 @@ namespace Extension.Rosie.Annotation
             {
                 var spanCollection = violationTagSpan.Span.GetSpans(snapshot);
                 if (spanCollection.Count == 1)
-                {
-                    var errorSpan = spanCollection[0];
                     yield return new TagSpan<IErrorTag>(
-                        errorSpan,
+                        /*errorSpan*/ spanCollection[0],
                         new RosieViolationSquiggleTag(
                             GetSquiggleTypeForRosieSeverity(violationTagSpan.Tag.Annotation.Severity),
                             violationTagSpan.Tag.Annotation.Message));
-                }
             }
         }
 

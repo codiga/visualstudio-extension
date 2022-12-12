@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Extension.Rosie.Model
 {
@@ -28,6 +29,33 @@ namespace Extension.Rosie.Model
             Start = violation.Start;
             End = violation.End;
             Fixes = violation.Fixes;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RosieAnnotation annotation &&
+                   RulesetName == annotation.RulesetName &&
+                   RuleName == annotation.RuleName &&
+                   Message == annotation.Message &&
+                   Severity == annotation.Severity &&
+                   Category == annotation.Category &&
+                   EqualityComparer<RosiePosition>.Default.Equals(Start, annotation.Start) &&
+                   EqualityComparer<RosiePosition>.Default.Equals(End, annotation.End) &&
+                   Fixes.SequenceEqual(annotation.Fixes);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 638126934;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RulesetName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RuleName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Message);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Severity);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Category);
+            hashCode = hashCode * -1521134295 + EqualityComparer<RosiePosition>.Default.GetHashCode(Start);
+            hashCode = hashCode * -1521134295 + EqualityComparer<RosiePosition>.Default.GetHashCode(End);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IList<RosieViolationFix>>.Default.GetHashCode(Fixes);
+            return hashCode;
         }
     }
 }

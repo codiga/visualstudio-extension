@@ -17,7 +17,6 @@ namespace Extension.Rosie.Annotation
     //Restricts the creation of this provider to certain text view roles
     [TextViewRole(PredefinedTextViewRoles.Document)]
     [TextViewRole(PredefinedTextViewRoles.Editable)]
-    // [TextViewRole(PredefinedTextViewRoles.Analyzable)]
     [TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
     internal class RosieViolationTaggerProvider : IViewTaggerProvider
     {

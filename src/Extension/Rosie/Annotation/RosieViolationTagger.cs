@@ -204,7 +204,9 @@ namespace Extension.Rosie.Annotation
                 //span:             |--------|
                 //anno:                          |--------|
                 //anno: |--------|
-                if (annotationStart > span.End.Position || annotationEnd < span.Start.Position)
+                if (annotationStart > span.End.Position
+                    || annotationEnd < span.Start.Position
+                    || annotationStart > annotationEnd)
                     continue;
 
                 if (annotationStart <= span.Start.Position)

@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Extension.Caching;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -107,7 +108,7 @@ namespace Extension.Rosie.Annotation
             {
                 var rosieAnnotation = violation.Tag.Annotation;
                 foreach (var fix in rosieAnnotation.Fixes)
-                    actions.Add(new ApplyRosieFixSuggestedAction(range.Snapshot.TextBuffer, fix));
+                    actions.Add(new ApplyRosieFixSuggestedAction(range.Snapshot.TextBuffer, fix, new DefaultCodigaClientProvider()));
 
                 actions.Add(new DisableRosieAnalysisSuggestedAction(
                     rosieAnnotation,

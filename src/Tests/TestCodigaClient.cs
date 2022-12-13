@@ -62,7 +62,12 @@ namespace Tests
         {
             return await Task.FromResult(RulesetsForClientTestSupport.GetRulesetsLastTimestamp(names));
         }
-        
+
+        public async Task<string> RecordRuleFixAsync()
+        {
+            return await Task.FromResult<string>(null);
+        }
+
         public void Dispose()
         {
         }

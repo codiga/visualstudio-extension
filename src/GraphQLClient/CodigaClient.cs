@@ -93,6 +93,11 @@ namespace GraphQLClient
 		/// <exception cref="CodigaAPIException"></exception>
 		/// <returns>The timestamp when the sent rulesets were last updated.</returns>
 		public Task<long> GetRulesetsLastUpdatedTimestampAsync(IReadOnlyCollection<string> names);
+		
+		/// <summary>
+		/// Sends a request to Codiga that a rule fix quick fix was invoked by the user.
+		/// </summary>
+		public Task<string> RecordRuleFixAsync();
 	}
 
 	public class CodigaClient : ICodigaClient, IDisposable
@@ -283,6 +288,20 @@ namespace GraphQLClient
 			return result.Data.RuleSetsLastUpdatedTimestamp;
 		}
 
+		public async Task<string> RecordRuleFixAsync()
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = Fingerprint;
+
+			var request = new GraphQLHttpRequest(QueryProvider.RecordRuleFixMutation, variables);
+			var result = await _client.SendMutationAsync<RecordRuleFixMutationResult>(request);
+
+			ThrowOnErrors(result);
+			
+			return result.Data.RecordAccess;
+		}
+
 		public void Dispose()
 		{
 			_client?.Dispose();
@@ -349,6 +368,11 @@ namespace GraphQLClient
 	}
 
 	internal class RecordRecipeUseMutationResult
+	{
+		public string? RecordAccess { get; set; }
+	}
+	
+	internal class RecordRuleFixMutationResult
 	{
 		public string? RecordAccess { get; set; }
 	}

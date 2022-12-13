@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Extension.Caching;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Extension.Rosie.Model;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Span = Microsoft.VisualStudio.Text.Span;
 
@@ -18,17 +20,24 @@ namespace Extension.Rosie.Annotation
     {
         private readonly ITextBuffer _textBuffer;
         private readonly IList<RosieViolationFixEdit> _edits;
+        /// <summary>
+        /// Null only in case of testing.
+        /// </summary>
+        private readonly ICodigaClientProvider? _clientProvider;
         private readonly string _displayText;
 
-        public ApplyRosieFixSuggestedAction(ITextBuffer textBuffer, RosieViolationFix fix)
+        public ApplyRosieFixSuggestedAction(ITextBuffer textBuffer, RosieViolationFix fix, ICodigaClientProvider? clientProvider = null)
         {
             _textBuffer = textBuffer;
+            _clientProvider = clientProvider;
             _edits = fix.Edits;
             _displayText = $"Fix: {fix.Description}";
         }
 
         public void Invoke(CancellationToken cancellationToken)
         {
+            RecordRuleFix();
+            
             if (HasInvalidEditOffset())
                 return;
 
@@ -56,6 +65,27 @@ namespace Extension.Rosie.Annotation
                     _textBuffer.Delete(removalSpan);
                 }
             }
+        }
+
+        /// <summary>
+        /// No metric is recorded during integration testing.
+        /// </summary>
+        private void RecordRuleFix()
+        {
+            if(_clientProvider == null || !_clientProvider.TryGetClient(out var client))
+                return;
+            
+            ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            {
+                try
+                {
+                    await client.RecordRuleFixAsync();
+                }
+                catch
+                {
+                    //Even if recording this metric fails, the application of the fix should be performed
+                }
+            });
         }
 
         /// <summary>

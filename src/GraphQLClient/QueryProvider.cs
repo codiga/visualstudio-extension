@@ -21,6 +21,7 @@ namespace GraphQLClient
 		private const string GetUserQueryFile = Namespace + "GetUser.graphql";
 		private const string GetRulesetsForClientQueryFile = Namespace + "GetRulesetsForClient.graphql";
 		private const string GetRulesetsLastUpdatedTimestampQueryFile = Namespace + "GetRulesetsForClientLastTimestamp.graphql";
+		private const string RecordRuleFixMutationFile = Namespace + "RecordRuleFix.graphql";
 
 		public static string ShortcutQuery { get; }
 		public static string ShortcutLastTimestampQuery { get; }
@@ -29,6 +30,7 @@ namespace GraphQLClient
 		public static string GetUserQuery { get; }
 		public static string GetRulesetsForClientQuery { get; }
 		public static string GetRulesetsLastUpdatedTimestampQuery { get; }
+		public static string RecordRuleFixMutation { get; }
 
 		static QueryProvider()
 		{
@@ -74,6 +76,12 @@ namespace GraphQLClient
 			{
 				using StreamReader reader = new StreamReader(stream);
 				GetRulesetsLastUpdatedTimestampQuery = reader.ReadToEnd();
+			}
+			
+			using (Stream stream = assembly.GetManifestResourceStream(RecordRuleFixMutationFile))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				RecordRuleFixMutation = reader.ReadToEnd();
 			}
 		}
 	}

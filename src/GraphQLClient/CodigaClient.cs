@@ -107,17 +107,17 @@ namespace GraphQLClient
 
 		public string Fingerprint { get; }
 
-		public CodigaClient(string fingerprint)
+		//For testing
+		public CodigaClient(string fingerprint) : this(null, fingerprint)
 		{
-			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
-			_client.HttpClient.DefaultRequestHeaders.Add("User-Agent", GetUserAgent());
-			Fingerprint = fingerprint;
 		}
 
-		public CodigaClient(string apiToken, string fingerprint)
+		public CodigaClient(string? apiToken, string fingerprint)
 		{
 			Fingerprint = fingerprint;
 			_client = new GraphQLHttpClient(CodigaEndpoint, new SystemTextJsonSerializer());
+			//This removes the User-Agent completely, so that GraphQL's own user agent (e.g. GraphQL.Client/5.1.0.0) is not sent
+			_client.HttpClient.DefaultRequestHeaders.Remove("User-Agent");
 			_client.HttpClient.DefaultRequestHeaders.Add("User-Agent", GetUserAgent());
 
 			if (!string.IsNullOrEmpty(apiToken))

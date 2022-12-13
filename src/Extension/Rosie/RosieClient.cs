@@ -27,14 +27,6 @@ namespace Extension.Rosie
         /// An empty list of <c>RosieAnnotation</c>s, so that when we need an empty list of them, we don't need to create a new list each time.
         /// </summary>
         public static readonly IList<RosieAnnotation> NoAnnotation = new List<RosieAnnotation>();
-        
-        /// <summary>
-        /// Languages currently supported by Rosie.
-        /// <br/>
-        /// See also <see cref="RosieUtils.GetRosieLanguage"/>.
-        /// </summary>
-        private static readonly IList<LanguageUtils.LanguageEnumeration> SupportedLanguages =
-            new List<LanguageUtils.LanguageEnumeration> { LanguageUtils.LanguageEnumeration.Python };
 
         /// <summary>
         /// Matches for example '17.4.33103.184 D17.4' where majorVersion is 17, minorVersion is 4.
@@ -86,9 +78,9 @@ namespace Extension.Rosie
             if (fileName == null || !File.Exists(fileName))
                 return NoAnnotation;
 
-            var language = LanguageUtils.ParseFromFileName(fileName);
+            var fileLanguage = LanguageUtils.ParseFromFileName(fileName);
 
-            if (!SupportedLanguages.Contains(language))
+            if (!RosieLanguageSupport.IsLanguageSupported(fileLanguage))
                 return NoAnnotation;
 
             try
@@ -101,7 +93,7 @@ namespace Extension.Rosie
                 await InitializeRulesCacheIfNeeded();
 
                 //Prepare the request
-                var rosieRules = RosieRulesCache.Instance?.GetRosieRulesForLanguage(language);
+                var rosieRules = RosieRulesCache.Instance?.GetRosieRulesForLanguage(fileLanguage);
                 //If there is no rule for the target language, then Rosie is not called, and no tagging is performed
                 if (rosieRules == null || rosieRules.Count == 0)
                     return NoAnnotation;
@@ -110,7 +102,7 @@ namespace Extension.Rosie
                 {
                     //Prepare the request and send it to the Rosie server
                     var rosieRequest = new RosieRequest(Path.GetFileName(fileName),
-                        RosieUtils.GetRosieLanguage(language),
+                        RosieLanguageSupport.GetRosieLanguage(fileLanguage),
                         "utf8",
                         codeBase64, rosieRules, true);
                     var userAgent = await GetUserAgentAsync();
@@ -139,7 +131,7 @@ namespace Extension.Rosie
                                 return distinct
                                     .Select(violation =>
                                     {
-                                        var rule = RosieRulesCache.Instance?.GetRuleWithNamesFor(language,
+                                        var rule = RosieRulesCache.Instance?.GetRuleWithNamesFor(fileLanguage,
                                             res.Identifier);
                                         return new RosieAnnotation(rule.RuleName, rule.RulesetName, violation);
                                     });
@@ -233,20 +225,6 @@ namespace Extension.Rosie
             var match = AppVersionRegex.Match((string)version);
             //e.g. Microsoft Visual Studio Community 2022 17 4
             return $"{brandName ?? ""} {match.Groups["majorVersion"].Value} {match.Groups["minorVersion"].Value}";
-        }
-
-        /// <summary>
-        /// Returns whether the language of the provided filename is supported by Rosie.
-        /// </summary>
-        /// <param name="fileName">The file name to validate the language of.</param>
-        /// <returns>True if the file language is supported, false otherwise.</returns>
-        public static bool IsLanguageOfFileSupported(string? fileName)
-        {
-            if (fileName == null)
-                return false;
-
-            var languageOfCurrentFile = LanguageUtils.ParseFromFileName(fileName);
-            return SupportedLanguages.Contains(languageOfCurrentFile);
         }
     }
 }

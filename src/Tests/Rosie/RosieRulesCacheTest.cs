@@ -407,6 +407,19 @@ rulesets:
             Assert.That(updatedRules[0].Id,
                 Is.EqualTo($"mixed-ruleset/{RulesetsForClientTestSupport.JavaRule1.Name}"));
         }
+        
+        [Test]
+        public async Task GetRosieRulesForLanguage_should_return_javascript_rules_for_typescript() {
+            InitConfigAndCache(@"
+rulesets:
+  - javascriptRuleset");
+            
+            await _cache.HandleCacheUpdateAsync();
+            
+            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Typescript);
+            Assert.That(rules, Has.Count.EqualTo(3));
+            Assert.That(rules, Has.All.Property("Language").EqualTo("Javascript"));
+        }
 
         #endregion
 

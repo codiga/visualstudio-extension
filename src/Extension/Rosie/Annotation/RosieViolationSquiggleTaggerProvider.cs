@@ -40,7 +40,7 @@ namespace Extension.Rosie.Annotation
                     out RosieViolationSquiggleTagger squiggleTagger))
             {
                 //Create a tagger only when the language of the current file is supported by Rosie
-                if (RosieClient.IsLanguageOfFileSupported(buffer.GetFileName()))
+                if (RosieLanguageSupport.IsLanguageOfFileSupported(buffer.GetFileName()))
                 {
                     squiggleTagger = new RosieViolationSquiggleTagger(buffer,
                         TagAggregatorFactory.CreateTagAggregator<RosieViolationTag>(textView));

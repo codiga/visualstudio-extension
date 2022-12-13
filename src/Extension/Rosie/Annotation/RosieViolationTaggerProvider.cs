@@ -39,7 +39,7 @@ namespace Extension.Rosie.Annotation
                     out RosieViolationTagger violationTagger))
             {
                 //Create a tagger only when the language of the current file is supported by Rosie
-                if (RosieClient.IsLanguageOfFileSupported(buffer.GetFileName()))
+                if (RosieLanguageSupport.IsLanguageOfFileSupported(buffer.GetFileName()))
                 {
                     violationTagger = new RosieViolationTagger(textView, buffer);
                     textView.Properties[typeof(RosieViolationTagger)] = violationTagger;

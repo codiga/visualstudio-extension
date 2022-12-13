@@ -11,10 +11,10 @@ using EnvDTE;
 using Extension.Caching;
 using Extension.Rosie.Annotation;
 using Extension.Rosie.Model;
-using Extension.SnippetFormats;
 using GraphQLClient;
 using GraphQLClient.Model.Rosie;
 using Microsoft.VisualStudio.Shell;
+using LanguageEnumeration = Extension.SnippetFormats.LanguageUtils.LanguageEnumeration;
 
 namespace Extension.Rosie
 {
@@ -41,7 +41,7 @@ namespace Extension.Rosie
         /// NOTE: in the future, when the codiga.yml config file will be recognized at locations other than the project root,
         /// the cache key will probably have to be changed.
         /// </summary>
-        private IDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue> _cachedRules;
+        private IDictionary<LanguageEnumeration, RosieRulesCacheValue> _cachedRules;
 
         /// <summary>
         /// The timestamp of the last update on the Codiga server for the rulesets cached (and configured in codiga.yml).
@@ -81,18 +81,15 @@ namespace Extension.Rosie
         /// </summary>
         private SVsServiceProvider? _serviceProvider;
 
-        private RosieRulesCache()
+        private RosieRulesCache() : this(new DefaultCodigaClientProvider())
         {
-            _clientProvider = new DefaultCodigaClientProvider();
-            _cachedRules = new ConcurrentDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue>();
-            RulesetNames = new SynchronizedCollection<string>();
         }
         
         //For testing
         private RosieRulesCache(ICodigaClientProvider clientProvider)
         {
             _clientProvider = clientProvider;
-            _cachedRules = new ConcurrentDictionary<LanguageUtils.LanguageEnumeration, RosieRulesCacheValue>();
+            _cachedRules = new ConcurrentDictionary<LanguageEnumeration, RosieRulesCacheValue>();
             RulesetNames = new SynchronizedCollection<string>();
         }
 
@@ -307,7 +304,7 @@ namespace Extension.Rosie
                 .GroupBy(ruleWithName => ruleWithName.RosieRule.Language)
                 .ToDictionary(entry =>
                 {
-                    Enum.TryParse<LanguageUtils.LanguageEnumeration>(entry.Key, out var language);
+                    Enum.TryParse<LanguageEnumeration>(entry.Key, out var language);
                     return language;
                 }, entry => new RosieRulesCacheValue(entry.ToList()));
 
@@ -348,14 +345,24 @@ namespace Extension.Rosie
         /// </summary>
         /// <param name="language">The language to get the rules for.</param>
         /// <returns>The rules for the given language.</returns>
-        public IReadOnlyList<RosieRule> GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration language)
+        public IReadOnlyList<RosieRule> GetRosieRulesForLanguage(LanguageEnumeration language)
         {
-            if (_cachedRules.ContainsKey(language))
+            var cachedLanguageType = GetCachedLanguageTypeOf(language);
+            if (_cachedRules.ContainsKey(cachedLanguageType))
             {
-                var cachedRules = _cachedRules[language];
+                var cachedRules = _cachedRules[cachedLanguageType];
                 return cachedRules != null ? cachedRules.RosieRules : NoRule;                
             }
             return NoRule;
+        }
+        
+         /// <summary>
+         /// Since, besides JavaScript files, rules for TypeScript files are also handled under the same JavaScript Rosie language
+         /// type, we have to return JavaScript rules for TypeScript files as well. 
+         /// </summary>
+         /// <param name="fileLanguage">the file language to map</param>
+         private static LanguageEnumeration GetCachedLanguageTypeOf(LanguageEnumeration fileLanguage) {
+            return fileLanguage == LanguageEnumeration.Typescript ? LanguageEnumeration.Javascript : fileLanguage;
         }
 
         /// <summary>
@@ -366,9 +373,9 @@ namespace Extension.Rosie
         /// It should not return null when retrieving the rule for the rule id, since in <c>RosieApiImpl#GetAnnotations()</c>
         /// the <see cref="RosieRuleResponse"/>s and their ids are based on the values cached here.
         /// </summary>
-        public RuleWithNames GetRuleWithNamesFor(LanguageUtils.LanguageEnumeration language, string ruleId)
+        public RuleWithNames GetRuleWithNamesFor(LanguageEnumeration language, string ruleId)
         {
-            return _cachedRules[language].Rules[ruleId];
+            return _cachedRules[GetCachedLanguageTypeOf(language)].Rules[ruleId];
         }
 
         #endregion

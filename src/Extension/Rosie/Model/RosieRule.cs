@@ -11,6 +11,11 @@ namespace Extension.Rosie.Model
         private const string EntityCheckedForLoop = "forloop";
         private const string EntityCheckedFunctionDefinition = "functiondefinition";
         private const string EntityCheckedTryBlock = "tryblock";
+        private const string EntityCheckedType = "type";
+        private const string EntityCheckedInterface = "interface";
+        private const string EntityCheckedHtmlElement = "htmlelement";
+        private const string EntityCheckedClassDefinition = "classdefinition";
+        private const string EntityCheckedFunctionExpression = "functionexpression";
         
         public string Id { get; }
         public string ContentBase64 { get; }
@@ -42,6 +47,11 @@ namespace Extension.Rosie.Model
                 "Import" => EntityCheckedImport,
                 "IfCondition" => EntityCheckedIfCondition,
                 "FunctionCall" => EntityCheckedFunctionCall,
+                "Type" => EntityCheckedType,
+                "Interface" => EntityCheckedInterface,
+                "HtmlElement" => EntityCheckedHtmlElement,
+                "ClassDefinition" => EntityCheckedClassDefinition,
+                "FunctionExpression" => EntityCheckedFunctionExpression,
                 _ => null
             };
         }

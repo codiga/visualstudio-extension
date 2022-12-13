@@ -973,6 +973,13 @@ type DuplicateOccurrence {
 }
 
 enum ElementCheckedEnumeration {
+  HtmlElement
+  Interface
+  Type
+  ClassDefinition
+  FunctionExpression
+  Assignment
+  Import
   TryBlock
   FunctionDefinition
   ForLoop

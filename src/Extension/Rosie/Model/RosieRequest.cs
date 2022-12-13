@@ -12,7 +12,7 @@ namespace Extension.Rosie.Model
         /// <summary>
         /// The Rosie language string.
         /// </summary>
-        /// <seealso cref="RosieUtils#getRosieLanguage(io.codiga.api.type.LanguageEnumeration)"/>
+        /// <seealso cref="RosieLanguageSupport"/>
         /// <seealso cref="RosieClient"/>
         public string Language { get; }
 

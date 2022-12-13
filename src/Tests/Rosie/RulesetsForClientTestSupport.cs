@@ -10,6 +10,8 @@ namespace Tests.Rosie
     /// </summary>
     public static class RulesetsForClientTestSupport
     {
+        // Python rules
+        
         public static readonly Rule PythonRule1 = CreateAstRule(
             10L,
             "python_rule_1",
@@ -39,12 +41,34 @@ namespace Tests.Rosie
             "python_rule_5",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
             "Python");
+        
+        // Java rules
 
         public static readonly Rule JavaRule1 = CreateAstRule(
             20L,
             "java_rule_1",
             "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGFkZEVycm9yKGJ1aWxkRXJyb3IobW9kZS5zdGFydC5saW5lLCBtb2RlLnN0YXJ0LmNvbCwgbW9kZS5lbmQubGluZSwgbW9kZS5lbmQuY29sLCAiZXJyb3IgbWVzc2FnZSIsICJDUklUSUNBTCIsICJzZWN1cml0eSIpKTsKICB9Cn0=",
             "Java");
+        
+        // JavaScript rules
+        
+        private static readonly Rule JavaScriptRule1 = CreateAstRule(
+            10L,
+            "javascript_rule_1",
+            "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKfQ==",
+            "Javascript");
+
+        private static readonly Rule JavaScriptRule2 = CreateAstRule(
+            11L,
+            "javascript_rule_2",
+            "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGFkZEVycm9yKGJ1aWxkRXJyb3IobW9kZS5zdGFydC5saW5lLCBtb2RlLnN0YXJ0LmNvbCwgbW9kZS5lbmQubGluZSwgbW9kZS5lbmQuY29sLCAiZXJyb3IgbWVzc2FnZSIsICJDUklUSUNBTCIsICJzZWN1cml0eSIpKTsKICB9Cn0=",
+            "Javascript");
+
+        private static readonly Rule JavaScriptRule3 = CreateAstRule(
+            12L,
+            "javascript_rule_3",
+            "ZnVuY3Rpb24gdmlzaXQocGF0dGVybiwgZmlsZW5hbWUsIGNvZGUpIHsKICAgIGNvbnN0IGVycm9yID0gYnVpbGRFcnJvcihtb2RlLnN0YXJ0LmxpbmUsIG1vZGUuc3RhcnQuY29sLCBtb2RlLmVuZC5saW5lLCBtb2RlLmVuZC5jb2wsICJlcnJvciBtZXNzYWdlIiwgIkNSSVRJQ0FMIiwgInNlY3VyaXR5Iik7CiAgICBhZGRFcnJvcihlcnJvcik7CiAgfQp9",
+            "Javascript");
 
         /// <summary>
         /// Returns test rulesets based on the argument ruleset names. Currently, rulesets are returned based on the first
@@ -69,6 +93,8 @@ namespace Tests.Rosie
                     return MultipleRulesetsMultipleLanguages(); //Python, Java
                 case "erroredRuleset":
                     return null;
+                case "javascriptRuleset":
+                    return JavascriptRulesets();
                 default:
                     return ImmutableList.Create<RuleSetsForClient>();
             }
@@ -83,6 +109,7 @@ namespace Tests.Rosie
                 "singleRulesetMultipleLanguages" => 102L,
                 "multipleRulesetsSingleLanguage" => 103L,
                 "multipleRulesetsMultipleLanguages" => 104L,
+                "javascriptRuleset" => 105L,
                 _ => -1L
             };
         }
@@ -136,6 +163,17 @@ namespace Tests.Rosie
             var ruleset2 = new RuleSetsForClient { Id = 6789, Name = "python-ruleset", Rules = rules2 };
 
             return ImmutableList.Create(ruleset, ruleset2);
+        }
+        
+        /// <summary>
+        /// Returns a single ruleset with JavaScript rules.
+        /// </summary>
+        private static IReadOnlyCollection<RuleSetsForClient> JavascriptRulesets() {
+            var rules = new List<Rule> { JavaScriptRule1, JavaScriptRule2, JavaScriptRule3};
+
+            var ruleset = new RuleSetsForClient { Id = 5678, Name = "javascriptRuleset", Rules = rules };
+
+            return ImmutableList.Create(ruleset);
         }
 
         private static Rule CreateAstRule(long id, string name, string content, string language)

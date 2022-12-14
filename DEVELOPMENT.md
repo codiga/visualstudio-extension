@@ -148,6 +148,17 @@ request to the Rosie server. This way, it is initialized only when code analysis
 
 For response/request (de)serialization, you can find the model classes in the `Extension.Rosie.Model` namespace.
 
+### Adding new rule AST types
+
+You can add new constants and mappings for the new types in [`RosieRuleAstTypes`](/src/Extension/Rosie/Model/RosieRuleAstTypes.cs).
+
+### Adding support for new Rosie languages
+
+First, you need to add the new language(s) in [`RosieLanguageSupport.SupportedLanguages`](/src/Extension/Rosie/RosieLanguageSupport.cs)
+and [`RosieLanguageSupport.GetRosieLanguage`](/src/Extension/Rosie/RosieLanguageSupport.cs).
+
+If a language needs special treatment on the caching part, make sure to update at least [`RosieRulesCache.GetCachedLanguageTypeOf`](/src/Extension/Rosie/RosieRulesCache).
+
 ### Tagging
 
 #### Tagging in general in Visual Studio extensions

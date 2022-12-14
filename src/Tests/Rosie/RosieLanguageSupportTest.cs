@@ -33,15 +33,7 @@ namespace Tests.Rosie
 
             Assert.That(language, Is.EqualTo("python"));
         }
-        
-        [Test]
-        public void GetRosieLanguage_should_return_javascript_language_string_for_typescript()
-        {
-            var language = RosieLanguageSupport.GetRosieLanguage(LanguageUtils.LanguageEnumeration.Typescript);
 
-            Assert.That(language, Is.EqualTo("javascript"));
-        }
-        
         [Test]
         public void GetRosieLanguage_should_return_unknown_for_not_supported_language()
         {

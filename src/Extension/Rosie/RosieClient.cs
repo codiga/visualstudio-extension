@@ -117,26 +117,30 @@ namespace Extension.Rosie
                         var responseBody = await content.ReadAsStreamAsync();
                         var rosieResponse =
                             await JsonSerializer.DeserializeAsync<RosieResponse>(responseBody, DeserializerOptions);
+                        
+                        //If there is no error returned, collect the violations
+                        if (rosieResponse?.Errors.Count == 0)
+                        {
+                            annotations = rosieResponse.RuleResponses
+                                .SelectMany(res =>
+                                {
+                                    //This is a workaround of calling Distinct(), because Distinct() seems to work based on
+                                    // hashcode, instead of Equals(), and that doesn't filter out duplicate elements.
+                                    var distinct = new List<RosieViolation>();
+                                    foreach (var vi in res.Violations)
+                                        if (!distinct.Any(v => v.Equals(vi)))
+                                            distinct.Add(vi);
 
-                        annotations = rosieResponse?.RuleResponses
-                            .SelectMany(res =>
-                            {
-                                //This is a workaround of calling Distinct(), because Distinct() seems to work based on
-                                // hashcode, instead of Equals(), and that doesn't filter out duplicate elements.
-                                var distinct = new List<RosieViolation>();
-                                foreach (var vi in res.Violations)
-                                    if (!distinct.Any(v => v.Equals(vi)))
-                                        distinct.Add(vi);
-
-                                return distinct
-                                    .Select(violation =>
-                                    {
-                                        var rule = RosieRulesCache.Instance?.GetRuleWithNamesFor(fileLanguage,
-                                            res.Identifier);
-                                        return new RosieAnnotation(rule.RuleName, rule.RulesetName, violation);
-                                    });
-                            })
-                            .ToList();
+                                    return distinct
+                                        .Select(violation =>
+                                        {
+                                            var rule = RosieRulesCache.Instance?.GetRuleWithNamesFor(fileLanguage,
+                                                res.Identifier);
+                                            return new RosieAnnotation(rule.RuleName, rule.RulesetName, violation);
+                                        });
+                                })
+                                .ToList();   
+                        }
                     }
 
                     return annotations ?? NoAnnotation;

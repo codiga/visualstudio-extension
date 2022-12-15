@@ -47,6 +47,20 @@ namespace Extension.Logging
 
 			return logger;
 		}
+		
+		public static ILogger LogException(Exception exception, string fileExtension, string snippetName)
+		{
+			var parameters = new Dictionary<string, object>
+			{
+				{ "Source", exception.Source }, { "FileExtension", fileExtension }, { "SnippetName", snippetName }
+			};
+
+			var logger = RollbarLocator.RollbarInstance.Error(exception, parameters);
+
+			LogActivityError(exception);
+
+			return logger;
+		}
 
 		public static ILogger LogWarning(string message)
 		{

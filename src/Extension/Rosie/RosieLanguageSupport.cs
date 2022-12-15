@@ -53,7 +53,7 @@ namespace Extension.Rosie
             {
                 LanguageEnumeration.Python => "python",
                 LanguageEnumeration.Javascript => "javascript",
-                LanguageEnumeration.Typescript => "javascript",
+                LanguageEnumeration.Typescript => "typescript",
                 _ => "unknown"
             };
         }

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
-using EnvDTE;
 using Extension.Caching;
 using Extension.Rosie.Annotation;
 using Extension.Rosie.Model;
@@ -29,7 +28,6 @@ namespace Extension.Rosie
 
         private ICodigaClientProvider _clientProvider;
         private CancellationTokenSource _cancellationTokenSource;
-        private DTE _dte;
         
         /// <summary>
         /// Mapping the rules to their target languages, because this way
@@ -120,7 +118,6 @@ namespace Extension.Rosie
             //Retrieve the DTE object from which the Solution can be accessed
             ThreadHelper.ThrowIfNotOnUIThread();
             _serviceProvider = VS.GetMefService<SVsServiceProvider>();
-            _dte = (_DTE)_serviceProvider.GetService(typeof(_DTE));
 
             PollRulesetsAsync(_cancellationTokenSource.Token);
         }

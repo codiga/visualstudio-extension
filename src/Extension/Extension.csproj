@@ -74,6 +74,7 @@
     <Compile Include="Rosie\Annotation\RosieViolationTagger.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationTaggerProvider.cs" />
     <Compile Include="Rosie\Annotation\StringUtils.cs" />
+    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
     <Compile Include="Rosie\RosieClientProvider.cs" />
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />

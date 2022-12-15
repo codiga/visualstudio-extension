@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Threading;
 using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 
 namespace Extension.AssistantCompletion
@@ -36,25 +38,38 @@ namespace Extension.AssistantCompletion
 			return true;
         }
 
+		// This method runs synchronously
         public CommitResult TryCommit(IAsyncCompletionSession session, ITextBuffer buffer, CompletionItem item, char typedChar, CancellationToken token)
         {
-			// This method runs synchronously
+	        // start a snippet session using in memory xml rather than .xml files
+	        try
+	        {
+		        // use IVsEditorAdaptersFactoryService to get access to IVsTextview
+		        var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
+		        var wpfTextView = VsEditorAdapter.GetWpfTextView(vsTextView);
 
-			// start a snippet session using in memory xml rather than .xml files
-			try
-			{
-				// use IVsEditorAdaptersFactoryService to get access to IVsTextview
-				var vsTextView = VsEditorAdapter.GetViewAdapter(session.TextView);
-				var wpfTextView = VsEditorAdapter.GetWpfTextView(vsTextView);
+		        var success =
+			        item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet),
+				        out var snippet);
 
-				var success = item.Properties.TryGetProperty<VisualStudioSnippet>(nameof(VisualStudioSnippet.CodeSnippet.Snippet), out var snippet);
+		        if (!success)
+		        {
+			        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
+			        {
+				        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				        return wpfTextView.TextBuffer.GetFileName();
+			        });
 
-				if (!success)
-					throw new ArgumentException("Could not find VisualStudioSnippet in property bag", nameof(item));
+			        throw new CouldNotFindSnippetException("Could not find VisualStudioSnippet in property bag", nameof(item),
+				        Path.GetExtension(fileName), item.DisplayText);
+		        }
 
-				ExpansionClient.StartExpansion(wpfTextView, snippet, true);
-
-			}
+		        ExpansionClient.StartExpansion(wpfTextView, snippet, true);
+	        }
+	        catch (CouldNotFindSnippetException e)
+	        {
+		        ExtensionLogger.LogException(e, e.FileExtension, e.SnippetName);
+	        }
 			catch(Exception e)
 			{
 				ExtensionLogger.LogException(e);
@@ -63,5 +78,17 @@ namespace Extension.AssistantCompletion
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;
         }
+
+        private sealed class CouldNotFindSnippetException : ArgumentException
+        {
+	        public string FileExtension { get; }
+	        public string SnippetName { get; }
+
+	        public CouldNotFindSnippetException(string message, string paramName, string fileExtension, string snippetName) : base(message, paramName)
+	        {
+		        FileExtension = fileExtension;
+		        SnippetName = snippetName;
+	        }
+        }  
     }
 }

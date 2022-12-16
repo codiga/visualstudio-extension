@@ -30,6 +30,9 @@ namespace Extension
 		/// </summary>
 		public const string PackageGuidString = "e8d2d8f8-96dc-4c92-bb81-346b4d2318e4";
 
+		private static readonly CodigaDefaultRulesetsInfoBarHelper.InfoBarHolder InfoBarHolder =
+			new CodigaDefaultRulesetsInfoBarHelper.InfoBarHolder();
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ExtensionPackage"/> class.
 		/// </summary>
@@ -72,7 +75,7 @@ namespace Extension
 
 		private void HandleOpenSolution(object sender = null, EventArgs e = null)
 		{
-			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync();
+			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder);
 		}
 
 		public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
@@ -95,16 +98,18 @@ namespace Extension
 
 			return base.GetToolWindowTitle(toolWindowType, id);
 		}
-		
-		private void DoAdditionalInitialization(object sender, OpenSolutionEventArgs e)
+
+		private void DoAdditionalInitialization(object sender, EventArgs e)
 		{
-			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync();
+			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder);
 		}
 
 		private static void CleanupCachesAndServices(object sender, EventArgs e)
 		{
             RosieRulesCache.Dispose();
-        }
+            InfoBarHolder.InfoBar?.Close();
+            InfoBarHolder.InfoBar = null;
+		}
 
 		#endregion
 	}

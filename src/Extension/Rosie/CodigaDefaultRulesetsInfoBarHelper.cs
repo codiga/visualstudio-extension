@@ -23,6 +23,26 @@ namespace Extension.Rosie
         private const string NeverForThisSolutionActionText = "Never for this solution";
 
         /// <summary>
+        /// Holds and instance of <see cref="InfoBar"/> that is saved in <see cref="ShowDefaultRulesetCreationInfoBarAsync"/>.
+        /// <br/>
+        /// When one opens a solution/folder for which the info bar is displayed, then opens another solution/folder,
+        /// the following can happen:
+        /// <ul>
+        ///     <li>if the newly opened solution wouldn't show the info bar, the previous solution's info bar is still displayed,</li>
+        ///     <li>if the newly opened solution would show the info bar, both the previous and the new solution's info bar is displayed.</li>
+        /// </ul>
+        /// <br/>
+        /// Therefore, when a solution/folder gets closed we have to close the info bar, which happens in <see cref="ExtensionPackage.CleanupCachesAndServices"/>.
+        /// <br/>
+        /// This wrapper is used to keep the async nature of <see cref="ShowDefaultRulesetCreationInfoBarAsync"/>, and because async methods
+        /// are not allowed to have <c>out</c> parameters.
+        /// </summary>
+        internal class InfoBarHolder
+        {
+            internal InfoBar? InfoBar { get; set; }
+        }
+
+        /// <summary>
         /// Displays an info bar in the Solution Explorer with the following options:
         /// <ul>
         ///     <li>Create codiga.yml</li>
@@ -36,7 +56,7 @@ namespace Extension.Rosie
         ///     <li>At least one of the projects in the solution is a Python project.</li>
         /// </ol>
         /// </summary>
-        internal static async void ShowDefaultRulesetCreationInfoBarAsync()
+        internal static async void ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder infoBarHolder)
         {
             var serviceProvider = await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
             {
@@ -61,7 +81,12 @@ namespace Extension.Rosie
                     infoBar.ActionItemClicked += InfoBar_ActionItemClicked;
                     await infoBar.TryShowInfoBarUIAsync();
                 }
+
+                infoBarHolder.InfoBar = infoBar;
+                return;
             }
+
+            infoBarHolder.InfoBar = null;
         }
 
         /// <summary>

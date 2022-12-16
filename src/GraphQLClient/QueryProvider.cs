@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Reflection;
+using Microsoft.VisualStudio.Threading;
 
 namespace GraphQLClient
 {
@@ -22,6 +23,7 @@ namespace GraphQLClient
 		private const string GetRulesetsForClientQueryFile = Namespace + "GetRulesetsForClient.graphql";
 		private const string GetRulesetsLastUpdatedTimestampQueryFile = Namespace + "GetRulesetsForClientLastTimestamp.graphql";
 		private const string RecordRuleFixMutationFile = Namespace + "RecordRuleFix.graphql";
+		private const string RecordCreateCodigaYamlMutationFile = Namespace + "RecordCreateCodigaYaml.graphql";
 
 		public static string ShortcutQuery { get; }
 		public static string ShortcutLastTimestampQuery { get; }
@@ -31,6 +33,7 @@ namespace GraphQLClient
 		public static string GetRulesetsForClientQuery { get; }
 		public static string GetRulesetsLastUpdatedTimestampQuery { get; }
 		public static string RecordRuleFixMutation { get; }
+		public static string RecordCreateCodigaYamlMutation { get; }
 
 		static QueryProvider()
 		{
@@ -82,6 +85,12 @@ namespace GraphQLClient
 			{
 				using StreamReader reader = new StreamReader(stream);
 				RecordRuleFixMutation = reader.ReadToEnd();
+			}
+			
+			using (Stream stream = assembly.GetManifestResourceStream(RecordCreateCodigaYamlMutationFile))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				RecordCreateCodigaYamlMutation = reader.ReadToEnd();
 			}
 		}
 	}

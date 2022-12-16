@@ -98,6 +98,12 @@ namespace GraphQLClient
 		/// Sends a request to Codiga that a rule fix quick fix was invoked by the user.
 		/// </summary>
 		public Task<string> RecordRuleFixAsync();
+
+		/// <summary>
+		/// Sends a request to Codiga that the Codiga config file was created by the user with default rulesets,
+		/// via the notification popup shown in <c>CodigaDefaultRulesetsInfoBarHelper</c>.
+		/// </summary>
+		public Task<string> RecordCreateCodigaYaml();
 	}
 
 	public class CodigaClient : ICodigaClient, IDisposable
@@ -219,7 +225,7 @@ namespace GraphQLClient
 			variablesDict["recipeId"] = recipeId;
 
 			var request = new GraphQLHttpRequest(QueryProvider.RecordRecipeUseMutation, variables);
-			var result = await _client.SendMutationAsync<RecordRecipeUseMutationResult>(request);
+			var result = await _client.SendMutationAsync<RecordMutationResult>(request);
 
 			ThrowOnErrors(result);
 			
@@ -295,7 +301,21 @@ namespace GraphQLClient
 			variablesDict["fingerprint"] = Fingerprint;
 
 			var request = new GraphQLHttpRequest(QueryProvider.RecordRuleFixMutation, variables);
-			var result = await _client.SendMutationAsync<RecordRuleFixMutationResult>(request);
+			var result = await _client.SendMutationAsync<RecordMutationResult>(request);
+
+			ThrowOnErrors(result);
+			
+			return result.Data.RecordAccess;
+		}
+		
+		public async Task<string> RecordCreateCodigaYaml()
+		{
+			dynamic variables = new System.Dynamic.ExpandoObject();
+			var variablesDict = (IDictionary<string, object?>)variables;
+			variablesDict["fingerprint"] = Fingerprint;
+
+			var request = new GraphQLHttpRequest(QueryProvider.RecordCreateCodigaYamlMutation, variables);
+			var result = await _client.SendMutationAsync<RecordMutationResult>(request);
 
 			ThrowOnErrors(result);
 			
@@ -367,12 +387,7 @@ namespace GraphQLClient
 		public long RuleSetsLastUpdatedTimestamp { get; set; }
 	}
 
-	internal class RecordRecipeUseMutationResult
-	{
-		public string? RecordAccess { get; set; }
-	}
-	
-	internal class RecordRuleFixMutationResult
+	internal class RecordMutationResult
 	{
 		public string? RecordAccess { get; set; }
 	}

@@ -77,7 +77,6 @@
     <Compile Include="Rosie\Annotation\StringUtils.cs" />
     <Compile Include="Rosie\CodigaDefaultRulesetsInfoBarHelper.cs" />
     <Compile Include="Rosie\CodigaRulesetConfigs.cs" />
-    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
     <Compile Include="Rosie\RosieClientProvider.cs" />
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />

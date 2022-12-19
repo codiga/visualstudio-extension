@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
+using Community.VisualStudio.Toolkit;
+using Extension.InlineCompletion;
 using Extension.Logging;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Editor;
@@ -11,6 +13,7 @@ using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
 
 namespace Extension.AssistantCompletion
 {
@@ -80,7 +83,17 @@ namespace Extension.AssistantCompletion
 	        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
 	        {
 		        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-		        return wpfTextView.TextBuffer.GetFileName();
+		        DocumentView? doc;
+		        try
+		        {
+			        doc = wpfTextView.ToDocumentView();
+		        }
+		        catch
+		        {
+			        doc = ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Documents.GetActiveDocumentViewAsync());
+		        }
+
+		        return DocumentHelper.GetFileName(doc, wpfTextView);
 	        });
 	        
 	        var fileExtension = fileName != null

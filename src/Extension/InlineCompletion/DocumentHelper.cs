@@ -14,24 +14,42 @@ namespace Extension.InlineCompletion
         /// <summary>
         /// Returns the file extension from the current document.
         /// <br/>
-        /// First, it tries to parse <see cref="DocumentView.FilePath"/>, if that is null,
-        /// it tries to get the extension via <see cref="ITextBufferExtensions.GetFileName"/>.
+        /// It has the following fallback logic:
+        /// <ul>
+        ///     <li>First, it tries to parse <see cref="DocumentView.FilePath"/>,</li>
+        ///     <li>then the underlying <see cref="ITextDocument.FilePath"/>,</li>
+        ///     <li>then via the underlying <c>DocumentView.TextBuffer.GetFileName</c>,</li>
+        ///     <li>finally, it tries to get the extension via <see cref="ITextBufferExtensions.GetFileName"/></li>
+        /// </ul>
         /// </summary>
-        /// <param name="documentView"></param>
-        /// <param name="textView"></param>
-        /// <returns></returns>
-        internal static string? GetFileExtension(DocumentView? documentView, IWpfTextView textView)
+        /// <param name="documentView">The document view</param>
+        /// <param name="textView">The text view</param>
+        /// <returns>The file extension, or null if the extension could not be retrieved.</returns>
+        internal static string? GetFileExtension(DocumentView? documentView, IWpfTextView? textView = null)
         {
             if (documentView?.FilePath != null)
                 return Path.GetExtension(documentView.FilePath);
 
-            var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
-            {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                return textView.TextBuffer.GetFileName();
-            });
+            if (documentView?.Document?.FilePath != null)
+                return Path.GetExtension(documentView.Document.FilePath);
 
-            return Path.GetExtension(fileName);
+            if (documentView?.TextBuffer != null)
+                return ThreadHelper.JoinableTaskFactory.Run(async () =>
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    return Path.GetExtension(documentView?.TextBuffer?.GetFileName());
+                });
+
+            if (textView != null)
+            {
+                return ThreadHelper.JoinableTaskFactory.Run(async () =>
+                {
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    return Path.GetExtension(textView.TextBuffer.GetFileName());
+                });
+            }
+
+            return null;
         }
     }
 }

@@ -66,7 +66,7 @@ namespace Extension.SnippetFormats
 		/// if the file extension is not supported.
 		/// </summary>
 		/// <param name="extension">the file extension</param>
-		public static LanguageEnumeration Parse(string extension)
+		public static LanguageEnumeration Parse(string? extension)
 		{
 			return extension switch
 			{

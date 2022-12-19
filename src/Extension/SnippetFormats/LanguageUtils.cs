@@ -56,8 +56,11 @@ namespace Extension.SnippetFormats
 		/// This is a convenience method for <c>LanguageEnumeration.Parse(Path.GetExtension(fileName))</c>.
 		/// </summary>
 		/// <param name="fileName">the file name whose extension is parsed</param>
-		public static LanguageEnumeration ParseFromFileName(string fileName)
+		public static LanguageEnumeration ParseFromFileName(string? fileName)
 		{
+			if (fileName == null)
+				return LanguageEnumeration.Unknown;
+			
 			return fileName.ToLower().StartsWith("docker") ? LanguageEnumeration.Docker : Parse(Path.GetExtension(fileName));
 		}
 
@@ -144,6 +147,7 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Scss:
 					return "//";
 
+				case LanguageEnumeration.Docker:
 				case LanguageEnumeration.Python:
 				case LanguageEnumeration.Shell:
 				case LanguageEnumeration.Perl:

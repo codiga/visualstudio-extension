@@ -66,8 +66,8 @@ namespace Extension.InlineCompletion
 
 			try
 			{
-				var ext = DocumentHelper.GetFileExtension(doc, textView);
-				if (LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
+				var fileName = DocumentHelper.GetFileName(doc, textView);
+				if (LanguageUtils.ParseFromFileName(fileName) == LanguageUtils.LanguageEnumeration.Unknown)
 					return;
 
 				textView.Closed += TextView_Closed;

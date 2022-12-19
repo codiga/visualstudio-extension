@@ -11,8 +11,6 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -30,18 +28,16 @@ namespace Extension.InlineCompletion
 		private IWpfTextView _wpfTextView;
 		private ICodigaClientProvider _clientProvider;
 
-		private InlineCompletionView _completionView;
-		private ListNavigator<VisualStudioSnippet> _snippetNavigator; 
+		private InlineCompletionView? _completionView;
+		private ListNavigator<VisualStudioSnippet>? _snippetNavigator; 
 
-		private ExpansionClient _expansionClient;
+		private ExpansionClient? _expansionClient;
 
 		/// <summary>
 		/// Initialize the client and start listening for commands
 		/// </summary>
 		/// <param name="wpfTextView"></param>
-		/// <param name="vsTextView"></param>
 		/// <param name="expansionClient"></param>
-		/// <param name="clientProvider"></param>
 		public void Initialize(IWpfTextView wpfTextView, ExpansionClient expansionClient)
 		{
 			_clientProvider = new DefaultCodigaClientProvider();
@@ -173,7 +169,7 @@ namespace Extension.InlineCompletion
 		{
 			try
 			{
-				_expansionClient.StartExpansion(_wpfTextView, _snippetNavigator.CurrentItem, true);
+				_expansionClient?.StartExpansion(_wpfTextView, _snippetNavigator.CurrentItem, true);
 			}
 			catch(Exception e)
 			{
@@ -194,7 +190,6 @@ namespace Extension.InlineCompletion
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			var setting = EditorSettingsProvider.GetCurrentIndentationSettings();
 			var snippets = result.Result.Select(s => SnippetParser.FromCodigaSnippet(s, setting));
-			var currentIndex = 0;
 
 			if (_completionView == null)
 				return;
@@ -203,7 +198,7 @@ namespace Extension.InlineCompletion
 			{
 				_snippetNavigator = new ListNavigator<VisualStudioSnippet>(snippets.ToList());
 				var previewCode = SnippetParser.GetPreviewCode(_snippetNavigator.CurrentItem);
-				currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
+				var currentIndex = _snippetNavigator.IndexOf(_snippetNavigator.CurrentItem) + 1;
 				_completionView.UpdateView(previewCode, currentIndex, _snippetNavigator.Count);
 			}
 			else
@@ -222,7 +217,7 @@ namespace Extension.InlineCompletion
 		{
 			if (nCmdID == (uint)VSConstants.VSStd2KCmdID.TAB)
 			{
-				_completionView.RemoveInstructions();
+				_completionView?.RemoveInstructions();
 				_completionView = null;
 				CommitCurrentSnippet();
 				return VSConstants.S_OK;
@@ -239,7 +234,7 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(next);
-				_completionView.UpdateView(previewCode, i + 1, c);
+				_completionView?.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
@@ -255,14 +250,14 @@ namespace Extension.InlineCompletion
 				var c = _snippetNavigator.Count;
 
 				var previewCode = SnippetParser.GetPreviewCode(previous); 
-				_completionView.UpdateView(previewCode, i + 1, c);
+				_completionView?.UpdateView(previewCode, i + 1, c);
 
 				return VSConstants.S_OK;
 			}
 			else if((pguidCmdGroup == VSConstants.VSStd2K && nCmdID == (uint)VSConstants.VSStd2KCmdID.TYPECHAR) || 
 					nCmdID == (uint)VSConstants.VSStd2KCmdID.CANCEL)
 			{
-				_completionView.RemoveInstructions();
+				_completionView?.RemoveInstructions();
 				_completionView = null;
 				_snippetNavigator = null;
 			}
@@ -272,8 +267,7 @@ namespace Extension.InlineCompletion
 
 		public void Dispose()
 		{
-			var vsTextView = _wpfTextView.ToIVsTextView();
-			vsTextView.RemoveCommandFilter(this);
+			_wpfTextView.ToIVsTextView()?.RemoveCommandFilter(this);
 		}
 	}
 }

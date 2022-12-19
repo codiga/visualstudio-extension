@@ -33,9 +33,6 @@ namespace Extension.InlineCompletion
 		private AdornmentLayerDefinition editorAdornmentLayer;
 
 		[Import]
-		internal IVsEditorAdaptersFactoryService AdapterService;
-
-		[Import]
 		internal ExpansionClient ExpansionClient;
 
 		internal Dictionary<IWpfTextView, InlineCompletionClient> InlineCompletionClients { get;}
@@ -56,7 +53,7 @@ namespace Extension.InlineCompletion
 			if (textView == null)
 				return;
 
-			DocumentView doc;
+			DocumentView? doc;
 			try
 			{
 				doc = textView.ToDocumentView();
@@ -75,8 +72,7 @@ namespace Extension.InlineCompletion
 			try
 			{
 				var ext = Path.GetExtension(doc.FilePath);
-
-				if (LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
+				if (ext == null || LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
 					return;
 
 				textView.Closed += TextView_Closed;

@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 
 namespace Extension.AssistantCompletion
 {
@@ -53,16 +54,7 @@ namespace Extension.AssistantCompletion
 				        out var snippet);
 
 		        if (!success)
-		        {
-			        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
-			        {
-				        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				        return wpfTextView?.TextBuffer.GetFileName();
-			        });
-
-			        throw new CouldNotFindSnippetException("Could not find VisualStudioSnippet in property bag", nameof(item),
-				        GetFileExtension(fileName), item.DisplayText);
-		        }
+			        HandleSnippetNotFoundException(wpfTextView, item);
 
 		        ExpansionClient.StartExpansion(wpfTextView, snippet, true);
 	        }
@@ -79,11 +71,24 @@ namespace Extension.AssistantCompletion
 			return CommitResult.Handled;
         }
 
-        private static string GetFileExtension(string? fileName)
+        private static void HandleSnippetNotFoundException(IWpfTextView? wpfTextView, CompletionItem item)
         {
-	        return fileName != null
-		        ? Path.GetExtension(fileName) ?? "File extension unavailable"
-		        : "File name unavailable";
+	        if (wpfTextView == null)
+		        throw new CouldNotFindSnippetException("Could not find VisualStudioSnippet in property bag", nameof(item),
+			        "No IWpfTextView", item.DisplayText);
+
+	        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
+	        {
+		        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+		        return wpfTextView.TextBuffer.GetFileName();
+	        });
+	        
+	        var fileExtension = fileName != null
+		        ? Path.GetExtension(fileName) ?? "No file extension"
+		        : "No file name";
+	        
+	        throw new CouldNotFindSnippetException("Could not find VisualStudioSnippet in property bag", nameof(item),
+		        fileExtension, item.DisplayText);
         }
 
         private sealed class CouldNotFindSnippetException : ArgumentException

@@ -12,7 +12,7 @@ namespace Extension.InlineCompletion
     internal static class DocumentHelper
     {
         /// <summary>
-        /// Returns the file extension from the current document.
+        /// Returns the file name of the current document.
         /// <br/>
         /// It has the following fallback logic:
         /// <ul>
@@ -24,20 +24,20 @@ namespace Extension.InlineCompletion
         /// </summary>
         /// <param name="documentView">The document view</param>
         /// <param name="textView">The text view</param>
-        /// <returns>The file extension, or null if the extension could not be retrieved.</returns>
-        internal static string? GetFileExtension(DocumentView? documentView, IWpfTextView? textView = null)
+        /// <returns>The file name, or null if it was not available by any means.</returns>
+        internal static string? GetFileName(DocumentView? documentView, IWpfTextView? textView = null)
         {
             if (documentView?.FilePath != null)
-                return Path.GetExtension(documentView.FilePath);
+                return Path.GetFileName(documentView.FilePath);
 
             if (documentView?.Document?.FilePath != null)
-                return Path.GetExtension(documentView.Document.FilePath);
+                return Path.GetFileName(documentView.Document.FilePath);
 
             if (documentView?.TextBuffer != null)
                 return ThreadHelper.JoinableTaskFactory.Run(async () =>
                 {
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    return Path.GetExtension(documentView?.TextBuffer?.GetFileName());
+                    return documentView.TextBuffer?.GetFileName();
                 });
 
             if (textView != null)
@@ -45,7 +45,7 @@ namespace Extension.InlineCompletion
                 return ThreadHelper.JoinableTaskFactory.Run(async () =>
                 {
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    return Path.GetExtension(textView.TextBuffer.GetFileName());
+                    return textView.TextBuffer.GetFileName();
                 });
             }
 

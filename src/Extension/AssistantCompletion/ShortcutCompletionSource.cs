@@ -113,10 +113,10 @@ namespace Extension.AssistantCompletion
             try
             {
 	            var doc = await VS.Documents.GetActiveDocumentViewAsync();
-	            var ext = DocumentHelper.GetFileExtension(doc);
+	            var fileName = DocumentHelper.GetFileName(doc);
 				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
 				var cachedSnippets = 
-					Cache.GetSnippets(LanguageUtils.Parse(ext))
+					Cache.GetSnippets(LanguageUtils.ParseFromFileName(fileName))
 						.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
 				var completionItems = SnippetParser.FromVisualStudioSnippets(cachedSnippets, this);
 

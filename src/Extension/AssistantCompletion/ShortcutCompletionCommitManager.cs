@@ -57,11 +57,11 @@ namespace Extension.AssistantCompletion
 			        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
 			        {
 				        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				        return wpfTextView.TextBuffer.GetFileName();
+				        return wpfTextView?.TextBuffer.GetFileName();
 			        });
 
 			        throw new CouldNotFindSnippetException("Could not find VisualStudioSnippet in property bag", nameof(item),
-				        Path.GetExtension(fileName), item.DisplayText);
+				        GetFileExtension(fileName), item.DisplayText);
 		        }
 
 		        ExpansionClient.StartExpansion(wpfTextView, snippet, true);
@@ -77,6 +77,13 @@ namespace Extension.AssistantCompletion
 
 			// we handled the completion by starting an expansion session so no other handlers should participate
 			return CommitResult.Handled;
+        }
+
+        private static string GetFileExtension(string? fileName)
+        {
+	        return fileName != null
+		        ? Path.GetExtension(fileName) ?? "File extension unavailable"
+		        : "File name unavailable";
         }
 
         private sealed class CouldNotFindSnippetException : ArgumentException

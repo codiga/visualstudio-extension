@@ -2,7 +2,6 @@
 using Extension.AssistantCompletion;
 using Extension.Logging;
 using Extension.SnippetFormats;
-using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -10,7 +9,6 @@ using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.IO;
 
 namespace Extension.InlineCompletion
 {
@@ -60,10 +58,7 @@ namespace Extension.InlineCompletion
 			}
 			catch
 			{
-				doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
-				{
-					return await VS.Documents.GetActiveDocumentViewAsync();
-				});
+				doc = ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Documents.GetActiveDocumentViewAsync());
 			}
 
 			if (doc == null)
@@ -71,7 +66,7 @@ namespace Extension.InlineCompletion
 
 			try
 			{
-				var ext = Path.GetExtension(doc.FilePath);
+				var ext = DocumentHelper.GetFileExtension(doc, textView);
 				if (ext == null || LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
 					return;
 

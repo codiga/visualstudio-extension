@@ -66,6 +66,7 @@
     <Compile Include="Caching\CodigaClientProvider.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
+    <Compile Include="InlineCompletion\DocumentHelper.cs" />
     <Compile Include="Logging\ExtensionLogger.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationSquiggleTag.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationSquiggleTaggerProvider.cs" />
@@ -74,7 +75,6 @@
     <Compile Include="Rosie\Annotation\RosieViolationTagger.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationTaggerProvider.cs" />
     <Compile Include="Rosie\Annotation\StringUtils.cs" />
-    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
     <Compile Include="Rosie\RosieClientProvider.cs" />
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />
@@ -87,6 +87,7 @@
     <Compile Include="Rosie\Model\RosieRequest.cs" />
     <Compile Include="Rosie\Model\RosieResponse.cs" />
     <Compile Include="Rosie\Model\RosieRule.cs" />
+    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
     <Compile Include="Rosie\Model\RosieRuleResponse.cs" />
     <Compile Include="Rosie\Model\RosieViolation.cs" />
     <Compile Include="Rosie\Model\RosieViolationFix.cs" />

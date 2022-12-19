@@ -151,6 +151,9 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Terraform:
 					return "#";
 
+				case LanguageEnumeration.Html:
+					return "<!--";
+				
 				case LanguageEnumeration.Coldfusion:
 					return "<!---";
 

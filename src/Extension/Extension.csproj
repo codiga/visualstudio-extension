@@ -117,6 +117,7 @@
       <DependentUpon>SnippetSearchControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ExtensionPackage.cs" />
+    <Compile Include="CodigaImageMoniker.cs" />
     <Compile Include="SnippetSearch\SnippetSearchPackage1.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -235,8 +236,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="codiga.png" />
     <Content Include="logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Monikers.imagemanifest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>

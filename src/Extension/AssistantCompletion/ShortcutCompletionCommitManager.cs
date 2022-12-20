@@ -45,6 +45,20 @@ namespace Extension.AssistantCompletion
 		// This method runs synchronously
         public CommitResult TryCommit(IAsyncCompletionSession session, ITextBuffer buffer, CompletionItem item, char typedChar, CancellationToken token)
         {
+	        /*
+	         * This adds an extra step above retrieving the VisualStudioSnippet from the CompletionItem.
+	         * Since this commit manager is supposed to commit Codiga snippets only, we identify the CompletionItem whether it is a Codiga one,
+	         * by its icon id, and if, for some reason, it is not a Codiga snippet, we don't handle it here. Instead, we let it be handled by other commit managers.
+	         *
+	         * This way, if a Codiga snippet is about to be committed (identified by its icon id), but its underlying VisualStudioSnippet is still not
+	         * available, we can report it as an actual issue.
+	         *
+	         * See https://github.com/microsoft/vs-editor-api/issues/9: 
+	         * CommitResult.IsHandled "indicates whether the item was committed - if not, Editor will call TryCommit on another IAsyncCompletionCommitManager".
+	         */
+	        if (item.Icon.ImageId.Id != CodigaImageMoniker.CodigaMoniker.Id)
+		        return CommitResult.Unhandled;
+	        
 	        // start a snippet session using in memory xml rather than .xml files
 	        try
 	        {

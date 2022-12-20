@@ -28,8 +28,9 @@ namespace Extension.SnippetFormats
 		{
 			return vsSnippets.Select(s =>
 			{
-				var snippetMoniker = Microsoft.VisualStudio.Imaging.KnownMonikers.Snippet;
-				var imageElement = new ImageElement(new ImageId(snippetMoniker.Guid, snippetMoniker.Id));
+				//This makes it possible to have the Codiga icon displayed in front of each snippet name in the shortcut completion list,
+				// and also that the CompletionItems can be identified as Codiga snippets.
+				var imageElement = new ImageElement(new ImageId(CodigaImageMoniker.CodigaMoniker.Guid, CodigaImageMoniker.CodigaMoniker.Id));
 
 				var item = new CompletionItem(s.CodeSnippet.Header.Shortcut, source, imageElement, ImmutableArray<CompletionFilter>.Empty, s.CodeSnippet.Header.Title);
 

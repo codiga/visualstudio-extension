@@ -1,0 +1,3 @@
+mutation RecordCreateCodigaYaml($fingerprint: String) {
+  recordAccess(accessType: VisualStudio, actionType: CreateCodigaYaml, userFingerprint: $fingerprint)
+}

@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Extension.Helpers;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -44,12 +44,7 @@ namespace Extension.Rosie
         /// <returns>The path of the config file, or null if it doesn't exist.</returns>
         public static string? FindCodigaConfigFile(SVsServiceProvider serviceProvider)
         {
-            var sol = (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
-
-            // 'dir' contains the solution's directory path, or the open folder's path when it is a folder that's open, and not a solution
-            sol.GetSolutionInfo(out var dir, out var file, out var ops);
-
-            var solutionRoot = Path.GetDirectoryName(dir);
+            var solutionRoot = SolutionHelper.GetSolutionDir(serviceProvider);
             if (solutionRoot == null)
                 return null;
 
@@ -58,6 +53,17 @@ namespace Extension.Rosie
                 .FirstOrDefault();
 
             return codigaConfigFile != null && File.Exists(codigaConfigFile) ? codigaConfigFile : null;
+        }
+
+        /// <summary>
+        /// Creates the Codiga config file in the solution's root directory with default Python rulesets.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider to retrieve information about the solution from.</param>
+        public static void CreateCodigaConfigFile(SVsServiceProvider serviceProvider)
+        {
+            var solutionRoot = SolutionHelper.GetSolutionDir(serviceProvider);;
+            if (solutionRoot != null)
+                File.WriteAllText($"{solutionRoot}\\codiga.yml", CodigaRulesetConfigs.DefaultPythonRulesetConfig);
         }
 
         /// <summary>

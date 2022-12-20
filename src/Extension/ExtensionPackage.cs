@@ -4,10 +4,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Extension.Rosie;
 using Task = System.Threading.Tasks.Task;
 using Extension.SnippetSearch;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Events;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Extension
@@ -28,6 +30,9 @@ namespace Extension
 		/// </summary>
 		public const string PackageGuidString = "e8d2d8f8-96dc-4c92-bb81-346b4d2318e4";
 
+		private static readonly CodigaDefaultRulesetsInfoBarHelper.InfoBarHolder InfoBarHolder =
+			new CodigaDefaultRulesetsInfoBarHelper.InfoBarHolder();
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ExtensionPackage"/> class.
 		/// </summary>
@@ -46,6 +51,10 @@ namespace Extension
 		/// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
+			if (await IsSolutionLoadedAsync())
+				HandleOpenSolution();
+
+			SolutionEvents.OnAfterOpenSolution += DoAdditionalInitialization;
 			SolutionEvents.OnAfterCloseSolution += CleanupCachesAndServices;
 
             // When initialized asynchronously, the current thread may be a background thread at this point.
@@ -53,6 +62,21 @@ namespace Extension
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			await SnippetSearchMenuCommand.InitializeAsync(this);
         }
+
+		private async Task<bool> IsSolutionLoadedAsync()
+		{
+			await JoinableTaskFactory.SwitchToMainThreadAsync();
+			var solService = await GetServiceAsync(typeof(SVsSolution)) as IVsSolution;
+
+			ErrorHandler.ThrowOnFailure(solService.GetProperty((int)__VSPROPID.VSPROPID_IsSolutionOpen, out object value));
+
+			return value is bool isSolOpen && isSolOpen;
+		}
+
+		private void HandleOpenSolution(object sender = null, EventArgs e = null)
+		{
+			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder);
+		}
 
 		public override IVsAsyncToolWindowFactory GetAsyncToolWindowFactory(Guid toolWindowType)
 		{
@@ -75,10 +99,17 @@ namespace Extension
 			return base.GetToolWindowTitle(toolWindowType, id);
 		}
 
+		private void DoAdditionalInitialization(object sender, EventArgs e)
+		{
+			CodigaDefaultRulesetsInfoBarHelper.ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder);
+		}
+
 		private static void CleanupCachesAndServices(object sender, EventArgs e)
 		{
             RosieRulesCache.Dispose();
-        }
+            InfoBarHolder.InfoBar?.Close();
+            InfoBarHolder.InfoBar = null;
+		}
 
 		#endregion
 	}

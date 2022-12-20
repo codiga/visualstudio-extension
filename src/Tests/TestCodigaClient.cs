@@ -68,6 +68,11 @@ namespace Tests
             return await Task.FromResult<string>(null);
         }
 
+        public async Task<string> RecordCreateCodigaYaml()
+        {
+            return await Task.FromResult<string>(null);
+        }
+
         public void Dispose()
         {
         }

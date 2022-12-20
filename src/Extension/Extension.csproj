@@ -66,6 +66,7 @@
     <Compile Include="Caching\CodigaClientProvider.cs" />
     <Compile Include="Caching\SnippetCache.cs" />
     <Compile Include="Caching\TextViewCreationListener.cs" />
+    <Compile Include="Helpers\SolutionHelper.cs" />
     <Compile Include="Logging\ExtensionLogger.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationSquiggleTag.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationSquiggleTaggerProvider.cs" />
@@ -74,7 +75,8 @@
     <Compile Include="Rosie\Annotation\RosieViolationTagger.cs" />
     <Compile Include="Rosie\Annotation\RosieViolationTaggerProvider.cs" />
     <Compile Include="Rosie\Annotation\StringUtils.cs" />
-    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
+    <Compile Include="Rosie\CodigaDefaultRulesetsInfoBarHelper.cs" />
+    <Compile Include="Rosie\CodigaRulesetConfigs.cs" />
     <Compile Include="Rosie\RosieClientProvider.cs" />
     <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="Rosie\Model\RosieRequest.cs" />
     <Compile Include="Rosie\Model\RosieResponse.cs" />
     <Compile Include="Rosie\Model\RosieRule.cs" />
+    <Compile Include="Rosie\Model\RosieRuleAstTypes.cs" />
     <Compile Include="Rosie\Model\RosieRuleResponse.cs" />
     <Compile Include="Rosie\Model\RosieViolation.cs" />
     <Compile Include="Rosie\Model\RosieViolationFix.cs" />
@@ -122,6 +125,7 @@
       <DependentUpon>SnippetSearchPackage.vsct</DependentUpon>
     </Compile>
     <Compile Include="Settings\EditorSettings.cs" />
+    <Compile Include="Settings\SolutionSettings.cs" />
     <Compile Include="Settings\ExtensionOptions.cs">
       <SubType>Component</SubType>
     </Compile>

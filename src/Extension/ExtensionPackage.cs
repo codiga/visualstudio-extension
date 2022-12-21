@@ -9,7 +9,6 @@ using Extension.Rosie;
 using Task = System.Threading.Tasks.Task;
 using Extension.SnippetSearch;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Events;
 using SolutionEvents = Microsoft.VisualStudio.Shell.Events.SolutionEvents;
 
 namespace Extension
@@ -22,7 +21,10 @@ namespace Extension
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	[ProvideOptionPage(typeof(Settings.CodigaOptionPage), "Codiga", "General", 0, 0, true, SupportsProfiles = true)]
 	//See https://github.com/madskristensen/SolutionLoadSample
+	//Required so that the package gets initialized when a solution is open
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
+	//Required so that the package gets initialized when in Open Folder mode
+	[ProvideAutoLoad(VSConstants.UICONTEXT.FolderOpened_string, PackageAutoLoadFlags.BackgroundLoad)]
     public sealed class ExtensionPackage : AsyncPackage
 	{
 		/// <summary>
@@ -55,9 +57,11 @@ namespace Extension
 				HandleOpenSolution();
 
 			SolutionEvents.OnAfterOpenSolution += DoAdditionalInitialization;
+			SolutionEvents.OnAfterOpenFolder += DoAdditionalInitialization;
 			SolutionEvents.OnAfterCloseSolution += CleanupCachesAndServices;
+			SolutionEvents.OnAfterCloseFolder += CleanupCachesAndServices;
 
-            // When initialized asynchronously, the current thread may be a background thread at this point.
+			// When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			await SnippetSearchMenuCommand.InitializeAsync(this);

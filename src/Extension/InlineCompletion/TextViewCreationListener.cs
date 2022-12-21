@@ -2,7 +2,6 @@
 using Extension.AssistantCompletion;
 using Extension.Logging;
 using Extension.SnippetFormats;
-using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -10,7 +9,6 @@ using Microsoft.VisualStudio.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.IO;
 
 namespace Extension.InlineCompletion
 {
@@ -33,9 +31,6 @@ namespace Extension.InlineCompletion
 		private AdornmentLayerDefinition editorAdornmentLayer;
 
 		[Import]
-		internal IVsEditorAdaptersFactoryService AdapterService;
-
-		[Import]
 		internal ExpansionClient ExpansionClient;
 
 		internal Dictionary<IWpfTextView, InlineCompletionClient> InlineCompletionClients { get;}
@@ -56,17 +51,14 @@ namespace Extension.InlineCompletion
 			if (textView == null)
 				return;
 
-			DocumentView doc;
+			DocumentView? doc;
 			try
 			{
 				doc = textView.ToDocumentView();
 			}
 			catch
 			{
-				doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
-				{
-					return await VS.Documents.GetActiveDocumentViewAsync();
-				});
+				doc = ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Documents.GetActiveDocumentViewAsync());
 			}
 
 			if (doc == null)
@@ -74,9 +66,8 @@ namespace Extension.InlineCompletion
 
 			try
 			{
-				var ext = Path.GetExtension(doc.FilePath);
-
-				if (LanguageUtils.Parse(ext) == LanguageUtils.LanguageEnumeration.Unknown)
+				var fileName = DocumentHelper.GetFileName(doc, textView);
+				if (LanguageUtils.ParseFromFileName(fileName) == LanguageUtils.LanguageEnumeration.Unknown)
 					return;
 
 				textView.Closed += TextView_Closed;

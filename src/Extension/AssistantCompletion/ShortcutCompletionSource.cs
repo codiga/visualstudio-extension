@@ -1,21 +1,16 @@
 ﻿using Extension.SnippetFormats;
-using Microsoft.VisualStudio.Core.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Operations;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Extension.Caching;
 using Community.VisualStudio.Toolkit;
-using System.IO;
+using Extension.InlineCompletion;
 using Extension.Logging;
 
 namespace Extension.AssistantCompletion
@@ -117,12 +112,13 @@ namespace Extension.AssistantCompletion
         {
             try
             {
-				var doc = await VS.Documents.GetActiveDocumentViewAsync();
-				var path = doc.Document.FilePath;
-				var ext = Path.GetExtension(path);
+	            var doc = await VS.Documents.GetActiveDocumentViewAsync();
+	            var fileName = DocumentHelper.GetFileName(doc);
 				var settings = EditorSettingsProvider.GetCurrentIndentationSettings();
-				var chachedSnippets = Cache.GetSnippets(LanguageUtils.Parse(ext)).Select(s => SnippetParser.FromCodigaSnippet(s, settings));
-				var completionItems = SnippetParser.FromVisualStudioSnippets(chachedSnippets, this);
+				var cachedSnippets = 
+					Cache.GetSnippets(LanguageUtils.ParseFromFileName(fileName))
+						.Select(s => SnippetParser.FromCodigaSnippet(s, settings));
+				var completionItems = SnippetParser.FromVisualStudioSnippets(cachedSnippets, this);
 
 				return new CompletionContext(completionItems);
 			}

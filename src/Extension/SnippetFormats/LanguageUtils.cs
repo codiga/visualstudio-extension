@@ -56,8 +56,11 @@ namespace Extension.SnippetFormats
 		/// This is a convenience method for <c>LanguageEnumeration.Parse(Path.GetExtension(fileName))</c>.
 		/// </summary>
 		/// <param name="fileName">the file name whose extension is parsed</param>
-		public static LanguageEnumeration ParseFromFileName(string fileName)
+		public static LanguageEnumeration ParseFromFileName(string? fileName)
 		{
+			if (fileName == null)
+				return LanguageEnumeration.Unknown;
+			
 			return fileName.ToLower().StartsWith("docker") ? LanguageEnumeration.Docker : Parse(Path.GetExtension(fileName));
 		}
 
@@ -66,7 +69,7 @@ namespace Extension.SnippetFormats
 		/// if the file extension is not supported.
 		/// </summary>
 		/// <param name="extension">the file extension</param>
-		public static LanguageEnumeration Parse(string extension)
+		public static LanguageEnumeration Parse(string? extension)
 		{
 			return extension switch
 			{
@@ -144,6 +147,7 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Scss:
 					return "//";
 
+				case LanguageEnumeration.Docker:
 				case LanguageEnumeration.Python:
 				case LanguageEnumeration.Shell:
 				case LanguageEnumeration.Perl:
@@ -151,6 +155,9 @@ namespace Extension.SnippetFormats
 				case LanguageEnumeration.Terraform:
 					return "#";
 
+				case LanguageEnumeration.Html:
+					return "<!--";
+				
 				case LanguageEnumeration.Coldfusion:
 					return "<!---";
 

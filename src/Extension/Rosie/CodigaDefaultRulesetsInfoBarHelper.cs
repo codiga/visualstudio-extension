@@ -1,8 +1,11 @@
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
 using Extension.Caching;
+using Extension.Helpers;
 using Extension.Settings;
+using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -66,7 +69,7 @@ namespace Extension.Rosie
 
             if (SolutionSettings.IsShouldNotifyUserToCreateCodigaConfig(serviceProvider)
                 && CodigaConfigFileUtil.FindCodigaConfigFile(serviceProvider) == null
-                && await IsSolutionContainPythonProject(serviceProvider))
+                && await IsSolutionContainPythonAsync(serviceProvider))
             {
                 var model = new InfoBarModel(new[]
                 {
@@ -132,12 +135,13 @@ namespace Extension.Rosie
         }
 
         /// <summary>
-        /// Returns whether any of the projects in the current solution is a Python project.
+        /// Returns whether any of the projects in the current solution is a Python project,
+        /// or if in Open Folder mode, whether the folder or any of its sub-folders contain a Python file.
         /// <br/>
         /// Python project guid comes from https://github.com/microsoft/PTVS/blob/main/Python/Product/VSCommon/CommonGuidList.cs
         /// </summary>
         /// <param name="serviceProvider">The service provider to retrieve information about the solution from.</param>
-        private static async Task<bool> IsSolutionContainPythonProject(SVsServiceProvider serviceProvider)
+        private static async Task<bool> IsSolutionContainPythonAsync(SVsServiceProvider serviceProvider)
         {
             var solution = await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
             {
@@ -145,10 +149,8 @@ namespace Extension.Rosie
                 return (IVsSolution)serviceProvider.GetService(typeof(SVsSolution));
             });
 
-            solution.GetProperty((int)__VSPROPID7.VSPROPID_IsInOpenFolderMode, out object isInFolderMode);
-
             //If we have a proper VS solution open, check if at least one of the projects in it is a Python project
-            if (!(bool)isInFolderMode)
+            if (!SolutionHelper.IsInOpenFolderMode(solution))
             {
                 var projectsInSolution =
                     ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Solutions.GetAllProjectsAsync());
@@ -157,7 +159,48 @@ namespace Extension.Rosie
                         await project.IsKindAsync("888888A0-9F3D-457C-B088-3A5042F75D52")));
             }
 
-            return false;
+            //Running the lookup in the background, so it doesn't block the UI
+            return await Task.Run(() => IsContainPythonFile(SolutionHelper.GetSolutionDir(serviceProvider)) != null);
+        }
+
+        /// <summary>
+        /// Searches the argument <c>directory</c> and all its sub-directories for the presence of files with <c>.py</c>
+        /// extension.
+        /// <br/>
+        /// It currently excludes lookup in IDE solution and project specific folders, <c>.vs</c> and <c>.idea</c>.
+        /// </summary>
+        /// <param name="directory">The root directory to search in</param>
+        /// <returns>The language of the found file if there is a file found, or null if no file was found.</returns>
+        private static LanguageUtils.LanguageEnumeration? IsContainPythonFile(string directory)
+        {
+            try
+            {
+                //Using a foreach instead of a call to '.Any()' because 'Any()' creates an extra enumerator each time it is called.
+                foreach (var _ in Directory.EnumerateFiles(directory, "*.py"))
+                    return LanguageUtils.LanguageEnumeration.Python;
+
+                foreach (var subDir in Directory.EnumerateDirectories(directory))
+                {
+                    //Exclude non-existent folders, and ones whose name starts with a dot
+                    if (subDir != null)
+                    {
+                        string? directoryName = Path.GetDirectoryName(subDir);
+                        if (directoryName != ".vs" && directoryName != ".idea")
+                        {
+                            var isContainPythonFile = IsContainPythonFile(subDir);
+                            if (isContainPythonFile != null)
+                                return isContainPythonFile;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                //Falling through to return null, so that we return to one level up in the recursion,
+                // with no specific file found
+            }
+
+            return null;
         }
     }
 }

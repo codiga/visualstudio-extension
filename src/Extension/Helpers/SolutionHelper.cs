@@ -21,5 +21,15 @@ namespace Extension.Helpers
             sol.GetSolutionInfo(out string dir, out string file, out string ops);
             return Path.GetDirectoryName(dir);
         }
+
+        /// <summary>
+        /// Returns whether the argument solution is in Open Folder mode.
+        /// </summary>
+        /// <param name="solution">The solution service</param>
+        internal static bool IsInOpenFolderMode(IVsSolution solution)
+        {
+            solution.GetProperty((int)__VSPROPID7.VSPROPID_IsInOpenFolderMode, out object folderMode);
+            return folderMode is bool isInOpenFolderMode && isInOpenFolderMode;
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System.IO;
 using Extension.Rosie;
+using Extension.SnippetFormats;
 using NUnit.Framework;
 using static Tests.ServiceProviderMockSupport;
 
@@ -187,7 +188,56 @@ rulesets:
 
             Assert.That(configFile, Is.EqualTo(_codigaConfigFile));
         }
-        
+
+        #endregion
+
+        #region CreateCodigaConfigFile
+
+        [Test]
+        public void CreateCodigaConfigFile_should_create_codiga_yml_with_python_rulesets()
+        {
+            var serviceProvider = MockServiceProvider(Path.GetTempPath());
+            _codigaConfigFile = $"{Path.GetTempPath()}codiga.yml";
+
+            CodigaConfigFileUtil.CreateCodigaConfigFile(LanguageUtils.LanguageEnumeration.Python, serviceProvider);
+
+            Assert.That(File.Exists(_codigaConfigFile), Is.True);
+            Assert.That(File.ReadAllText(_codigaConfigFile), Is.EqualTo("rulesets:\n" +
+                                                                        "  - python-security\n" +
+                                                                        "  - python-best-practices\n" +
+                                                                        "  - python-code-style"));
+        }
+
+        [Test]
+        public void CreateCodigaConfigFile_should_create_codiga_yml_with_js_rulesets_for_js()
+        {
+            var serviceProvider = MockServiceProvider(Path.GetTempPath());
+            _codigaConfigFile = $"{Path.GetTempPath()}codiga.yml";
+
+            CodigaConfigFileUtil.CreateCodigaConfigFile(LanguageUtils.LanguageEnumeration.Javascript, serviceProvider);
+
+            Assert.That(File.Exists(_codigaConfigFile), Is.True);
+            Assert.That(File.ReadAllText(_codigaConfigFile), Is.EqualTo("rulesets:\n" +
+                                                                        "  - jsx-a11y\n" +
+                                                                        "  - jsx-react\n" +
+                                                                        "  - react-best-practices"));
+        }
+
+        [Test]
+        public void CreateCodigaConfigFile_should_create_codiga_yml_with_js_rulesets_for_ts()
+        {
+            var serviceProvider = MockServiceProvider(Path.GetTempPath());
+            _codigaConfigFile = $"{Path.GetTempPath()}codiga.yml";
+
+            CodigaConfigFileUtil.CreateCodigaConfigFile(LanguageUtils.LanguageEnumeration.Typescript, serviceProvider);
+
+            Assert.That(File.Exists(_codigaConfigFile), Is.True);
+            Assert.That(File.ReadAllText(_codigaConfigFile), Is.EqualTo("rulesets:\n" +
+                                                                        "  - jsx-a11y\n" +
+                                                                        "  - jsx-react\n" +
+                                                                        "  - react-best-practices"));
+        }
+
         #endregion
 
         #region Invalid ruleset names

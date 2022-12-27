@@ -27,6 +27,30 @@ namespace Tests.Rosie
         }
         
         [Test]
+        public void IsLanguageOfFileSupported_should_return_true_for_supported_language()
+        {
+            var isLanguageSupported = RosieLanguageSupport.IsLanguageOfFileSupported("typescript_file.tsx");
+
+            Assert.That(isLanguageSupported, Is.True);
+        }
+        
+        [Test]
+        public void IsLanguageOfFileSupported_should_return_false_for_unsupported_language()
+        {
+            var isLanguageSupported = RosieLanguageSupport.IsLanguageOfFileSupported("csharp_file.cs");
+
+            Assert.That(isLanguageSupported, Is.False);
+        }
+        
+        [Test]
+        public void IsLanguageOfFileSupported_should_return_false_for_null_language()
+        {
+            var isLanguageSupported = RosieLanguageSupport.IsLanguageOfFileSupported(null);
+
+            Assert.That(isLanguageSupported, Is.False);
+        }
+        
+        [Test]
         public void GetRosieLanguage_should_return_language_string_for_supported_language()
         {
             var language = RosieLanguageSupport.GetRosieLanguage(LanguageUtils.LanguageEnumeration.Python);

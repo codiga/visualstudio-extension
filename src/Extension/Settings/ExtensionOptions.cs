@@ -1,7 +1,5 @@
 ﻿using Community.VisualStudio.Toolkit;
 using Microsoft.VisualStudio.Shell;
-using System;
-using System.CodeDom;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;

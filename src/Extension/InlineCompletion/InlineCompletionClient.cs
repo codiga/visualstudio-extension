@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -202,6 +203,7 @@ namespace Extension.InlineCompletion
 			}
 			else
 			{
+				_snippetNavigator = new ListNavigator<VisualStudioSnippet>(new List<VisualStudioSnippet>());
 				_completionView.ShowPreview = false;
 				_completionView.UpdateView(null, 0, 0);
 			}

@@ -1,9 +1,7 @@
-﻿using Extension.Logging;
+﻿using System;
+using Extension.Logging;
 using Extension.Settings;
 using GraphQLClient;
-using Microsoft.VisualStudio.Shell;
-using System;
-using System.ComponentModel.Composition;
 
 namespace Extension.Caching
 {

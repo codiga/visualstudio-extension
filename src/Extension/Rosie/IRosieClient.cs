@@ -16,6 +16,6 @@ namespace Extension.Rosie
         /// </summary>
         /// <param name="textBuffer">contains the file content to query Rosie information for</param>
         /// <returns>The list of violation information from Rosie</returns>
-        Task<IList<RosieAnnotation>> GetAnnotations(ITextBuffer textBuffer);
+        Task<IList<RosieAnnotation>> GetAnnotationsAsync(ITextBuffer textBuffer);
     }
 }

@@ -1,16 +1,10 @@
-﻿using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
+﻿using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using Extension.Caching;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
-using Microsoft.VisualStudio.Editor;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Extension.Caching;
-using System.Windows.Controls;
 
 namespace Extension.AssistantCompletion
 {

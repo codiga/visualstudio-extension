@@ -153,7 +153,7 @@ namespace Extension.Rosie.Annotation
             if (!_isDisposed)
                 TagsChanged?.Invoke(this,
                     new SnapshotSpanEventArgs(new SnapshotSpan(_sourceBuffer.CurrentSnapshot,
-                        new Span(0, _sourceBuffer.CurrentSnapshot.Length - 1))));
+                        new Span(0, _sourceBuffer.CurrentSnapshot.Length == 0 ? 0 : _sourceBuffer.CurrentSnapshot.Length - 1))));
         }
 
         /// <summary>

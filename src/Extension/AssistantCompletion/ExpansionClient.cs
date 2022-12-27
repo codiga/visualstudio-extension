@@ -1,28 +1,21 @@
-﻿using Community.VisualStudio.Toolkit;
-using EnvDTE;
-using Extension.Caching;
-using Extension.Logging;
-using Extension.SnippetFormats;
-using GraphQLClient;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.GraphModel.CodeSchema;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Settings.Internal;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.TextManager.Interop;
-using MSXML;
-using System;
+﻿using System;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Media.TextFormatting;
-using System.Windows.Shapes;
 using System.Xml;
+using System.Xml.Serialization;
+using Extension.Caching;
+using Extension.Logging;
+using Extension.SnippetFormats;
+using GraphQLClient;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.TextManager.Interop;
+using MSXML;
 
 namespace Extension.AssistantCompletion
 {
@@ -86,7 +79,7 @@ namespace Extension.AssistantCompletion
 
 			// create IXMLDOMNode from snippet
 			IXMLDOMNode snippetXml;
-			var serializer = new System.Xml.Serialization.XmlSerializer(typeof(VisualStudioSnippet));
+			var serializer = new XmlSerializer(typeof(VisualStudioSnippet));
 			using (var sw = new StringWriter())
 			{
 				using var xw = XmlWriter.Create(sw, new XmlWriterSettings { Encoding = Encoding.UTF8 });
@@ -258,7 +251,6 @@ namespace Extension.AssistantCompletion
 				catch (CodigaAPIException e)
 				{
 					ExtensionLogger.LogException(e);
-					return;
 				}
 			});
 		}

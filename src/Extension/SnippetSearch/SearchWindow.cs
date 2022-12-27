@@ -1,7 +1,6 @@
-﻿using Extension.SearchWindow.View;
+﻿using System.Runtime.InteropServices;
+using Extension.SearchWindow.View;
 using Microsoft.VisualStudio.Shell;
-using System;
-using System.Runtime.InteropServices;
 
 namespace Extension.SnippetSearch
 {

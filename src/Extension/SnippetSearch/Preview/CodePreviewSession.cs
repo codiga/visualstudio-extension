@@ -1,10 +1,7 @@
-﻿using Extension.SnippetFormats;
-using Microsoft.VisualStudio.GraphModel.CodeSchema;
+﻿using System.Linq;
+using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Linq;
-using System.Windows.Forms;
-using System.Windows.Shapes;
 
 namespace Extension.SnippetSearch.Preview
 {

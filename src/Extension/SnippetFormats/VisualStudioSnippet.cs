@@ -1,20 +1,12 @@
-﻿using Microsoft.VisualStudio.Shell.Interop;
-using MSXML;
-using Newtonsoft.Json.Linq;
-using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.IO.Pipelines;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Windows.Ink;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace Extension.SnippetFormats
 {
 	/// <summary>
-	/// Represents the XML snippet structure used by Viusal Studio for managing code snippets
+	/// Represents the XML snippet structure used by Visual Studio for managing code snippets
 	/// </summary>
 	[XmlRoot(ElementName = "CodeSnippets", Namespace = "http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet")]
 	public class VisualStudioSnippet

@@ -89,7 +89,7 @@ namespace Extension.Rosie.Annotation
             ThreadHelper.JoinableTaskFactory.Run(async () =>
             {
                 if (RosieClientProvider.TryGetClient(out var client))
-                    Annotations = await client.GetAnnotations(_sourceBuffer);
+                    Annotations = await client.GetAnnotationsAsync(_sourceBuffer);
             });
         }
 
@@ -145,10 +145,10 @@ namespace Extension.Rosie.Annotation
         {
             if (RosieClientProvider.TryGetClient(out var client))
             {
-                Annotations = await client.GetAnnotations(textView.TextBuffer);
+                Annotations = await client.GetAnnotationsAsync(textView.TextBuffer);
                 TagsChanged.Invoke(this,
                     new SnapshotSpanEventArgs(new SnapshotSpan(textView.TextBuffer.CurrentSnapshot,
-                        new Span(0, textView.TextBuffer.CurrentSnapshot.Length - 1))));
+                        new Span(0, textView.TextBuffer.CurrentSnapshot.Length == 0 ? 0 : textView.TextBuffer.CurrentSnapshot.Length - 1))));
                 if (RosieRulesCache.Instance != null)
                     textView.Properties[RosieRulesCache.CacheLastUpdatedTimeStampProp] =
                         RosieRulesCache.Instance.CacheLastUpdatedTimeStamp;

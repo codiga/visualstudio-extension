@@ -1,11 +1,7 @@
-﻿using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using System;
+﻿using System;
 using System.ComponentModel.Design;
-using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
-using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.Shell;
 
 namespace Extension.SnippetSearch
 {
@@ -58,7 +54,7 @@ namespace Extension.SnippetSearch
 		/// <summary>
 		/// Gets the service provider from the owner package.
 		/// </summary>
-		private Microsoft.VisualStudio.Shell.IAsyncServiceProvider ServiceProvider
+		private IAsyncServiceProvider ServiceProvider
 		{
 			get
 			{

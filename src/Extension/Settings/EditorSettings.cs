@@ -1,19 +1,11 @@
-﻿using Community.VisualStudio.Toolkit;
+﻿using System;
+using System.Linq;
+using System.Windows.Media;
+using Community.VisualStudio.Toolkit;
 using EnvDTE;
 using Extension.Settings;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell.Settings;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace Extension
 {

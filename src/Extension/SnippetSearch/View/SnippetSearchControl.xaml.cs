@@ -1,8 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using Microsoft.Xaml.Behaviors;
-using EventTrigger = Microsoft.Xaml.Behaviors.EventTrigger;
 
 namespace Extension.SearchWindow.View
 {

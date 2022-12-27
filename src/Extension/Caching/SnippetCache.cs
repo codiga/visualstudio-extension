@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Extension.Logging;
 using Extension.SnippetFormats;
 using GraphQLClient;
-using Microsoft.VisualStudio.Shell;
-using CodigaSnippet = GraphQLClient.CodigaSnippet;
+using Timer = System.Timers.Timer;
 
 namespace Extension.Caching
 {
@@ -197,18 +196,18 @@ namespace Extension.Caching
 
 		public long? LastTimeStamp { get; set; }
 
-		private System.Timers.Timer IdleTimer { get; }
+		private Timer IdleTimer { get; }
 
 		public event EventHandler<EventArgs> IdleTimerElapsed;
 
 		public PollingSession()
 		{
-			IdleTimer = new System.Timers.Timer(TimeSpan.FromMinutes(SnippetCache.IdleIntervalInMinutes).TotalMilliseconds);
+			IdleTimer = new Timer(TimeSpan.FromMinutes(SnippetCache.IdleIntervalInMinutes).TotalMilliseconds);
 			IdleTimer.AutoReset = true;
 			IdleTimer.Elapsed += IdleTimer_Elapsed;
 		}
 
-		private void IdleTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		private void IdleTimer_Elapsed(object sender, ElapsedEventArgs e)
 		{
 			IdleTimerElapsed?.Invoke(this, new EventArgs());
 		}

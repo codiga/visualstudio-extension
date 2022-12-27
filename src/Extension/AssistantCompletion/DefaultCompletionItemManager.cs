@@ -1,14 +1,13 @@
-﻿using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.PatternMatching;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Extension.AssistantCompletion
 {
@@ -44,7 +43,7 @@ namespace Extension.AssistantCompletion
             // The relevant CompletionItem is match.Item1, its PatternMatch is match.Item2
             var patternMatcher = _patternMatcherFactory.CreatePatternMatcher(
                 filterText,
-                new PatternMatcherCreationOptions(System.Globalization.CultureInfo.CurrentCulture, PatternMatcherCreationFlags.IncludeMatchedSpans));
+                new PatternMatcherCreationOptions(CultureInfo.CurrentCulture, PatternMatcherCreationFlags.IncludeMatchedSpans));
 
             var matches = data.InitialSortedItemList
 				// Perform pattern matching

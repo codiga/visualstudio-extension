@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Extension.Helpers;
+using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Shell;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -59,11 +60,19 @@ namespace Extension.Rosie
         /// Creates the Codiga config file in the solution's root directory with default Python rulesets.
         /// </summary>
         /// <param name="serviceProvider">The service provider to retrieve information about the solution from.</param>
-        public static void CreateCodigaConfigFile(SVsServiceProvider serviceProvider)
+        public static void CreateCodigaConfigFile(LanguageUtils.LanguageEnumeration language, SVsServiceProvider serviceProvider)
         {
-            var solutionRoot = SolutionHelper.GetSolutionDir(serviceProvider);;
+            var solutionRoot = SolutionHelper.GetSolutionDir(serviceProvider);
             if (solutionRoot != null)
-                File.WriteAllText($"{solutionRoot}\\codiga.yml", CodigaRulesetConfigs.DefaultPythonRulesetConfig);
+            {
+                var rulesetConfig = language switch
+                {
+                    LanguageUtils.LanguageEnumeration.Python => CodigaRulesetConfigs.DefaultPythonRulesetConfig,
+                    LanguageUtils.LanguageEnumeration.Javascript => CodigaRulesetConfigs.DefaultJavascriptRulesetConfig,
+                    LanguageUtils.LanguageEnumeration.Typescript => CodigaRulesetConfigs.DefaultJavascriptRulesetConfig,
+                };
+                File.WriteAllText($"{solutionRoot}\\codiga.yml", rulesetConfig);
+            }
         }
 
         /// <summary>

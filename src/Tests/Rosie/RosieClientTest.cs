@@ -21,7 +21,7 @@ namespace Tests.Rosie
         {
             var rosieClient = new RosieClient(_ => null, _ => "");
 
-            var annotations = await rosieClient.GetAnnotations(new Mock<ITextBuffer>().Object);
+            var annotations = await rosieClient.GetAnnotationsAsync(new Mock<ITextBuffer>().Object);
 
             Assert.That(annotations, Is.Empty);
         }
@@ -31,7 +31,7 @@ namespace Tests.Rosie
         {
             var rosieClient = new RosieClient(_ => "", _ => "");
 
-            var annotations = await rosieClient.GetAnnotations(new Mock<ITextBuffer>().Object);
+            var annotations = await rosieClient.GetAnnotationsAsync(new Mock<ITextBuffer>().Object);
 
             Assert.That(annotations, Is.Empty);
         }
@@ -42,7 +42,7 @@ namespace Tests.Rosie
             CreateTestFile("not_supported_file_type.xaml");
             var rosieClient = new RosieClient(_ => _testFile, _ => "");
 
-            var annotations = await rosieClient.GetAnnotations(new Mock<ITextBuffer>().Object);
+            var annotations = await rosieClient.GetAnnotationsAsync(new Mock<ITextBuffer>().Object);
 
             Assert.That(annotations, Is.Empty);
         }
@@ -54,7 +54,7 @@ namespace Tests.Rosie
             var rosieClient = new RosieClient(_ => _testFile, _ => "");
             var textBuffer = new Mock<ITextBuffer>();
 
-            var annotations = await rosieClient.GetAnnotations(textBuffer.Object);
+            var annotations = await rosieClient.GetAnnotationsAsync(textBuffer.Object);
 
             Assert.That(annotations, Is.Empty);
         }

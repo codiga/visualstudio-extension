@@ -72,7 +72,7 @@ namespace Extension.Rosie
             };
         }
 
-        public /*override*/ async Task<IList<RosieAnnotation>> GetAnnotations(ITextBuffer textBuffer)
+        public /*override*/ async Task<IList<RosieAnnotation>> GetAnnotationsAsync(ITextBuffer textBuffer)
         {
             var fileName = _dataProvider.FileName(textBuffer);
             if (fileName == null || !File.Exists(fileName))
@@ -90,7 +90,7 @@ namespace Extension.Rosie
                 var fileText = Encoding.UTF8.GetBytes(_dataProvider.FileText(textBuffer).Replace("\r", ""));
                 var codeBase64 = Convert.ToBase64String(fileText);
 
-                await InitializeRulesCacheIfNeeded();
+                await InitializeRulesCacheIfNeededAsync();
 
                 //Prepare the request
                 var rosieRules = RosieRulesCache.Instance?.GetRosieRulesForLanguage(fileLanguage);
@@ -155,11 +155,11 @@ namespace Extension.Rosie
         /// <summary>
         /// Initializes the rules cache if it hasn't been done.
         /// <br/>
-        /// We are doing this at the first request for annotations (see <see cref="GetAnnotations"/> above), instead of on/after Solution open,
+        /// We are doing this at the first request for annotations (see <see cref="GetAnnotationsAsync"/> above), instead of on/after Solution open,
         /// since a document might be open (thus has an <c>ITextView</c> and <c>ITextBuffer</c>, and a <see cref="RosieViolationTagger"/> is created)
         /// before the Solution would open or complete opening. 
         /// </summary>
-        private async Task InitializeRulesCacheIfNeeded()
+        private async Task InitializeRulesCacheIfNeededAsync()
         {
             if (RosieRulesCache.Instance == null)
             {

@@ -148,7 +148,7 @@ namespace Extension.Rosie.Annotation
                 Annotations = await client.GetAnnotationsAsync(textView.TextBuffer);
                 TagsChanged.Invoke(this,
                     new SnapshotSpanEventArgs(new SnapshotSpan(textView.TextBuffer.CurrentSnapshot,
-                        new Span(0, textView.TextBuffer.CurrentSnapshot.Length - 1))));
+                        new Span(0, textView.TextBuffer.CurrentSnapshot.Length == 0 ? 0 : textView.TextBuffer.CurrentSnapshot.Length - 1))));
                 if (RosieRulesCache.Instance != null)
                     textView.Properties[RosieRulesCache.CacheLastUpdatedTimeStampProp] =
                         RosieRulesCache.Instance.CacheLastUpdatedTimeStamp;

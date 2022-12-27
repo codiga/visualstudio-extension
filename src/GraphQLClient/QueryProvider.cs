@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Reflection;
-using Microsoft.VisualStudio.Threading;
 
 namespace GraphQLClient
 {
@@ -34,64 +33,29 @@ namespace GraphQLClient
 		public static string GetRulesetsLastUpdatedTimestampQuery { get; }
 		public static string RecordRuleFixMutation { get; }
 		public static string RecordCreateCodigaYamlMutation { get; }
-
+		
 		static QueryProvider()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
 
-			using (Stream stream = assembly.GetManifestResourceStream(ShortcutQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				ShortcutQuery = reader.ReadToEnd();
-			}
-
-			using (Stream stream = assembly.GetManifestResourceStream(ShortcutLastTimestampQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				ShortcutLastTimestampQuery = reader.ReadToEnd();
-			}
-
-			using (Stream stream = assembly.GetManifestResourceStream(RecordRecipeUseMutationFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				RecordRecipeUseMutation = reader.ReadToEnd();
-			}
-
-			using (Stream stream = assembly.GetManifestResourceStream(SemanticQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				SemanticQuery = reader.ReadToEnd();
-			}
-
-			using (Stream stream = assembly.GetManifestResourceStream(GetUserQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				GetUserQuery = reader.ReadToEnd();
-			}
-			
-			using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsForClientQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				GetRulesetsForClientQuery = reader.ReadToEnd();
-			}
-			
-			using (Stream stream = assembly.GetManifestResourceStream(GetRulesetsLastUpdatedTimestampQueryFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				GetRulesetsLastUpdatedTimestampQuery = reader.ReadToEnd();
-			}
-			
-			using (Stream stream = assembly.GetManifestResourceStream(RecordRuleFixMutationFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				RecordRuleFixMutation = reader.ReadToEnd();
-			}
-			
-			using (Stream stream = assembly.GetManifestResourceStream(RecordCreateCodigaYamlMutationFile))
-			{
-				using StreamReader reader = new StreamReader(stream);
-				RecordCreateCodigaYamlMutation = reader.ReadToEnd();
-			}
+			ShortcutQuery = ReadQuery(assembly, ShortcutQueryFile);
+			ShortcutLastTimestampQuery = ReadQuery(assembly, ShortcutLastTimestampQueryFile);
+			RecordRecipeUseMutation = ReadQuery(assembly, RecordRecipeUseMutationFile);
+			SemanticQuery = ReadQuery(assembly, SemanticQueryFile);
+			GetUserQuery = ReadQuery(assembly, GetUserQueryFile);
+			GetRulesetsForClientQuery = ReadQuery(assembly, GetRulesetsForClientQueryFile);
+			GetRulesetsLastUpdatedTimestampQuery = ReadQuery(assembly, GetRulesetsLastUpdatedTimestampQueryFile);
+			RecordRuleFixMutation = ReadQuery(assembly, RecordRuleFixMutationFile);
+			RecordCreateCodigaYamlMutation = ReadQuery(assembly, RecordCreateCodigaYamlMutationFile);
 		}
+		
+		private static string ReadQuery(Assembly assembly, string queryFileName)
+		{
+			using (Stream stream = assembly.GetManifestResourceStream(queryFileName))
+			{
+				using StreamReader reader = new StreamReader(stream);
+				return reader.ReadToEnd();
+			}
+		} 
 	}
 }

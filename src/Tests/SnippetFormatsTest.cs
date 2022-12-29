@@ -14,15 +14,18 @@ using NUnit.Framework;
 
 namespace Tests
 {
+	/// <summary>
+	/// Unit test for <see cref="SnippetParser"/>.
+	/// </summary>
     [TestFixture]
 	internal class SnippetFormatsTest
 	{
 		[Test]
-		[TestCase("&[USER_INPUT:0]", ExpectedResult = "$end$")]
-		[TestCase("&[USER_INPUT:0] test &[USER_INPUT:1] test &[USER_INPUT:2]", ExpectedResult = "$end$ test $end$ test $end$")]
-		[TestCase("&[USER_INPUT:0:default]", ExpectedResult = "&[USER_INPUT:0:default]$end$")]
-		[TestCase("&[USER_INPUT:0: ]", ExpectedResult = "$end$", Ignore = "Not sure how to handle yet")]
-		[TestCase("&[USER_INPsUT:0:__ ::]", ExpectedResult = "&[USER_INPsUT:0:__ ::]$end$")]
+		[TestCase("&[USER_INPUT:0]", ExpectedResult = "ßendß")]
+		[TestCase("&[USER_INPUT:0] test &[USER_INPUT:1] test &[USER_INPUT:2]", ExpectedResult = "ßendß test ßendß test ßendß")]
+		[TestCase("&[USER_INPUT:0:default]", ExpectedResult = "&[USER_INPUT:0:default]ßendß")]
+		[TestCase("&[USER_INPUT:0: ]", ExpectedResult = "ßendß", Ignore = "Not sure how to handle yet")]
+		[TestCase("&[USER_INPsUT:0:__ ::]", ExpectedResult = "&[USER_INPsUT:0:__ ::]ßendß")]
 		public string ReplaceUserCaretPositions_should_create_end_variable(string input)
 		{
 			// arrange
@@ -36,14 +39,16 @@ namespace Tests
 		}
 
 		[Test]
-		[TestCase("&[USER_INPUT:0:default]", 1, ExpectedResult = "$param0$")]
-		[TestCase("&[USER_INPUT:3:CONSTANT_NAME]", 1, ExpectedResult = "$param3$")]
+		[TestCase("&[USER_INPUT:0:default]", 1, ExpectedResult = "ßparam0ß")]
+		[TestCase("&[USER_INPUT:3:CONSTANT_NAME]", 1, ExpectedResult = "ßparam3ß")]
 		[TestCase("&[USER_INPUT:0: ]", 1, ExpectedResult = "&[USER_INPUT:0: ]", Ignore ="Not sure how to handle yet")]
-		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:1:default1] test &[USER_INPUT:2:default2]", 3, ExpectedResult = "$param0$ test $param1$ test $param2$")]
+		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:1:default1] test &[USER_INPUT:2:default2]", 3, ExpectedResult = "ßparam0ß test ßparam1ß test ßparam2ß")]
 		[TestCase("&[USER_INPUT:0]", 0, ExpectedResult = "&[USER_INPUT:0]")]
-		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:0:default1] test &[USER_INPUT:0:default2]", 1, ExpectedResult = "$param0$ test $param0$ test $param0$")]
-
-		public string ReplaceUserVariables_should_replace_codiga_format_with_vs_fromat_and_add_literals(string input, int literalCount)
+		[TestCase("&[USER_INPUT:0:default0] test &[USER_INPUT:0:default1] test &[USER_INPUT:0:default2]", 1, ExpectedResult = "ßparam0ß test ßparam0ß test ßparam0ß")]
+		[TestCase("console.log(`${&[USER_INPUT:1:value]}: &[USER_INPUT:1:name]`);", 1, ExpectedResult = "console.log(`${ßparam1ß}: ßparam1ß`);")]
+		[TestCase("console.log(`${&[USER_INPUT:1:value1]}: &[USER_INPUT:1:name1], ${&[USER_INPUT:2:value2]}: &[USER_INPUT:2:name2], &[USER_INPUT:3]`);", 
+			2, ExpectedResult = "console.log(`${ßparam1ß}: ßparam1ß, ${ßparam2ß}: ßparam2ß, &[USER_INPUT:3]`);")]
+		public string ReplaceUserVariables_should_replace_codiga_format_with_vs_format_and_add_literals(string input, int literalCount)
 		{
 			// arrange
 			var builder = new StringBuilder(input);
@@ -123,6 +128,8 @@ namespace Tests
 			Assert.NotNull(snippet);
 		}
 
+		#region FromCodigaSnippet
+		
 		[Test]
         public void FromCodigaSnippet_should_convert_to_VisualStudioSnippet_with_two_user_variables()
         {
@@ -176,8 +183,8 @@ namespace Tests
 			Assert.That(param2.Default, Is.EqualTo("act"));
 
 			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Csharp"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam1ß"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam2ß"));
         }
 
 		[Test]
@@ -233,8 +240,8 @@ namespace Tests
 			Assert.That(param2.Default, Is.EqualTo("act"));
 
 			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Csharp"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param2$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam1ß"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam2ß"));
 		}
 
 		[Test]
@@ -278,10 +285,59 @@ namespace Tests
 			Assert.That(param1.Default, Is.EqualTo("file_name"));
 
 			Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("Python"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$param1$"));
-			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("$end$"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam1ß"));
+			Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßendß"));
 		}
 
+		[Test]
+		public void FromCodigaSnippet_should_work_with_snippet_including_original_delimiter()
+		{
+			// arrange
+			var snippet = new CodigaSnippet
+			{
+				Id = 89,
+				Shortcut = "console.log.multiple",
+				Name = "console log",
+				Description = "Console Log Value/Name (Multiple)",
+				Language = "JavaScript",
+				Keywords = new [] { "console", "log", "multiple" },
+				Code = Convert.ToBase64String(Encoding.UTF8.GetBytes(
+					"console.log(`${&[USER_INPUT:1:value1]}: &[USER_INPUT:1:name1], ${&[USER_INPUT:2:value2]}: &[USER_INPUT:2:name2], &[USER_INPUT:3]`);"))
+			};
+
+			// act
+			var vsSnippet = SnippetParser.FromCodigaSnippet(snippet, new IndentationSettings(4, 4, false));
+
+			// assert
+			Assert.Multiple(() =>
+			{
+				Assert.That(vsSnippet.CodeSnippet.Header.Id, Is.EqualTo(89));
+				Assert.That(vsSnippet.CodeSnippet.Header.Shortcut, Is.EqualTo("console.log.multiple"));
+				Assert.That(vsSnippet.CodeSnippet.Header.Title, Is.EqualTo("console log"));
+				Assert.That(vsSnippet.CodeSnippet.Header.Description, Is.EqualTo("Console Log Value/Name (Multiple)"));
+				Assert.That(vsSnippet.CodeSnippet.Header.Author, Is.Null);
+			});
+			
+			Assert.That(vsSnippet.CodeSnippet.Snippet.Declarations, Has.Exactly(2).Items);
+
+			Assert.Multiple(() =>
+			{
+				var param1 = vsSnippet.CodeSnippet.Snippet.Declarations.First();
+				Assert.That(param1.ID, Is.EqualTo("param1"));
+				Assert.That(param1.Default, Is.EqualTo("value1"));
+				
+				var param2 = vsSnippet.CodeSnippet.Snippet.Declarations[1];
+				Assert.That(param2.ID, Is.EqualTo("param2"));
+				Assert.That(param2.Default, Is.EqualTo("value2"));
+
+				Assert.That(vsSnippet.CodeSnippet.Snippet.Code.Language, Is.EqualTo("JavaScript"));
+				Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam1ß"));
+				Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßparam2ß"));
+				Assert.True(vsSnippet.CodeSnippet.Snippet.Code.CodeString.Contains("ßendß"));				
+			});
+		}
+		
+		#endregion
 
 		[Test]
         public void VisualStudioSnippet_should_serialize_correctly_to_xml()
@@ -315,14 +371,21 @@ namespace Tests
 		[Test]
 		public void GetPreviewCode_should_replace_all_vs_literals()
 		{
-			// arrange
-			var snippet = SnippetTestData.Snippet;
-
 			// act
-			var preview = SnippetParser.GetPreviewCode(snippet);
+			var preview = SnippetParser.GetPreviewCode(SnippetTestData.Snippet);
 
 			// assert
 			Assert.That(preview, Is.EqualTo("MessageBox.Show(\"first\");     MessageBox.Show(\"second\");"));
+		}
+		
+		[Test]
+		public void GetPreviewCode_should_replace_all_vs_literals_including_delimiters()
+		{
+			// act
+			var preview = SnippetParser.GetPreviewCode(SnippetTestData.SnippetWithOriginalDelimiters);
+
+			// assert
+			Assert.That(preview, Is.EqualTo("console.log(`${first}: first, ${second}: second, `);"));
 		}
 
 		[Test]
@@ -377,14 +440,46 @@ namespace Tests
 								Default = "second"
 							}
 						},
-						References = new List<Reference>
+						References = new List<Reference> { new Reference { Assembly = "System.Windows.Forms.dll" } },
+						Code = new Code("CSharp", "MessageBox.Show(\"ßparam1ß\");     MessageBox.Show(\"ßparam2ß\");", "ß")
+					}
+				}
+			};
+			
+			public static VisualStudioSnippet SnippetWithOriginalDelimiters => new VisualStudioSnippet
+			{
+				CodeSnippet = new CodeSnippet
+				{
+					Format = "1.0.0",
+					
+					Header = new Header
+					{
+						Title = "Test replacement fields",
+						Shortcut = "test",
+						Description = "Code snippet for testing replacement fields",
+						Author = "MSIT",
+						SnippetTypes = new SnippetTypes { SnippetType = "Expansion" }
+					},
+
+					Snippet = new Snippet
+					{
+						Declarations = new List<Literal>
 						{
-							new Reference
+							new Literal
 							{
-								Assembly = "System.Windows.Forms.dll"
+								ID = "param1",
+								ToolTip = "First field",
+								Default = "first"
+							},
+							new Literal
+							{
+								ID = "param2",
+								ToolTip = "Second field",
+								Default = "second"
 							}
 						},
-						Code = new Code("CSharp", "MessageBox.Show(\"$param1$\");     MessageBox.Show(\"$param2$\");")
+						References = new List<Reference> { new Reference { Assembly = "System.Windows.Forms.dll" } },
+						Code = new Code("JavaScript", "console.log(`${ßparam1ß}: ßparam1ß, ${ßparam2ß}: ßparam2ß, ßendß`);", "ß")
 					}
 				}
 			};
@@ -420,8 +515,8 @@ namespace Tests
 												"               </Reference>" +
 												"            </References>" +
 												"            <Code Language=\"CSharp\">" +
-												"                <![CDATA[MessageBox.Show(\"$param1$\");" +
-												"     MessageBox.Show(\"$param2$\");]]>" +
+												"                <![CDATA[MessageBox.Show(\"ßparam1ß\");" +
+												"     MessageBox.Show(\"ßparam2ß\");]]>" +
 												"            </Code>" +
 												"        </Snippet>" +
 												"    </CodeSnippet>" +

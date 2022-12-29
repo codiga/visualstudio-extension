@@ -7,6 +7,13 @@ namespace Extension.SnippetFormats
 {
 	/// <summary>
 	/// Represents the XML snippet structure used by Visual Studio for managing code snippets
+	/// <br/>
+	/// See the following documentation:
+	/// <ul>
+	/// <li>https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-implementing-code-snippets</li>
+	/// <li>https://learn.microsoft.com/en-us/visualstudio/ide/walkthrough-creating-a-code-snippet</li>
+	/// <li>https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference</li>
+	/// </ul>
 	/// </summary>
 	[XmlRoot(ElementName = "CodeSnippets", Namespace = "http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet")]
 	public class VisualStudioSnippet
@@ -209,11 +216,12 @@ namespace Extension.SnippetFormats
 
 		}
 
-		public Code(string language, string codeString)
+		public Code(string language, string codeString, string parameterDelimiter)
 		{
 			RawCode = codeString;
 			CDataCode = new XmlNode[] { new XmlDocument().CreateCDataSection(codeString) };
 			Language = language;
+			Delimiter = parameterDelimiter;
 		}
 	}
 

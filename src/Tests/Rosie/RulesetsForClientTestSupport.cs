@@ -82,18 +82,18 @@ namespace Tests.Rosie
 
             switch (rulesetNames.ToList()[0])
             {
-                case "singleRulesetSingleLanguage":
+                case "single-ruleset-single-language":
                     return SingleRulesetSingleLanguage(); //Python
-                case "singleRulesetMultipleLanguagesDefaultTimestamp":
-                case "singleRulesetMultipleLanguages":
+                case "single-set-multi-lang-def-ts":
+                case "single-ruleset-multi-languages":
                     return SingleRulesetMultipleLanguages(); //Python, Java
-                case "multipleRulesetsSingleLanguage":
+                case "multi-rulesets-single-language":
                     return MultipleRulesetsSingleLanguage(); //Python
-                case "multipleRulesetsMultipleLanguages":
+                case "multi-rulesets-multi-languages":
                     return MultipleRulesetsMultipleLanguages(); //Python, Java
-                case "erroredRuleset":
+                case "errored-ruleset":
                     return null;
-                case "javascriptRuleset":
+                case "javascript-ruleset":
                     return JavascriptRulesets();
                 default:
                     return ImmutableList.Create<RuleSetsForClient>();
@@ -104,12 +104,12 @@ namespace Tests.Rosie
         {
             return rulesetNames.ToList()[0] switch
             {
-                "singleRulesetSingleLanguage" => 101L,
-                "singleRulesetMultipleLanguagesDefaultTimestamp" => 100L,
-                "singleRulesetMultipleLanguages" => 102L,
-                "multipleRulesetsSingleLanguage" => 103L,
-                "multipleRulesetsMultipleLanguages" => 104L,
-                "javascriptRuleset" => 105L,
+                "single-ruleset-single-language" => 101L,
+                "single-set-multi-lang-def-ts" => 100L,
+                "single-ruleset-multi-languages" => 102L,
+                "multi-rulesets-single-language" => 103L,
+                "multi-rulesets-multi-languages" => 104L,
+                "javascript-ruleset" => 105L,
                 _ => -1L
             };
         }
@@ -171,7 +171,7 @@ namespace Tests.Rosie
         private static IReadOnlyCollection<RuleSetsForClient> JavascriptRulesets() {
             var rules = new List<Rule> { JavaScriptRule1, JavaScriptRule2, JavaScriptRule3};
 
-            var ruleset = new RuleSetsForClient { Id = 5678, Name = "javascriptRuleset", Rules = rules };
+            var ruleset = new RuleSetsForClient { Id = 5678, Name = "javascript-ruleset", Rules = rules };
 
             return ImmutableList.Create(ruleset);
         }

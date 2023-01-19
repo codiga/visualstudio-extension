@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EnvDTE;
 using Extension.Caching;
 using Extension.Rosie;
-using Extension.SnippetFormats;
+using Extension.Rosie.Model;
+using Extension.Rosie.Model.Codiga;
 using GraphQLClient;
 using Moq;
 using NUnit.Framework;
+using LanguageEnumeration = Extension.SnippetFormats.LanguageUtils.LanguageEnumeration;
 
 namespace Tests.Rosie
 {
@@ -26,6 +29,8 @@ namespace Tests.Rosie
         private string? _codigaConfigFile;
         private ICodigaClientProvider _clientProvider;
         private RosieRulesCache? _cache;
+        private string? _pythonFile;
+        private string? _javaScriptFile;
 
         /// <summary>
         /// Initializes the test with a Solution directory with a mock Solution,
@@ -41,6 +46,8 @@ namespace Tests.Rosie
 
             _solutionDirPath = Path.GetTempPath();
             _codigaConfigFile = $"{_solutionDirPath}codiga.yml";
+            _pythonFile = $"{_solutionDirPath}python_file.py";
+            _javaScriptFile = $"{_solutionDirPath}javascript_file.js";
 
             _solution = new Mock<Solution>();
             //Necessary to mock for CodigaConfigFileUtil.FindCodigaConfigFile()
@@ -65,7 +72,7 @@ namespace Tests.Rosie
 
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
 
             Assert.That(RosieRulesCache.IsInitializedWithRules, Is.False);
 
@@ -78,11 +85,13 @@ rulesets:
             var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.NoConfigFile);
+            
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
+            
             Assert.Multiple(() =>
             {
-                Assert.That(_cache.RulesetNames, Is.Empty);
-                Assert.That(_cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python),
-                    Is.Empty);
+                Assert.That(_cache.CodigaConfig.Rulesets, Is.Empty);
+                Assert.That(rules, Is.Empty);
                 Assert.That(RosieRulesCache.IsInitializedWithRules, Is.True);
             });
         }
@@ -93,14 +102,16 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
 
             var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.Success);
+            
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
+            
             Assert.Multiple(() =>
             {
-                var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
                 Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
                 Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule2.Name}"));
                 Assert.That(rules[2].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule3.Name}"));
@@ -113,11 +124,13 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
 
             await _cache.HandleCacheUpdateAsync();
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
+
+            Assert.That(rules, Has.Count.EqualTo(3));
             Assert.Multiple(() =>
             {
                 Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
@@ -127,15 +140,17 @@ rulesets:
 
             await UpdateCodigaConfig(@"
 rulesets:
-  - multipleRulesetsSingleLanguage");
+  - multi-rulesets-single-language");
 
             var updateResult = await _cache.HandleCacheUpdateAsync();
 
             Assert.AreEqual(updateResult, RosieRulesCache.UpdateResult.Success);
 
+            Assert.That(rules, Has.Count.EqualTo(3));
+            
+            var rulesMulti = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.Multiple(() =>
             {
-                var rulesMulti = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
                 Assert.That(rulesMulti[0].Id,
                     Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
                 Assert.That(rulesMulti[1].Id,
@@ -151,20 +166,23 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
 
             _cache.UpdateCacheFrom(RulesetsForClientTestSupport.SingleRulesetMultipleLanguages());
             _cache.RulesetslastUpdatedTimeStamp = 102L;
             _cache.ConfigFileLastWriteTime = File.GetLastWriteTime(_codigaConfigFile);
-            _cache.RulesetNames = new List<string> { "singleRulesetSingleLanguage" };
+            _cache.CodigaConfig = new CodigaCodeAnalysisConfig
+            {
+                Rulesets = new List<string> { "single-ruleset-single-language" }
+            };
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(rules.Count, Is.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(102L));
 
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(updatedRules.Count, Is.EqualTo(3));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(101L));
         }
@@ -179,7 +197,7 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
 
             await _cache.HandleCacheUpdateAsync();
 
@@ -198,8 +216,8 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
-            
+  - single-ruleset-single-language");
+
             await _cache.HandleCacheUpdateAsync();
 
             Assert.IsFalse(_cache.IsEmpty());
@@ -219,11 +237,11 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
-            
+  - single-ruleset-single-language");
+
             await _cache.HandleCacheUpdateAsync();
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.Multiple(() =>
             {
                 Assert.That(rules[0].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule1.Name}"));
@@ -233,11 +251,11 @@ rulesets:
 
             await UpdateCodigaConfig(@"
 rulesets:
-  - erroredRuleset");
-            
+  - errored-ruleset");
+
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.Multiple(() =>
             {
                 Assert.That(updatedRules[0].Id,
@@ -255,15 +273,15 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
-            
+  - single-ruleset-single-language");
+
             await _cache.HandleCacheUpdateAsync();
 
             Assert.IsFalse(_cache.IsEmpty());
 
             await UpdateCodigaConfig(@"
 rulesets:
-  - nonExistentRuleset");
+  - non-existent-ruleset");
 
             await _cache.HandleCacheUpdateAsync();
 
@@ -276,18 +294,18 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
-            
+  - single-ruleset-single-language");
+
             await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
             await UpdateCodigaConfig(@"
 rulesets:
-  - singleRulesetMultipleLanguagesDefaultTimestamp");
+  - single-set-multi-lang-def-ts");
 
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(100L));
         }
@@ -298,18 +316,18 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
-            
+  - single-ruleset-single-language");
+
             await _cache.HandleCacheUpdateAsync();
             _cache.RulesetslastUpdatedTimeStamp = 100L;
 
             await UpdateCodigaConfig(@"
 rulesets:
-  - singleRulesetMultipleLanguages");
+  - single-ruleset-multi-languages");
 
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(102L));
         }
@@ -342,19 +360,22 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
             _cache.UpdateCacheFrom(RulesetsForClientTestSupport.SingleRulesetMultipleLanguages());
-            _cache.RulesetNames = new List<string> { "singleRulesetSingleLanguage" };
+            _cache.CodigaConfig = new CodigaCodeAnalysisConfig
+            {
+                Rulesets = new List<string> { "single-ruleset-single-language" }
+            };
             _cache.RulesetslastUpdatedTimeStamp = 101L;
             _cache.ConfigFileLastWriteTime = File.GetLastWriteTime(_codigaConfigFile);
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(rules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(101L));
 
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(updatedRules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(101L));
         }
@@ -364,19 +385,22 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - singleRulesetSingleLanguage");
+  - single-ruleset-single-language");
             _cache.UpdateCacheFrom(RulesetsForClientTestSupport.SingleRulesetMultipleLanguages());
-            _cache.RulesetNames = new List<string> { "singleRulesetSingleLanguage" };
+            _cache.CodigaConfig = new CodigaCodeAnalysisConfig
+            {
+                Rulesets = new List<string> { "single-ruleset-single-language" }
+            };
             _cache.RulesetslastUpdatedTimeStamp = 102L;
             _cache.ConfigFileLastWriteTime = File.GetLastWriteTime(_codigaConfigFile);
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(rules, Has.Count.EqualTo(2));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(102L));
 
             await _cache.HandleCacheUpdateAsync();
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(updatedRules, Has.Count.EqualTo(3));
             Assert.That(_cache.RulesetslastUpdatedTimeStamp, Is.EqualTo(101L));
         }
@@ -390,11 +414,11 @@ rulesets:
         {
             InitConfigAndCache(@"
 rulesets:
-  - multipleRulesetsMultipleLanguages");
+  - multi-rulesets-multi-languages");
 
             await _cache.HandleCacheUpdateAsync();
 
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Python);
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Python, _pythonFile, _solutionDirPath);
             Assert.That(rules, Has.Count.EqualTo(2));
             Assert.Multiple(() =>
             {
@@ -402,23 +426,397 @@ rulesets:
                 Assert.That(rules[1].Id, Is.EqualTo($"python-ruleset/{RulesetsForClientTestSupport.PythonRule5.Name}"));
             });
 
-            var updatedRules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Java);
+            var updatedRules = await _cache.GetRosieRules(LanguageEnumeration.Java,
+                $"{_solutionDirPath}JavaFile.java", _solutionDirPath);
             Assert.That(updatedRules, Has.Count.EqualTo(1));
             Assert.That(updatedRules[0].Id,
                 Is.EqualTo($"mixed-ruleset/{RulesetsForClientTestSupport.JavaRule1.Name}"));
         }
-        
+
+        #endregion
+
+        #region GetRosieRules
+
         [Test]
-        public async Task GetRosieRulesForLanguage_should_return_javascript_rules_for_typescript() {
+        public async Task GetRosieRules_should_return_rules_for_empty_ignore_config()
+        {
             InitConfigAndCache(@"
 rulesets:
-  - javascriptRuleset");
-            
+  - javascript-ruleset");
+
             await _cache.HandleCacheUpdateAsync();
-            
-            var rules = _cache.GetRosieRulesForLanguage(LanguageUtils.LanguageEnumeration.Typescript);
-            Assert.That(rules, Has.Count.EqualTo(3));
-            Assert.That(rules, Has.All.Property("Language").EqualTo("Javascript"));
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2",
+                "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_not_filter_rules_for_ignore_config_with_no_ruleset()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  ");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2",
+                "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_not_filter_rules_for_ignore_config_with_no_rule()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2",
+                "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_filter_rules_for_ignore_config_with_no_prefix()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_filter_rule_for_ignore_config_with_one_matching_prefix_with_leading_slash()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: /javascript");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_filter_rules_with_ignore_config_with_one_matching_prefix_without_leading_slash()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: javascript");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_filter_rules_with_ignore_config_with_one_matching_file_path_prefix()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: /javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_filter_rules_with_ignore_config_with_one_matching_directory_path_prefix()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: /directory");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript,
+                $"{_solutionDirPath}directory/javascript_file.js", _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_not_filter_rules_with_ignore_config_with_one_prefix_not_matching()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: not-matching");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_not_filter_rules_with_ignore_config_with_one_prefix_containing_double_dots()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: javascript_file..js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_not_filter_rules_with_ignore_config_with_one_prefix_containing_single_dot_as_folder()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: directory/./javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript,
+                $"{_solutionDirPath}directory/sub/javascript_file.js", _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_not_filter_rules_with_ignore_config_with_one_prefix_containing_double_dots_as_folder()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: directory/../javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript,
+                $"{_solutionDirPath}directory/sub/javascript_file.js", _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_filter_rules_with_ignore_config_with_one_matching_prefix_of_multiple()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix:
+        - not/matching
+        - javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_filter_rules_with_ignore_config_with_multiple_matching_prefixes()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix:
+        - /javascript
+        - javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_not_filter_rules_with_ignore_config_with_multiple_prefixes_not_matching()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix:
+        - not-matching
+        - also/not/matching");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_filter_rules_with_ignore_config_with_multiple_rule_ignore_configurations()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - javascript_rule_2:
+      - prefix: javascript_file..js
+    - javascript_rule_3:
+      - prefix:
+        - /javascript_fi");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                2,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2");
+        }
+
+        [Test]
+        public async Task GetRosieRules_should_not_filter_rules_when_rule_doesnt_belong_to_ruleset()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - javascript-ruleset:
+    - non_javascript_rule:
+      - prefix: javascript_file..js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        [Test]
+        public async Task
+            GetRosieRules_should_not_filter_rules_when_ruleset_ignore_is_not_present_in_rulesets_property()
+        {
+            InitConfigAndCache(@"
+rulesets:
+  - javascript-ruleset
+ignore:
+  - not-configured-ruleset:
+    - javascript_rule_2:
+      - prefix: javascript_file.js");
+
+            await _cache.HandleCacheUpdateAsync();
+
+            var rules = await _cache.GetRosieRules(LanguageEnumeration.Javascript, _javaScriptFile, _solutionDirPath);
+
+            ValidateRuleCountAndRuleIds(rules,
+                3,
+                "javascript-ruleset/javascript_rule_1", "javascript-ruleset/javascript_rule_2", "javascript-ruleset/javascript_rule_3");
+        }
+
+        private void ValidateRuleCountAndRuleIds(IReadOnlyList<RosieRule> rules, int count,
+            params string[] expectedRuleIds)
+        {
+            Assert.That(rules, Has.Count.EqualTo(count));
+
+            var actualRuleIds = rules.Select(rule => rule.Id).ToList();
+            CollectionAssert.AreEqual(actualRuleIds, expectedRuleIds);
         }
 
         #endregion
@@ -450,7 +848,7 @@ rulesets:
         private async Task UpdateCodigaConfig(string rawConfig)
         {
             File.Delete(_codigaConfigFile);
-            
+
             //This delay ensures that the last write time of the new config file is different than the
             // one in the rules cache. In the CI pipeline the test execution tends to be so fast
             // that it is executed in the same millisecond, resulting in the exact same last write time. 
@@ -463,7 +861,7 @@ rulesets:
             {
                 return;
             }
-            
+
             InitCodigaConfig(rawConfig);
         }
 

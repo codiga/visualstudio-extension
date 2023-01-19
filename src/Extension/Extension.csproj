@@ -78,8 +78,10 @@
     <Compile Include="Rosie\Annotation\StringUtils.cs" />
     <Compile Include="Rosie\CodigaDefaultRulesetsInfoBarHelper.cs" />
     <Compile Include="Rosie\CodigaRulesetConfigs.cs" />
+    <Compile Include="Rosie\Model\Codiga\CodigaCodeAnalysisConfig.cs" />
+    <Compile Include="Rosie\Model\Codiga\RuleIgnore.cs" />
+    <Compile Include="Rosie\Model\Codiga\RulesetIgnore.cs" />
     <Compile Include="Rosie\RosieClientProvider.cs" />
-    <Compile Include="Rosie\CodigaCodeAnalysisConfig.cs" />
     <Compile Include="Rosie\CodigaConfigFileUtil.cs" />
     <Compile Include="Rosie\Annotation\ApplyRosieFixSuggestedAction.cs" />
     <Compile Include="Rosie\Annotation\DisableRosieAnalysisSuggestedAction.cs" />

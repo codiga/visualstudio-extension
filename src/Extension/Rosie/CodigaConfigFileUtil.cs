@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Extension.Helpers;
+using Extension.Rosie.Model.Codiga;
 using Extension.SnippetFormats;
 using Microsoft.VisualStudio.Shell;
 using YamlDotNet.Serialization;
@@ -34,6 +35,8 @@ namespace Extension.Rosie
         private static readonly Regex CodigaRulesetNamePattern = new Regex("^[a-z0-9][a-z0-9-]{4,31}$");
 
         private const string CodigaConfigFileName = "codiga.yml";
+        private const string RULESETS = "rulesets";
+        private const string IGNORE = "ignore";
 
         /// <summary>
         /// Looks up the Codiga config file in the provided Solution's root directory,
@@ -76,64 +79,77 @@ namespace Extension.Rosie
         }
 
         /// <summary>
-        /// Collects the list of valid ruleset names from the provided configuration object.
+        /// Deserializes the provided raw YAML string (the content of the Codiga config file) to a <see cref="CodigaCodeAnalysisConfig"/>
+        /// object, so that ruleset names, ignore prefixes, etc. can be accessed later.
+        /// <br/>
+        /// It deserializes it using dynamic typing.
         /// </summary>
-        /// <param name="config">The configuration containing the rulesets.</param>
-        /// <returns>The list of ruleset names or empty list if there is no config or no ruleset.</returns>
-        public static List<string> CollectRulesetNames(CodigaCodeAnalysisConfig? config)
+        /// <param name="rawYamlConfig">The content of the Codiga config file</param>
+        /// <returns>The deserialized config file, or <see cref="CodigaCodeAnalysisConfig.EMPTY"/> in case deserialization failed.</returns>
+        public static CodigaCodeAnalysisConfig DeserializeConfig(string rawYamlConfig)
         {
-            return config?.Rulesets == null
-                ? new List<string>()
-                : config.Rulesets
+            if (string.IsNullOrWhiteSpace(rawYamlConfig))
+                return CodigaCodeAnalysisConfig.EMPTY;
+
+            try
+            {
+                var codigaConfig = new CodigaCodeAnalysisConfig();
+                var semiRawConfig = ConfigDeserializer.Deserialize<dynamic>(rawYamlConfig);
+                if (semiRawConfig is Dictionary<object, object> properties)
+                {
+                    SetRulesets(properties, codigaConfig);
+                    SetIgnore(properties, codigaConfig);
+                }
+
+                return codigaConfig;
+            }
+            catch
+            {
+                return CodigaCodeAnalysisConfig.EMPTY;
+            }
+        }
+
+        /// <summary>
+        /// Configures the rulesets in the argument <see cref="CodigaCodeAnalysisConfig"/> based on the deserialized config data.
+        /// </summary>
+        /// <param name="semiRawConfig">The codiga.yml file as a dictionary of string-object entries</param>
+        /// <param name="codigaConfig">The Codiga config in which rulesets are being configured</param>
+        private static void SetRulesets(Dictionary<object, object> semiRawConfig, CodigaCodeAnalysisConfig codigaConfig)
+        {
+            if (semiRawConfig.ContainsKey(RULESETS) && semiRawConfig[RULESETS] is List<object> rulesetNames)
+            {
+                codigaConfig.Rulesets = rulesetNames
+                    .OfType<string>()
                     //Filter out non-string value, and null and empty ruleset names
                     .Where(name => !string.IsNullOrEmpty(name))
                     //Filter out invalid ruleset names
                     .Where(IsRulesetNameValid)
                     .ToList();
+            }
         }
 
         /// <summary>
-        /// Deserializes the provided raw YAML string (the content of the Codiga config file) to a <see cref="CodigaCodeAnalysisConfig"/>
-        /// object, so that ruleset names can be accessed later.
-        ///
-        /// First, it tries to deserialize directly into a <c>CodigaCodeAnalysisConfig</c> instance, and if that fails,
-        /// it tries to deserialize it using dynamic typing. This is necessary because when the config file is configured e.g. like this:
-        /// <code>
-        /// rulesets:
-        /// - my-csharp-ruleset
-        /// - rules:
-        ///     - some-rule
-        /// - my-other-ruleset
-        /// </code>
-        /// it would fail with an exception on the <c>rules</c> property, and would not return the rest of the ruleset names.
+        /// Configures the ignores in the argument <see cref="CodigaCodeAnalysisConfig"/> based on the deserialized config data.
         /// </summary>
-        /// <param name="rawYamlConfig">The content of the Codiga config file</param>
-        /// <returns>The deserialized config file, or null in case deserialization couldn't happen.</returns>
-        public static CodigaCodeAnalysisConfig? DeserializeConfig(string rawYamlConfig)
+        /// <param name="semiRawConfig">The codiga.yml file as a dictionary of string-object entries</param>
+        /// <param name="codigaConfig">The Codiga config in which ignore config is being configured</param>
+        private static void SetIgnore(Dictionary<object, object> semiRawConfig, CodigaCodeAnalysisConfig codigaConfig)
         {
-            if (string.IsNullOrWhiteSpace(rawYamlConfig))
-                return null;
-
-            try
+            //List of [ruleset name -> rule ignore config] mappings
+            if (semiRawConfig.ContainsKey(IGNORE) && semiRawConfig[IGNORE] is List<object> rulesetIgnoreConfigs)
             {
-                return ConfigDeserializer.Deserialize<CodigaCodeAnalysisConfig>(rawYamlConfig);
-            }
-            catch
-            {
-                var semiRawConfigFile = ConfigDeserializer.Deserialize<dynamic>(rawYamlConfig);
-                if (semiRawConfigFile is Dictionary<object, object> properties
-                    //If there is one property, and it is called 'rulesets'
-                    && properties.Keys.Count == 1 && properties.ContainsKey("rulesets")
-                    //If the value of 'rulesets' is a non-empty list
-                    && properties["rulesets"] is List<object> rulesetNames && rulesetNames.Count > 0)
+                foreach (var rulesetIgnoreConfig in rulesetIgnoreConfigs)
                 {
-                    return new CodigaCodeAnalysisConfig
+                    //[ruleset name -> rule ignore config] mappings
+                    if (rulesetIgnoreConfig is Dictionary<object, object> rulesetIgnoreDict)
                     {
-                        Rulesets = rulesetNames.OfType<string>().ToList()
-                    };
-                }
+                        var rulesetIgnore = new RulesetIgnore(
+                            rulesetIgnoreDict.Keys.FirstOrDefault() as string,
+                            rulesetIgnoreDict.Values.FirstOrDefault());
 
-                return null;
+                        codigaConfig.Ignore.Add(rulesetIgnore.RulesetName, rulesetIgnore);
+                    }
+                }
             }
         }
 

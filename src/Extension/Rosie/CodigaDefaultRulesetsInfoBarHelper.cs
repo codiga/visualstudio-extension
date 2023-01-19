@@ -65,11 +65,7 @@ namespace Extension.Rosie
         /// </summary>
         internal static async void ShowDefaultRulesetCreationInfoBarAsync(InfoBarHolder infoBarHolder)
         {
-            var serviceProvider = await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-            {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                return await VS.GetMefServiceAsync<SVsServiceProvider>();
-            });
+            var serviceProvider = await SolutionHelper.GetServiceProvider();
 
             if (SolutionSettings.IsShouldNotifyUserToCreateCodigaConfig(serviceProvider)
                 && CodigaConfigFileUtil.FindCodigaConfigFile(serviceProvider) == null)

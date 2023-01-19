@@ -2,14 +2,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
 using Extension.Caching;
+using Extension.Helpers;
 using Extension.Rosie.Annotation;
 using Extension.Rosie.Model;
+using Extension.Rosie.Model.Codiga;
 using GraphQLClient;
 using GraphQLClient.Model.Rosie;
 using Microsoft.VisualStudio.Shell;
@@ -59,10 +62,7 @@ namespace Extension.Rosie
         /// </summary>
         internal DateTime ConfigFileLastWriteTime { get; set; } = DateTime.MinValue;
 
-        /// <summary>
-        /// Ruleset names stored locally in the codiga.yml config file.
-        /// </summary>
-        public IList<string> RulesetNames { get; set; }
+        public CodigaCodeAnalysisConfig CodigaConfig { get; set; }
 
         /// <summary>
         /// The cache is considered initialized with rules right after the response is received from <see cref="ICodigaClient.GetRulesetsForClientAsync"/>,
@@ -88,11 +88,14 @@ namespace Extension.Rosie
         {
             _clientProvider = clientProvider;
             _cachedRules = new ConcurrentDictionary<LanguageEnumeration, RosieRulesCacheValue>();
-            RulesetNames = new SynchronizedCollection<string>();
+            CodigaConfig = CodigaCodeAnalysisConfig.EMPTY;
         }
 
         public static void Initialize(bool startPolling = true)
         {
+            TextWriterTraceListener tr1 = new TextWriterTraceListener(Console.Out);
+            Debug.Listeners.Add(tr1);
+            
             Instance = new RosieRulesCache();
             if (startPolling)
                 Instance.StartPolling();
@@ -196,22 +199,23 @@ namespace Extension.Rosie
         {
             ConfigFileLastWriteTime = File.GetLastWriteTime(codigaConfigFile);
             var rawCodigaConfig = File.ReadAllText(codigaConfigFile);
-            var rulesetNames = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig)?.GetRulesets();
+            var codigaConfig = CodigaConfigFileUtil.DeserializeConfig(rawCodigaConfig);
             //If the config file is not configured properly, we clear the cache
-            if (rulesetNames == null)
+            if (codigaConfig.Rulesets.Count == 0)
             {
                 ClearCache();
                 return;
             }
             
-            RulesetNames = rulesetNames;
+            CodigaConfig = codigaConfig;
 
             //If there is at least on ruleset name, we can make a request with them
-            if (RulesetNames.Count > 0)
+            if (CodigaConfig.Rulesets.Count > 0)
             {
                 try
                 {
-                    var rulesetsForClient = await client.GetRulesetsForClientAsync(rulesetNames);
+                    Debug.WriteLine($"Fetching rulesets last updated timestamp at {DateTime.Now}");
+                    var rulesetsForClient = await client.GetRulesetsForClientAsync(codigaConfig.Rulesets);
                     IsInitializedWithRules = true;
                     if (rulesetsForClient == null)
                         return;
@@ -233,7 +237,8 @@ namespace Extension.Rosie
                       codiga.yml was updated locally with a non-existent ruleset, or a ruleset that has an earlier timestamp
                       than the latest updated one, so the rulesets configured don't result in an updated timestamp from the server.
                     */
-                    long timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(rulesetNames);
+                    Debug.WriteLine($"Fetching rulesets last updated timestamp at {DateTime.Now}");
+                    long timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(codigaConfig.Rulesets);
                     if (timestampFromServer != RulesetslastUpdatedTimeStamp)
                         RulesetslastUpdatedTimeStamp = timestampFromServer;
 
@@ -257,18 +262,20 @@ namespace Extension.Rosie
         /// </summary>
         private async Task UpdateCacheFromChangesOnServerAsync(ICodigaClient client)
         {
-            if (RulesetNames.Count == 0)
+            if (CodigaConfig.Rulesets.Count == 0)
                 return;
 
             try
             {
                 //Retrieve the last updated timestamp for the rulesets
-                var timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(RulesetNames.ToImmutableList());
+                Debug.WriteLine($"Fetching rulesets last updated timestamp at {DateTime.Now}");
+                var timestampFromServer = await client.GetRulesetsLastUpdatedTimestampAsync(CodigaConfig.Rulesets.ToImmutableList());
                 IsInitializedWithRules = true;
                 //If there was a change on the server, we can get and cache the rulesets
                 if (RulesetslastUpdatedTimeStamp != timestampFromServer)
                 {
-                    var rulesetsForClient = await client.GetRulesetsForClientAsync(RulesetNames.ToImmutableList());
+                    Debug.WriteLine($"Fetching rulesets at {DateTime.Now}");
+                    var rulesetsForClient = await client.GetRulesetsForClientAsync(CodigaConfig.Rulesets.ToImmutableList());
                     if (rulesetsForClient == null)
                         return;
 
@@ -338,19 +345,68 @@ namespace Extension.Rosie
         #region Get rules
 
         /// <summary>
-        /// Returns the <see cref="RosieRule"/>s for the provided language.
+        /// Returns the list of <see cref="RosieRule"/>s for the argument language and file path,
+        /// that will be sent to the Rosie service for analysis.
         /// </summary>
-        /// <param name="language">The language to get the rules for.</param>
+        /// <param name="language">The language to get the rules for</param>
+        /// <param name="pathOfAnalyzedFile">the absolute path of the file being analyzed.
+        /// Required to pass in for the <c>ignore</c> configuration.</param>
+        /// <param name="solutionDirectory">The solution root directory.
+        /// Null only in case of production code, so we can retrieve the proper root directory.</param>
         /// <returns>The rules for the given language.</returns>
-        public IReadOnlyList<RosieRule> GetRosieRulesForLanguage(LanguageEnumeration language)
+        public async Task<IReadOnlyList<RosieRule>> GetRosieRules(LanguageEnumeration language, string pathOfAnalyzedFile, string? solutionDirectory = null)
         {
+            var solutionDir = solutionDirectory ?? await SolutionHelper.GetSolutionDir();
+            if (solutionDir == null)
+                return NoRule;
+            
             var cachedLanguageType = GetCachedLanguageTypeOf(language);
             if (_cachedRules.ContainsKey(cachedLanguageType))
             {
                 var cachedRules = _cachedRules[cachedLanguageType];
-                return cachedRules != null ? cachedRules.RosieRules : NoRule;                
+                var rosieRulesForLanguage = cachedRules != null ? cachedRules.RosieRules : NoRule;
+                
+                if (rosieRulesForLanguage.Count > 0)
+                {
+                    //Replaces backslash '\' symbols with forward slashes '/', so that in case of Windows specific paths,
+                    // we still can compare the relative paths properly. 
+                    string relativePathOfAnalyzedFile = pathOfAnalyzedFile.Replace(solutionDir, "").Replace("\\", "/");
+                    
+                    //Returns the RosieRules that either don't have an ignore rule, or their prefixes don't match the currently analyzed file's path
+                    return rosieRulesForLanguage
+                        .Where(rosieRule =>
+                        {
+                            //If there is no ruleset ignore or rule ignore for the current RosieRule, then we keep it/don't ignore it.
+                            if (!CodigaConfig.Ignore.ContainsKey(rosieRule.RulesetName)
+                                || !CodigaConfig.Ignore[rosieRule.RulesetName].RuleIgnores
+                                    .ContainsKey(rosieRule.RuleName))
+                                return true;
+                                    
+                            var ruleIgnore = CodigaConfig.Ignore[rosieRule.RulesetName].RuleIgnores[rosieRule.RuleName];
+
+                            //If there is no prefix specified for the current rule ignore config,
+                            // we don't keep the rule/ignore it.
+                            if (ruleIgnore.Prefixes.Count == 0)
+                                return false;
+
+                            return ruleIgnore.Prefixes
+                                    //Since the leading / is optional, we remove it
+                                    .Select(RemoveLeadingSlash)
+                                    //./, /. and .. sequences are not allowed in prefixes, therefore we consider them not matching the file path.
+                                    //. symbols in general are allowed to be able to target exact file paths with their file extensions.
+                                    .All(prefix =>
+                                        prefix.Contains("..")
+                                        || prefix.Contains("./")
+                                        || prefix.Contains("/.")
+                                        || !RemoveLeadingSlash(relativePathOfAnalyzedFile).StartsWith(prefix));
+                        }).ToList();
+                }
             }
             return NoRule;
+        }
+        
+        private static string RemoveLeadingSlash(string path) {
+            return path.StartsWith("/") ? path.Substring(1) : path;
         }
         
          /// <summary>
@@ -365,7 +421,7 @@ namespace Extension.Rosie
         /// <summary>
         /// Returns the cached rules for the provided language and rule id.
         /// <br/>
-        /// Null value for non-existent mapping for a language is already handled in <see cref="GetRosieRulesForLanguage"/>.
+        /// Null value for non-existent mapping for a language is already handled in <see cref="GetRosieRules"/>.
         /// <br/>
         /// It should not return null when retrieving the rule for the rule id, since in <c>RosieApiImpl#GetAnnotations()</c>
         /// the <see cref="RosieRuleResponse"/>s and their ids are based on the values cached here.
@@ -386,8 +442,7 @@ namespace Extension.Rosie
         {
             if (_cachedRules.Count > 0)
                 _cachedRules.Clear();
-            if (RulesetNames.Count > 0)
-                RulesetNames.Clear();
+            CodigaConfig = CodigaCodeAnalysisConfig.EMPTY;
             RulesetslastUpdatedTimeStamp = -1L;
         }
 

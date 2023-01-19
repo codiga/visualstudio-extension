@@ -93,7 +93,7 @@ namespace Extension.Rosie
                 await InitializeRulesCacheIfNeededAsync();
 
                 //Prepare the request
-                var rosieRules = RosieRulesCache.Instance?.GetRosieRulesForLanguage(fileLanguage);
+                var rosieRules = await RosieRulesCache.Instance?.GetRosieRules(fileLanguage, fileName);
                 //If there is no rule for the target language, then Rosie is not called, and no tagging is performed
                 if (rosieRules == null || rosieRules.Count == 0)
                     return NoAnnotation;

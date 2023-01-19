@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Codiga.7f415e9f-9649-4ced-bbb2-64044b3d0a72" Version="0.0.14" Language="en-US" Publisher="Codiga" />
+        <Identity Id="Codiga.7f415e9f-9649-4ced-bbb2-64044b3d0a72" Version="0.0.15" Language="en-US" Publisher="Codiga" />
         <DisplayName>Codiga</DisplayName>
         <Description xml:space="preserve">Code Snippets for 15+ languages and Code Analysis with Custom Rules.</Description>
         <MoreInfo>https://www.codiga.io/</MoreInfo>

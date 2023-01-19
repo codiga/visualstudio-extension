@@ -4,6 +4,8 @@ namespace Extension.Rosie.Model
 {
     public class RosieRule
     {
+        public string RulesetName { get; }
+        public string RuleName { get; }
         public string Id { get; }
         public string ContentBase64 { get; }
         public string Language { get; }
@@ -12,6 +14,8 @@ namespace Extension.Rosie.Model
         public string Pattern { get; }
 
         public RosieRule(string rulesetName, Rule rule) {
+            RulesetName = rulesetName;
+            RuleName = rule.Name;
             Id = rulesetName + "/" + rule.Name;
             ContentBase64 = rule.Content;
             Language = rule.Language;

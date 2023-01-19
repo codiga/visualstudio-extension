@@ -34,21 +34,7 @@ namespace Extension.Caching
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView)
 		{
-			if (textView == null)
-				return;
-
-			DocumentView doc;
-			try
-			{
-				doc = textView.ToDocumentView();
-			}
-			catch
-			{
-				doc = ThreadHelper.JoinableTaskFactory.Run(async () =>
-				{
-					return await VS.Documents.GetActiveDocumentViewAsync();
-				});
-			}
+			var doc = EditorUtils.ToDocumentView(textView);
 
 			if (doc == null)
 				return;

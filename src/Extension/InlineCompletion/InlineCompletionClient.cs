@@ -110,7 +110,12 @@ namespace Extension.InlineCompletion
 				var triggeringLine = _wpfTextView.TextBuffer.CurrentSnapshot.GetLineFromPosition(caretPos);
 				var triggeringLineText = triggeringLine.GetText();
 				var lineTrackingSpan = _wpfTextView.TextBuffer.CurrentSnapshot.CreateTrackingSpan(triggeringLine.Extent.Span, SpanTrackingMode.EdgePositive);
-				var language = LanguageUtils.ParseFromFileName(DocumentHelper.GetFileName(_wpfTextView.ToDocumentView(), _wpfTextView));
+				
+				var doc = EditorUtils.ToDocumentView(_wpfTextView);
+				if (doc == null)
+					return _nextCommandHandler.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
+				
+				var language = LanguageUtils.ParseFromFileName(DocumentHelper.GetFileName(doc, _wpfTextView));
 
 				var shouldTriggerCompletion = char.IsWhiteSpace(typedChar)
 					&& EditorUtils.IsSemanticSearchComment(triggeringLineText, language)

@@ -97,16 +97,7 @@ namespace Extension.AssistantCompletion
 	        var fileName = ThreadHelper.JoinableTaskFactory.Run(async () =>
 	        {
 		        await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-		        DocumentView? doc;
-		        try
-		        {
-			        doc = wpfTextView.ToDocumentView();
-		        }
-		        catch
-		        {
-			        doc = ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Documents.GetActiveDocumentViewAsync());
-		        }
-
+		        var doc = EditorUtils.ToDocumentView(wpfTextView);
 		        return DocumentHelper.GetFileName(doc, wpfTextView);
 	        });
 	        

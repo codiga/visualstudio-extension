@@ -2,6 +2,8 @@
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System.Linq;
+using Community.VisualStudio.Toolkit;
+using Microsoft.VisualStudio.Shell;
 using static Extension.SnippetFormats.LanguageUtils;
 
 namespace Extension.SnippetFormats
@@ -253,6 +255,27 @@ namespace Extension.SnippetFormats
 			textSpan.iEndIndex = caretIndex;
 
 			return textSpan;
+		}
+
+		/// <summary>
+		/// Converts the argument <see cref="IWpfTextView"/> to a <see cref="DocumentView"/>,
+		/// either directly, or by retrieving the currently active text and document views.
+		/// </summary>
+		/// <param name="textView">the text view to convert</param>
+		/// <returns>The DocumentView, or null if the argument IWpfTextView is null, or the DocumentView itself is null</returns>
+		public static DocumentView? ToDocumentView(IWpfTextView? textView)
+		{
+			if (textView == null)
+				return null;
+			
+			try
+			{
+				return textView.ToDocumentView();
+			}
+			catch
+			{
+				return ThreadHelper.JoinableTaskFactory.Run(async () => await VS.Documents.GetActiveDocumentViewAsync());
+			}
 		}
 	}
 }

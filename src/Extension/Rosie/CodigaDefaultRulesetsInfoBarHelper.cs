@@ -21,7 +21,7 @@ namespace Extension.Rosie
     public static class CodigaDefaultRulesetsInfoBarHelper
     {
         //\n characters are for better formatting of the entire content of the info bar
-        private const string InfoBarText = "Check for security, code style in your Python code with Codiga.\n";
+        private const string InfoBarText = "Check your code for security and code style issues with Codiga.\n";
         private const string CreateCodigaYmlActionText = "Create codiga.yml\n";
         private const string NeverForThisSolutionActionText = "Never for this solution";
 

@@ -985,6 +985,8 @@ enum ElementCheckedEnumeration {
   ForLoop
   IfCondition
   FunctionCall
+  VariableDeclaration
+  Any
 }
 
 "Information about duplicate occurrence (where it is in your code)"

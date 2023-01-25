@@ -17,6 +17,8 @@ namespace Extension.Rosie.Model
         private const string EntityCheckedHtmlElement = "htmlelement";
         private const string EntityCheckedClassDefinition = "classdefinition";
         private const string EntityCheckedFunctionExpression = "functionexpression";
+        private const string EntityCheckedVariableDeclaration = "variabledeclaration";
+        private const string EntityCheckedAny = "any";
         
         /// <summary>
         /// Maps the argument element checked to its Rosie counterpart value.
@@ -40,6 +42,8 @@ namespace Extension.Rosie.Model
                 "HtmlElement" => EntityCheckedHtmlElement,
                 "ClassDefinition" => EntityCheckedClassDefinition,
                 "FunctionExpression" => EntityCheckedFunctionExpression,
+                "VariableDeclaration" => EntityCheckedVariableDeclaration,
+                "Any" => EntityCheckedAny,
                 _ => null
             };
         }

@@ -1,35 +1,44 @@
 ![build and test workflow](https://github.com/codiga/visualstudio-extension/actions/workflows/main.yml/badge.svg)
 
 # Development documentation
+
 This documentation provides a high level view on the technical components of the extension project.
 
 # Table of contents
-1. [General](#general) 
+
+1. [General](#general)
 2. [Releasing](#releasing)
 3. [Project structure](#project-structure)
 4. [Feature overview](#feature-overview)
-   1. [Shortcut snippets](#shortcut-snippets)
-   2. [Inline completion](#inline-completion)
-   3. [Snippet search](#snippet-search)
-   4. [Settings](#settings)
+    1. [Shortcut snippets](#shortcut-snippets)
+    2. [Inline completion](#inline-completion)
+    3. [Snippet search](#snippet-search)
+    4. [Rosie code analysis](#rosie-code-analysis)
+    5. [Settings](#settings)
 5. [Frameworks/Packages](#frameworkspackages)
 6. [Testing](#testing)
 7. [Links/Help](#linkshelp)
 
 # General
+
 As Visual Studio has a long history, the SDK also has different APIs. The older one is referred to as [Legacy API](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/legacy-language-service-extensibility?view=vs-2022) and the current one uses the [MEF](https://learn.microsoft.com/en-us/visualstudio/extensibility/managed-extensibility-framework-in-the-editor?view=vs-2022) and async API. Not all APIs were migrated to the new style yet, so we have a mix of both in the extension. For example, the API for inserting snippets is a Legacy API.
+
 ## MEF
+
 The Managed Extensibility Framework is working like a dependency injection framework for Visual Studio components. Registering implementations of a type or interface is done via the `[Export]` attribute and receiving already registered components and services is done via `[Import]`. Depending on the context most exported components are instantiated as singletons.
 
 # Releasing
 
+The build and release process is automated via GitHub Actions. The release workflow is defined in [release.yml](.github/workflows/release.yml).
 
-The build and release process is automated via GitHub Actions. The release workflow is defined in [release.yml](.github/workflows/release.yml). 
 ## Versioning
 
+The version of the extension is stored in the manifest file [`src/source.extension.vsixmanifest`](src/Extension/source.extension.vsixmanifest).
+The vsix manifest editor in Visual Studio generates the C#-Class [`src/Extension/source.extension.cs`](src/Extension/source.extension.cs) that
+is used to version the assemblies. To update the Version of the Extension I recommend doing it in the VSIX-editor.
 
-The version of the extension is stored in the manifest file [`src/source.extension.vsixmanifest`](src/Extension/source.extension.vsixmanifest). The vsix manifest editor in Visual Studio generates the C#-Class [`src/Extension/source.extension.cs`](src/Extension/source.extension.cs) that is used to version the assemblies. To update the Version of the Extension I recommend doing it in the VSIX-editor.
 ## Releasing a new version to the marketplace
+
 <img align="right" src="images/version.png"/>
 
 To trigger a new release build follow these steps:
@@ -39,14 +48,16 @@ To trigger a new release build follow these steps:
 
 >To further automate this process, we would need to update the manifest file AND the C#-File with the just generated version tag before the extension is compiled in the build step.
 
-
 # Project structure
+
 The project is divided into three projects:
 * [`Extension.csproj`](src/Extension/Extension.csproj) - for the actual extension
 * [`GraphQLClient.csproj`](src/GraphQLClient/GraphQLClient.csproj) - for handling the Codiga API
 * [`Tests.csproj`](src/Tests/Tests.csproj) - for the unit tests
 
-Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual Studio itself is not migrated to .NET 6 or 7. That means for all libraries and packages we reference in our `Extension.csproj` we can only use [.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0).
+Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual Studio itself is not migrated to .NET 6 or 7.
+That means for all libraries and packages we reference in our `Extension.csproj` we can only use
+[.NET Standard 2.0](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-0).
 
 ## Folder structure
 
@@ -62,20 +73,50 @@ Visual Studio Extensions still need to target full .NET 4.8 Framework as Visual 
 * `SnippetSearch` - The menu entry and the tool window for the snippet search
 * `ExtensionPackage.cs` - registrations for settings dialog and search window
 * `.vsixmanifest` - metadata for the extension that will show up in the marketplace
-  
-<br>
 
+<br>
 
 # Feature overview
 
+## GraphQL client, queries and mutations
+
+The extension uses a GraphQL client to send queries and mutations to Codiga.
+
+The queries are used to fetch timestamp-, snippet- and ruleset related data from Codiga, while mutations are used to send metrics to Codiga
+of the usage of certain functionality, for example when a Rosie fix is applied.
+
+The query files are available under the [`GraphQLClient/Queries`](/src/GraphQLClient/Queries) folder,
+and are loaded and provided via [`QueryProvider.cs`](/src/GraphQLClient/QueryProvider.cs).
+
+### User-Agent
+
+The User-Agent header is sent in order to identify the client application the GraphQL requests are sent from.
+
+The `RosieClient` uses a value in the form "<product name> <major version> <minor version>, e.g. *Microsoft Visual Studio Community 2022 17 4*,
+while `CodigaClient` uses a simpler one in the form "VisualStudio/<version>, e.g. *"VisualStudio/17.4.33103.184 D17.4"*.
+
+### User fingerprint
+
+In general, the fingerprint is a unique string generated when the plugin is installed.
+
+### Codiga API Token
+
+Having a Codiga account registered, using this token, users can access and use to their private rulesets and rules in the IDE.
+
+The configuration is provided in the Visual Studio settings via [`ExtensionOptions.cs`](/src/Extension/Settings/ExtensionOptions.cs) and the `Extension.Settings` namespace.
+
 ## Shortcut snippets
+
 The shortcut snippets feature is triggered by typing `.` in the editor. This is the general workflow:
 <img src="images/snippet-workflow.png">
 The key part here is that we prevent the normal code completion session from completing the keyword and start an Expansion session instead.
+
 ### Triggering
+
 For the completion menu and triggering we use the standard API based on [this example](https://github.com/microsoft/VSSDK-Extensibility-Samples/tree/master/AsyncCompletion).
 
 ### Inserting
+
 Snippet insertion sessions are called [*Expansion*](https://learn.microsoft.com/en-us/visualstudio/extensibility/walkthrough-implementing-code-snippets?view=vs-2022&tabs=csharp) on the Visual Studio API. The insertion process is the same for all three features and is done in [`AssistantCompletion/ExpansionClient.cs`](src/Extension/AssistantCompletion/ExpansionClient.cs). We bypass the regular `.snippet` files by calling:
 ```csharp
 public int IVsExpansion.InsertSpecificExpansion (
@@ -86,41 +127,50 @@ public int IVsExpansion.InsertSpecificExpansion (
     string pszRelativePath, 
     out Microsoft.VisualStudio.TextManager.Interop.IVsExpansionSession pSession);
 ```     
- See the [documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.textmanager.interop.ivsexpansion.insertspecificexpansion?view=visualstudiosdk-2022).
+See the [documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.textmanager.interop.ivsexpansion.insertspecificexpansion?view=visualstudiosdk-2022).
 
- This API allows us to insert snippets from in-memory XML using the [Visual Studio snippet XML schema](https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference?view=vs-2022).
- We just need to serialize the incoming Codiga Recipes into the required XML format:
+This API allows us to insert snippets from in-memory XML using the [Visual Studio snippet XML schema](https://learn.microsoft.com/en-us/visualstudio/ide/code-snippets-schema-reference?view=vs-2022).
+We just need to serialize the incoming Codiga Recipes into the required XML format:
 
  <img src="images/serializer-workflow.png">
- 
+
 During the expansion session, we use [`IOleCommandTarget`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.visualstudio.ole.interop.iolecommandtarget?view=visualstudiosdk-2022) to handle incoming keystrokes and commands to pass `Tab` keys to the expansion and enable navigation between the user variables. The snippet usage reporting is also done in this module.
 
 >For more details look at the answer on [this thread](https://learn.microsoft.com/en-us/answers/questions/1018899/visual-studio-extensibility-addinginstalling-snipp.html).
 
 For a detailed explanation on the async completion API, there is a great GitHub issue at [microsoft/vs-editor-api#Async Completion API discussion](https://github.com/microsoft/vs-editor-api/issues/9).
 
-
 ## Inline completion
+
 The inline completion is triggered by starting a line comment on a new line.
+
 ### Triggering
+
 To be able to trigger the inline completion we make use of another `IOleCommandTarget` in [`InlineCompletion/InlineCompletionClient.cs`](src/Extension/InlineCompletion/InlineCompletionClient.cs). Where we check if a session should be started based on the typed text of the current line.
+
 ### Preview
+
 The preview is done by drawing on the editor Canvas by using [TextAdornments](https://learn.microsoft.com/de-de/archive/blogs/lucian/visual-studio-text-adornment-vsix-using-roslyn) which allows adding WPF controls in relation to editor text lines. The drawing of the instructions and the preview is done in [`InlineCompletionView.cs`](src/Extension/InlineCompletion/InlineCompletionView.cs).
 > An approach inserting styled code directly to the editor was dismissed as scrolling through suggestions would add all of those to the undo/redo stack which resulted in a bad UX.
 
 ### Inserting
+
 Inserting is handled the same way as with the shortcut snippets using `ExpansionClient.StartExpansion()`.
 
 ## Snippet search
-The snippet search is implemented using a [ToolWindow](https://learn.microsoft.com/en-us/visualstudio/extensibility/adding-a-tool-window?view=vs-2022). Tool windows are written using WPF and the search window UI is defined in [`SnippetSearch/View/SnippetSearchControl.xaml`](src/Extension/SnippetSearch/View/SnippetSearchControl.xaml). We try to follow [MVVM](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm) as much as possible, therefore the UI is mostly driven by the Binding on [`SnippetSearchViewModel.cs`](src/Extension/SnippetSearch/View/SnippetSearchViewModel.cs). 
+
+The snippet search is implemented using a [ToolWindow](https://learn.microsoft.com/en-us/visualstudio/extensibility/adding-a-tool-window?view=vs-2022). Tool windows are written using WPF and the search window UI is defined in [`SnippetSearch/View/SnippetSearchControl.xaml`](src/Extension/SnippetSearch/View/SnippetSearchControl.xaml). We try to follow [MVVM](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm) as much as possible, therefore the UI is mostly driven by the Binding on [`SnippetSearchViewModel.cs`](src/Extension/SnippetSearch/View/SnippetSearchViewModel.cs).
 
 ### Preview
+
 The preview for snippets from the Snippet Search is done by inserting the code in the editor and using a [Classifier](https://learn.microsoft.com/en-us/visualstudio/extensibility/language-service-and-editor-extension-points?view=vs-2022#extend-classification-types-and-classification-formats) to style the span in a way that makes it obvious to users that this is a preview. The classifier is polling the text spans to be classified on changes to the editor. While the preview is active we provide a static span to be used. When the preview ends, it is set to `null`. The whole preview and classification logic is grouped under [`SnippetSearch/Preview`](/src/Extension/SnippetSearch/Preview/).
 
 ### Inserting
+
 When inserting the snippet the preview span is replaced by the new Expansion via the [`ExpansionClient`](src/Extension/AssistantCompletion/ExpansionClient.cs).
 
 ### Menu item
+
 To be able to bring up the tool window via the menu, two parts are needed:
 1. Define the menu item command in a [VS command table](https://learn.microsoft.com/en-us/visualstudio/extensibility/internals/visual-studio-command-table-dot-vsct-files?view=vs-2022) ([`SnippetSearchPackage.vsct`](src/Extension/SnippetSearch/SnippetSearchPackage.vsct))
 2. Implement the command that gets fired when clicking the menu item (done in [`SearchWindowMenuCommand.cs`](/src/Extension/SnippetSearch/SearchWindowMenuCommand.cs))
@@ -143,6 +193,13 @@ If what is opened is simply a folder, and not an actual solution, the `codiga.ym
 Here comes in [`RosieRulesCache`](/src/Extension/Rosie/RosieRulesCache.cs) which provides a periodic background thread for polling the contents of this config file,
 and looking for rule changes on Codiga Hub, as well as the caches the received rules per language.
 
+The cache is initialized when the tagging is first invoked in an editor. (See **Tagging** section below)
+
+The periodic update is executed in every 10 seconds, and updates the cache if either the `codiga.yml` file has changed,
+or the configured rulesets (or underlying rules) have changed on Codiga Hub.
+
+### Rosie client
+
 The rules are retrieved via [`RosieClient`](/src/Extension/Rosie/RosieClient.cs), and this is where `RosieRulesCache` is initialized before sending the first
 request to the Rosie server. This way, it is initialized only when code analysis is actually needed.
 
@@ -150,7 +207,8 @@ For response/request (de)serialization, you can find the model classes in the `E
 
 ### Adding new rule AST types
 
-You can add new constants and mappings for the new types in [`RosieRuleAstTypes`](/src/Extension/Rosie/Model/RosieRuleAstTypes.cs).
+- Add new constants into the `ElementCheckedEnumeration` in [`schema.graphql`](/src/GraphQLClient/schema.graphql).
+- Add new constants and mappings for the new types in [`RosieRuleAstTypes`](/src/Extension/Rosie/Model/RosieRuleAstTypes.cs).
 
 ### Adding support for new Rosie languages
 
@@ -158,6 +216,10 @@ First, you need to add the new language(s) in [`RosieLanguageSupport.SupportedLa
 and [`RosieLanguageSupport.GetRosieLanguage`](/src/Extension/Rosie/RosieLanguageSupport.cs).
 
 If a language needs special treatment on the caching part, make sure to update at least [`RosieRulesCache.GetCachedLanguageTypeOf`](/src/Extension/Rosie/RosieRulesCache).
+
+If default ruleset suggestions are also needed for the language, then:
+- create a new `Default*RulesetConfig` constant in [`CodigaRulesetConfigs`](/src/Extension/Rosie/CodigaRulesetConfigs.cs)
+  and hook it into `CreateCodigaConfigFile(LanguageEnumeration, SVsServiceProvider)` in `CodigaConfigFileUtil`.
 
 ### Tagging
 
@@ -238,10 +300,18 @@ There are three lightbulb actions (quick fixes) available for each violation:
 <br>
 
 ## Settings
+
 The settings dialog is also divided into the settings model and the options dialog that shows up in the VS settings.
-The definition and registration of the Codiga settings are done in [`Settings/ExtensionOptions.cs`](src/Extension/Settings/ExtensionOptions.cs). These settings are stored in the Windows registry and can be accessed via a singleton instance `CodigaOptions.Instance`. The UI for the settings is defined in [`OptionsPage.xaml`](src/Extension/Settings/OptionsPage.xaml). For the simple settings dialog, the minimal logic is done in the [code-behind](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/code-behind-and-xaml-in-wpf?view=netframeworkdesktop-4.8) file [`OptionsPage.xaml.cs`](src/Extension/Settings/OptionsPage.xaml.cs).
+The definition and registration of the Codiga settings are done in [`Settings/ExtensionOptions.cs`](src/Extension/Settings/ExtensionOptions.cs).
+
+These settings are stored in the Windows registry and can be accessed via a singleton instance `CodigaOptions.Instance`.
+
+The UI for the settings is defined in [`OptionsPage.xaml`](src/Extension/Settings/OptionsPage.xaml).
+For the simple settings dialog, the minimal logic is done in the
+[code-behind](https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/code-behind-and-xaml-in-wpf?view=netframeworkdesktop-4.8) file [`OptionsPage.xaml.cs`](src/Extension/Settings/OptionsPage.xaml.cs).
 
 # Frameworks/Packages
+
 List of used third-party frameworks and packages:
 
 | Library                                                                                            | Purpose                                   |
@@ -249,9 +319,29 @@ List of used third-party frameworks and packages:
 | [NUnit](https://nunit.org/)                                                                        | Unit test framework                       |
 | [Moq](https://github.com/Moq)                                                                      | For mocking in unit tests                 |
 | [GraphQL .NET](https://github.com/graphql-dotnet/graphql-dotnet)                                   | For consuming the Codiga API              | 
-| [Visual Studio Community Toolkit](https://github.com/VsixCommunity/Community.VisualStudio.Toolkit) | For easier development against the VS SDK |      
+| [Visual Studio Community Toolkit](https://github.com/VsixCommunity/Community.VisualStudio.Toolkit) | For easier development against the VS SDK |
+
+## Environments
+
+In case testing on different environments is necessary, you can use the following endpoints:
+
+| Environment | Codiga                                | Rosie                                      |
+|-------------|---------------------------------------|--------------------------------------------|
+| Production  | https://api.codiga.io/graphql         | https://analysis.codiga.io/analyze         |
+| Staging     | https://api-staging.codiga.io/graphql | https://analysis-staging.codiga.io/analyze |
 
 # Testing
+
+## Rosie
+
+Rosie related features are test via unit testing, with some mock types when it comes to tagging.
+
+Due to UI and threading related limitations, the `TextBuffer` is replaced with a mock implementation that uses simple string manipulation under the hood.
+This makes is possible to test the tagging in a simpler way, and test the lightbulb actions in a "visual" way, being able to compare the before and after states
+of the document easily.
+
+## Extras
+
 Some general overview of features and edge cases beyond the defined extension main features that should be tested with Visual Studio:
 
 | Scenario                                                                             | Expected                                                             |
@@ -261,12 +351,10 @@ Some general overview of features and edge cases beyond the defined extension ma
 | Changing the font settings under Tools -> Options -> Environment -> Fonts and Colors | Should also affect the inline completion and snippet search preview. |
 
 # Links/Help
+
 Some helpful links:
 * [Community examples](https://github.com/VsixCommunity/Samples)
 * [Official example repo](https://github.com/microsoft/VSSDK-Extensibility-Samples)
 * [VSIX Cookbook](https://www.vsixcookbook.com/)
 * [Gitter community](https://gitter.im/Microsoft/extendvs)
 * [Visual Studio YT channel with tutorials](https://www.youtube.com/playlist?list=PLReL099Y5nRdG2n1PrY_tbCsUznoYvqkS)
-
-
-

@@ -57,17 +57,20 @@ namespace Extension.SnippetSearch.Preview
 			}
 
 			var newSpan = new Span(caretBufferPosition, indentedCode.Length);
-
-			// create read only region for the new snippet
-			IReadOnlyRegion newRegion;
-			using (var readEdit = textView.TextBuffer.CreateReadOnlyRegionEdit())
+			//If the caret, for some reason, happens to be after the end of the current text buffer,
+			// then we don't show the preview.
+			if (caretBufferPosition <= textView.TextBuffer.CurrentSnapshot.Length)
 			{
-				newRegion = readEdit.CreateReadOnlyRegion(newSpan);
+				// create read only region for the new snippet
+				IReadOnlyRegion newRegion;
+				using (var readEdit = textView.TextBuffer.CreateReadOnlyRegionEdit())
+				{
+					newRegion = readEdit.CreateReadOnlyRegion(newSpan);
+					readEdit.Apply();
+				}
 
-				readEdit.Apply();
+				CurrentPreview = newRegion;
 			}
-
-			CurrentPreview = newRegion;
 		}
 
 		public void StopPreviewing(IWpfTextView textView)

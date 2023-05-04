@@ -1,3 +1,6 @@
+[Datadog acquired Codiga](https://www.codiga.io/blog/codiga-joins-datadog/). This repository is no longer active.
+
+
 [![Slack](https://img.shields.io/badge/Slack-@codigahq.svg?logo=slack)](https://join.slack.com/t/codigahq/shared_invite/zt-9hvmfwie-9BUVFwZDwvpIGlkHv2mzYQ)
 [![Twitter](https://img.shields.io/badge/Twitter-getcodiga-blue?logo=twitter&logoColor=blue&color=blue)](https://twitter.com/getcodiga)
 [![Visual Studio Marketplace](https://img.shields.io/badge/Visual%20Studio%20Marketplace-Download-blue)](https://marketplace.visualstudio.com/items?itemName=codiga.vsextension)
